@@ -7,7 +7,7 @@ use yazi_fs::Splatable;
 use yazi_shared::url::{AsUrl, Url, UrlBuf};
 use yazi_watcher::Watcher;
 
-use super::{Mimetype, Tabs, UndoManager, Yanked};
+use super::{Batcher, Mimetype, Tabs, UndoManager, Yanked};
 use crate::tab::{Folder, Tab};
 
 pub struct Mgr {
@@ -15,7 +15,8 @@ pub struct Mgr {
 	pub yanked: Yanked,
 	pub undo: UndoManager,
 
-	pub watcher: Watcher,
+	pub batcher:  Batcher,
+	pub watcher:  Watcher,
 	pub mimetype: Mimetype,
 }
 
@@ -26,7 +27,8 @@ impl Mgr {
 			yanked: Default::default(),
 			undo: Default::default(),
 
-			watcher: Watcher::serve(),
+			batcher:  Default::default(),
+			watcher:  Watcher::serve(),
 			mimetype: Default::default(),
 		}
 	}

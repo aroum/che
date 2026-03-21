@@ -27,6 +27,7 @@ pub enum Spark<'a> {
 	// Mgr
 	Arrow(yazi_parser::ArrowOpt),
 	Back(yazi_parser::VoidOpt),
+	BulkExit(yazi_parser::mgr::BulkExitOpt),
 	BulkRename(yazi_parser::VoidOpt),
 	Cd(yazi_parser::mgr::CdOpt),
 	Close(yazi_parser::mgr::CloseOpt),
@@ -232,6 +233,7 @@ impl<'a> IntoLua for Spark<'a> {
 			// Mgr
 			Self::Arrow(b) => b.into_lua(lua),
 			Self::Back(b) => b.into_lua(lua),
+			Self::BulkExit(b) => b.into_lua(lua),
 			Self::BulkRename(b) => b.into_lua(lua),
 			Self::Cd(b) => b.into_lua(lua),
 			Self::Close(b) => b.into_lua(lua),
@@ -427,6 +429,7 @@ try_from_spark!(yazi_parser::confirm::CloseOpt, confirm:close);
 try_from_spark!(yazi_parser::confirm::ShowOpt, confirm:show);
 try_from_spark!(yazi_parser::help::ToggleOpt, help:toggle);
 try_from_spark!(yazi_parser::input::CloseOpt, input:close);
+try_from_spark!(yazi_parser::mgr::BulkExitOpt, mgr:bulk_exit);
 try_from_spark!(yazi_parser::mgr::CdOpt, mgr:cd);
 try_from_spark!(yazi_parser::mgr::CloseOpt, mgr:close);
 try_from_spark!(yazi_parser::mgr::CopyOpt, mgr:copy);
