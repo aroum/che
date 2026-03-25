@@ -72,6 +72,8 @@ impl Default for Loader {
 			("tab".to_owned(), [][..].into()),
 			("tabs".to_owned(), [][..].into()),
 			("tasks".to_owned(), [][..].into()),
+			// Reserved
+			("inline".to_owned(), [][..].into()),
 		]);
 		Self { cache: RwLock::new(cache) }
 	}
