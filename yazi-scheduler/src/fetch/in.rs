@@ -8,6 +8,10 @@ pub(crate) struct FetchIn {
 	pub(crate) targets: Vec<yazi_fs::File>,
 }
 
+impl From<FetchIn> for FetchJob {
+	fn from(value: FetchIn) -> Self { Self { action: &value.plugin.run, files: value.targets } }
+}
+
 impl FetchIn {
 	pub(crate) fn id(&self) -> Id { self.id }
 }
