@@ -1,7 +1,7 @@
 use std::io;
 
 use tokio::sync::mpsc;
-use yazi_fs::{cha::Cha, provider::{Attrs, Capabilities, Provider, local::Local}};
+use yazi_fs::{cha::{Cha, ChaMode}, provider::{Attrs, Capabilities, Provider, local::Local}};
 use yazi_shared::{path::PathBufDyn, strand::AsStrand, url::{AsUrl, Url, UrlBuf, UrlCow}};
 
 use super::{Providers, ReadDir, RwFile};
@@ -370,6 +370,13 @@ where
 		}
 	}
 	res
+}
+
+pub async fn set_mode<U>(url: U, mode: ChaMode) -> io::Result<()>
+where
+	U: AsUrl,
+{
+	Providers::new(url.as_url()).await?.set_mode(mode).await
 }
 
 pub async fn symlink<U, S, F>(link: U, original: S, is_dir: F) -> io::Result<()>
