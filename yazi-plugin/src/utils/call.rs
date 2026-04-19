@@ -16,6 +16,7 @@ impl Utils {
 
 	pub(super) fn mgr_emit(lua: &Lua) -> mlua::Result<Function> {
 		lua.create_function(|lua, (name, args): (String, Table)| {
+			yazi_proxy::deprecate!("ya.mgr_emit() is deprecated, use ya.emit() instead");
 			emit!(Call(Action {
 				name:   name.into(),
 				args:   Sendable::table_to_args(lua, args)?,
