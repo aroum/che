@@ -30,6 +30,55 @@ Yazi (means "duck") is a terminal file manager written in Rust, based on non-blo
 
 https://github.com/sxyazi/yazi/assets/17523360/92ff23fa-0cd5-4f04-b387-894c12265cc7
 
+## dual-yazi 快速开始
+
+dual-yazi 是 [yazi](https://github.com/sxyazi/yazi) 的 fork, 在上游基础上强化了双面板 (dual-pane) 体验, 并提供 `--dual` 启动标志, 让双面板成为一等公民.
+
+### 安装 (macOS / Linux, 通过 Homebrew)
+
+```sh
+# 如果之前装过官方 yazi, 先卸载 (二者 binary 同名, 会冲突)
+brew uninstall yazi
+
+# 通过个人 tap 安装 dual-yazi
+brew install jtianling/tap/dual-yazi
+```
+
+也可以先 `brew tap` 再装:
+
+```sh
+brew tap jtianling/tap
+brew install dual-yazi
+```
+
+升级:
+
+```sh
+brew update && brew upgrade dual-yazi
+```
+
+### 进入 dual mode
+
+启动时直接以双面板模式打开:
+
+```sh
+yazi --dual
+```
+
+或者先正常启动 `yazi`, 再用快捷键切换:
+
+| 快捷键 | 动作 |
+| --- | --- |
+| `Ctrl+W o` | 单面板 / 双面板切换 |
+| `Tab` | 在两个面板之间切换焦点 |
+| `Ctrl+W h` / `Ctrl+W l` | 直接聚焦左 / 右面板 |
+| `Ctrl+W p` | 切换右侧 preview |
+| `=` | 把另一侧面板同步到当前目录 |
+| `F5` / `Shift+F5` | 复制选中文件到对面 (Shift 强制覆盖) |
+| `F6` / `Shift+F6` | 移动选中文件到对面 (Shift 强制覆盖) |
+
+更详细的 keymap 参见 [`yazi-config/preset/keymap-default.toml`](yazi-config/preset/keymap-default.toml).
+
 ## Project status
 
 Public beta, can be used as a daily driver.
