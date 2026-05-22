@@ -1,4 +1,6 @@
-use std::path::PathBuf;
+#[cfg(unix)]
+use std::os::unix::fs::DirBuilderExt;
+use std::{fs::DirBuilder, path::PathBuf};
 
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
@@ -59,8 +61,12 @@ impl Preview {
 			bail!("[preview].cache_dir must be either empty or an absolute path.");
 		};
 
-		std::fs::create_dir_all(&self.cache_dir)
-			.context(format!("Failed to create cache directory: {}", self.cache_dir.display()))?;
+		#[cfg(unix)]
+		let result = DirBuilder::new().mode(0o700).recursive(true).create(&self.cache_dir);
+		#[cfg(not(unix))]
+		let result = DirBuilder::new().recursive(true).create(&self.cache_dir);
+
+		result.context(format!("Failed to create cache directory: {}", self.cache_dir.display()))?;
 
 		Ok(self)
 	}

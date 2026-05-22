@@ -52,7 +52,6 @@ anyhow             = { workspace = true }
 better-panic       = "0.3.0"
 crossterm          = { workspace = true }
 fdlimit            = "0.3.0"
-futures            = { workspace = true }
 mlua               = { workspace = true }
 paste              = { workspace = true }
 ratatui            = { workspace = true }
