@@ -4,6 +4,7 @@
 
 **che** is a modern, blazing-fast dual-pane terminal file manager written in Rust and built on non-blocking async I/O. It combines the convenience and efficiency of classic dual-pane file managers (Total Commander, Double Commander, Midnight Commander) with the powerful architecture and rich plugin ecosystem of Yazi.
 
+![che](che.png)
 ---
 
 ## 💡 Motivation
@@ -66,6 +67,7 @@ brew install che
 ```
 
 To upgrade:
+
 ```bash
 brew update && brew upgrade che
 ```
@@ -74,6 +76,29 @@ brew update && brew upgrade che
 
 Requires Rust toolchain (1.78+):
 
+```bash
+## 📦 Installation
+
+### 🍺 Homebrew (macOS & Linux)
+```bash
+brew tap aroum/che
+brew install che
+```
+
+### 🪟 Windows Package Manager (Winget)
+> ⏳ **Winget (Coming Soon)** — Package submission to Microsoft (`winget install aroum.che`) is currently under review ([PR #407686](https://github.com/microsoft/winget-pkgs/pull/407686)).
+
+### 🐧 Snapcraft (Linux)
+```bash
+snap install che-fm
+```
+
+### ❄️ Nix (Flakes)
+```bash
+nix run github:aroum/che
+```
+
+### 🛠 Building from Source
 ```bash
 git clone https://github.com/aroum/che.git
 cd che
@@ -134,25 +159,25 @@ overwrite_dialog = true
 
 ### Pane Navigation & Management
 
-| Keybinding | Command (`run = ...`) | Description |
-| :--- | :--- | :--- |
-| **`Tab`** / **`Shift+Tab`** | `pane_switch` | Switch focus between left and right panes |
-| **`Ctrl+W h`** / **`Ctrl+W l`** | `pane_focus` | Focus left / right pane directly |
-| **`Ctrl+W o`** | `dual_toggle` | Toggle between dual-pane and single-pane modes |
-| **`Ctrl+W p`** | `preview_toggle` | Toggle preview pane visibility |
-| **`=`** | `sync_pane` | Synchronize opposite pane CWD with active pane |
-| **`F5`** / **`Shift+F5`** | `copy_to` | Copy selected items to opposite pane |
-| **`F6`** / **`Shift+F6`** | `move_to` | Move selected items to opposite pane |
+| Keybinding                      | Command (`run = ...`) | Description                                    |
+| :------------------------------ | :-------------------- | :--------------------------------------------- |
+| **`Tab`** / **`Shift+Tab`**     | `pane_switch`         | Switch focus between left and right panes      |
+| **`Ctrl+W h`** / **`Ctrl+W l`** | `pane_focus`          | Focus left / right pane directly               |
+| **`Ctrl+W o`**                  | `dual_toggle`         | Toggle between dual-pane and single-pane modes |
+| **`Ctrl+W p`**                  | `preview_toggle`      | Toggle preview pane visibility                 |
+| **`=`**                         | `sync_pane`           | Synchronize opposite pane CWD with active pane |
+| **`F5`** / **`Shift+F5`**       | `copy_to`             | Copy selected items to opposite pane           |
+| **`F6`** / **`Shift+F6`**       | `move_to`             | Move selected items to opposite pane           |
 
 ### New Features & Jump Mode
 
-| Keybinding | Command (`run = ...`) | Description |
-| :--- | :--- | :--- |
-| **`Ctrl + J`** | `jump_mode` | Toggle letter jump navigation mode (`JUMP`) |
-| **`g` `m`** | `disks` | Open disk and volume selection picker |
-| **`c` `m`** | `comment` | Add / edit file comment (`descript.ion`) |
-| **`Ctrl+Shift+R`** / **`c` `r`** | `plugin multirename` | Launch batch multirename plugin |
-| **`Ctrl+Shift+Y`** / **`c` `y`** | `plugin system_copy` | Copy selected files to OS system clipboard |
+| Keybinding                       | Command (`run = ...`) | Description                                 |
+| :------------------------------- | :-------------------- | :------------------------------------------ |
+| **`Ctrl + J`**                   | `jump_mode`           | Toggle letter jump navigation mode (`JUMP`) |
+| **`g` `m`**                      | `disks`               | Open disk and volume selection picker       |
+| **`c` `m`**                      | `comment`             | Add / edit file comment (`descript.ion`)    |
+| **`Ctrl+Shift+R`** / **`c` `r`** | `plugin multirename`  | Launch batch multirename plugin             |
+| **`Ctrl+Shift+Y`** / **`c` `y`** | `plugin system_copy`  | Copy selected files to OS system clipboard  |
 
 ---
 
@@ -161,16 +186,21 @@ overwrite_dialog = true
 Migrating your setup from Yazi to **che** takes just a few seconds:
 
 1. **Copy configuration files**:
+
    ```bash
    mkdir -p ~/.config/che
    cp -r ~/.config/yazi/* ~/.config/che/
    ```
+
 2. **Copy plugins and theme data**:
+
    ```bash
    mkdir -p ~/.local/share/che
    cp -r ~/.local/share/yazi/* ~/.local/share/che/ 2>/dev/null || true
    ```
+
 3. **Launch `che`**:
+
    ```bash
    che
    ```

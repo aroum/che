@@ -3,8 +3,6 @@ name: Validate Form
 on:
   issues:
     types: [opened, edited]
-  schedule:
-    - cron: "20 * * * *"
 
 jobs:
   check-version:
