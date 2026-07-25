@@ -42,10 +42,7 @@ function Marker:redraw()
 			w = 1,
 			h = math.min(1 + last[2] - last[1], self._area.y + self._area.h - y),
 		}
-		elements[#elements + 1] = ui.Bar(ui.Edge.LEFT)
-			:area(rect)
-			:style(self:decorate(last[3]))
-			:symbol(th.mgr.marker_symbol)
+		elements[#elements + 1] = ui.Bar(ui.Edge.LEFT):area(rect):style(self:decorate(last[3])):symbol(th.mgr.marker_symbol)
 	end
 
 	local last = { 0, 0, nil } -- start, end, style

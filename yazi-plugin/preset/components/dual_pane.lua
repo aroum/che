@@ -48,10 +48,7 @@ end
 
 function DualPane:build()
 	self._base = {
-		ui.Bar(ui.Edge.LEFT)
-			:area(self._chunks[2])
-			:symbol("│")
-			:style(ui.Style():patch(th.mgr.border_style)),
+		ui.Bar(ui.Edge.LEFT):area(self._chunks[2]):symbol("│"):style(ui.Style():patch(th.mgr.border_style)),
 	}
 
 	if cx.tabs.preview_pane then

@@ -59,8 +59,7 @@ function Current:redraw()
 			right[#right + 1] = ui.Line {}
 		else
 			local entity = Entity:new(f, self._active)
-			left[#left + 1], right[#right + 1] =
-				self:dim(entity:redraw()), self:dim(Linemode:new(f):redraw())
+			left[#left + 1], right[#right + 1] = self:dim(entity:redraw()), self:dim(Linemode:new(f):redraw())
 
 			local max = math.max(0, self._area.w - right[#right]:width())
 			left[#left]:truncate { max = max, ellipsis = entity:ellipsis(max) }

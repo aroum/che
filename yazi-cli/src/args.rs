@@ -89,7 +89,7 @@ pub(super) struct CommandPub {
 	pub(super) kind: String,
 	/// Send the message with a string body.
 	#[arg(long)]
-	pub(super) str: Option<String>,
+	pub(super) str:  Option<String>,
 	/// Send the message with a JSON body.
 	#[arg(long)]
 	pub(super) json: Option<String>,
@@ -118,16 +118,16 @@ pub(super) struct CommandPubTo {
 	pub(super) receiver: Id,
 	/// Kind of message.
 	#[arg(index = 2)]
-	pub(super) kind: String,
+	pub(super) kind:     String,
 	/// Send the message with a string body.
 	#[arg(long)]
-	pub(super) str: Option<String>,
+	pub(super) str:      Option<String>,
 	/// Send the message with a JSON body.
 	#[arg(long)]
-	pub(super) json: Option<String>,
+	pub(super) json:     Option<String>,
 	/// Send the message as a list of strings.
 	#[arg(long, num_args = 0..)]
-	pub(super) list: Vec<String>,
+	pub(super) list:     Vec<String>,
 }
 
 #[derive(clap::Args)]

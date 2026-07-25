@@ -42,16 +42,17 @@ function M:entry()
 	end
 
 	local gez_bin = find_gez()
-	local child, err = Command(gez_bin)
-		:arg(args)
-		:stdin(Command.INHERIT)
-		:stdout(Command.INHERIT)
-		:stderr(Command.INHERIT)
-		:spawn()
+	local child, err =
+		Command(gez_bin):arg(args):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):spawn()
 
 	if not child then
 		permit:drop()
-		return ya.notify { title = "Multi-Rename", content = "Failed to start rename tool: " .. tostring(err), timeout = 5, level = "error" }
+		return ya.notify {
+			title = "Multi-Rename",
+			content = "Failed to start rename tool: " .. tostring(err),
+			timeout = 5,
+			level = "error",
+		}
 	end
 
 	local status, wait_err = child:wait()
@@ -59,7 +60,12 @@ function M:entry()
 
 	if not status then
 		os.remove(result_path)
-		return ya.notify { title = "Multi-Rename", content = "Error waiting for tool: " .. tostring(wait_err), timeout = 5, level = "error" }
+		return ya.notify {
+			title = "Multi-Rename",
+			content = "Error waiting for tool: " .. tostring(wait_err),
+			timeout = 5,
+			level = "error",
+		}
 	end
 
 	if not status.success then

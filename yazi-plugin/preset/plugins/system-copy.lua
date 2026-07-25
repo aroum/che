@@ -1,11 +1,11 @@
 local M = {}
 
 local function log(fmt, ...)
-  local f = io.open("/tmp/che_system_copy_debug.log", "a")
-  if f then
-    f:write(string.format("[%s] " .. fmt .. "\n", os.date("%H:%M:%S"), ...))
-    f:close()
-  end
+	local f = io.open("/tmp/che_system_copy_debug.log", "a")
+	if f then
+		f:write(string.format("[%s] " .. fmt .. "\n", os.date("%H:%M:%S"), ...))
+		f:close()
+	end
 end
 
 -- Access cx only inside ya.sync because cx is not available in the async thread
@@ -45,14 +45,12 @@ function M:entry()
 			table.insert(paths_list, string.format('"%s"', p))
 		end
 		local script = string.format(
-			'Add-Type -AssemblyName System.Windows.Forms; $c = New-Object System.Collections.Specialized.StringCollection; %s; [System.Windows.Forms.Clipboard]::SetFileDropList($c)',
+			"Add-Type -AssemblyName System.Windows.Forms; $c = New-Object System.Collections.Specialized.StringCollection; %s; [System.Windows.Forms.Clipboard]::SetFileDropList($c)",
 			table.concat(paths_list, "; "):gsub('"', '\\"')
 		)
 		log("Executing Windows script: %s", script)
 		local output
-		output, err = Command("powershell")
-			:arg({ "-NoProfile", "-NonInteractive", "-Command", script })
-			:output()
+		output, err = Command("powershell"):arg({ "-NoProfile", "-NonInteractive", "-Command", script }):output()
 		success = output and output.status.success
 		log("Powershell exit status: %s, err: %s", tostring(success), tostring(err))
 	elseif os_name == "macos" then
@@ -63,8 +61,9 @@ function M:entry()
 			table.insert(paths, string.format('"%s"', p))
 		end
 		local paths_list = table.concat(paths, ", ")
-		
-		local osascript_command = string.format([[
+
+		local osascript_command = string.format(
+			[[
 use framework "Foundation"
 use framework "AppKit"
 use scripting additions
@@ -72,24 +71,27 @@ use scripting additions
 set pb to current application's NSPasteboard's generalPasteboard()
 pb's clearContents()
 pb's setPropertyList:{%s} forType:(current application's NSFilenamesPboardType)
-]], paths_list)
-		
+]],
+			paths_list
+		)
+
 		log("Executing AppleScript Objective-C via stdin:\n%s", osascript_command)
-		
+
 		local child
-		child, err = Command("osascript")
-			:stdin(Command.PIPED)
-			:stdout(Command.PIPED)
-			:stderr(Command.PIPED)
-			:spawn()
-		
+		child, err = Command("osascript"):stdin(Command.PIPED):stdout(Command.PIPED):stderr(Command.PIPED):spawn()
+
 		if child then
 			child:write_all(osascript_command)
 			child:flush()
 			local output = child:wait_with_output()
 			success = output and output.status.success
 			if output then
-				log("osascript exit status: %s, code: %s, stderr: %s", tostring(success), tostring(output.status.code), tostring(output.stderr))
+				log(
+					"osascript exit status: %s, code: %s, stderr: %s",
+					tostring(success),
+					tostring(output.status.code),
+					tostring(output.stderr)
+				)
 			else
 				log("osascript wait_with_output returned nil")
 			end
@@ -113,10 +115,7 @@ pb's setPropertyList:{%s} forType:(current application's NSFilenamesPboardType)
 
 		if wayland then
 			local child
-			child, err = Command("wl-copy")
-				:arg({ "-t", "text/uri-list" })
-				:stdin(Command.PIPED)
-				:spawn()
+			child, err = Command("wl-copy"):arg({ "-t", "text/uri-list" }):stdin(Command.PIPED):spawn()
 			if child then
 				child:write_all(input_data)
 				child:flush()
@@ -128,10 +127,8 @@ pb's setPropertyList:{%s} forType:(current application's NSFilenamesPboardType)
 			end
 		else
 			local child
-			child, err = Command("xclip")
-				:arg({ "-i", "-selection", "clipboard", "-t", "text/uri-list" })
-				:stdin(Command.PIPED)
-				:spawn()
+			child, err =
+				Command("xclip"):arg({ "-i", "-selection", "clipboard", "-t", "text/uri-list" }):stdin(Command.PIPED):spawn()
 			if child then
 				child:write_all(input_data)
 				child:flush()
