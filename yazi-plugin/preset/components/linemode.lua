@@ -6,7 +6,7 @@ Linemode = {
 	},
 }
 
-function Linemode:new(file) return setmetatable({ _file = file }, { __index = self }) end
+function Linemode:new(file, active) return setmetatable({ _file = file, _active = active ~= false }, { __index = self }) end
 
 function Linemode:solo()
 	if not self._file.in_current then
@@ -67,9 +67,11 @@ end
 function Linemode:padding()
 	if not self._file.is_hovered then
 		return " "
+	elseif not self._active and rt.mgr.hide_inactive_cursor then
+		return " "
 	end
 
-	local style = Entity:new(self._file):style_rev()
+	local style = Entity:new(self._file, self._active):style_rev()
 	if style then
 		return ui.Span(th.indicator.padding.close):style(style)
 	else
