@@ -1,10 +1,10 @@
-name: yazi
+name: che
 base: core24
-adopt-info: yazi
-summary: Blazing fast terminal file manager written in Rust, based on async I/O.
+adopt-info: che
+summary: Dual-pane terminal file manager written in Rust, based on async I/O.
 description: |
-  Yazi is a terminal file manager written in Rust, based on non-blocking async I/O.
-  It aims to provide an efficient, user-friendly, and customizable file management experience.
+  Che is a dual-pane terminal file manager written in Rust based on Yazi.
+  It provides an efficient, user-friendly, and customizable dual-pane file management experience.
 license: MIT
 grade: stable
 confinement: classic
@@ -14,19 +14,19 @@ platforms:
   arm64:
 
 apps:
-  yazi:
-    command: yazi
+  che:
+    command: che
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
-  ya:
-    command: ya
+  ch:
+    command: ch
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
 
 parts:
-  yazi:
+  che:
     plugin: rust
-    source: https://github.com/sxyazi/yazi.git
+    source: https://github.com/aroum/che.git
     stage-snaps:
       - jq
     stage-packages:
