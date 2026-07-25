@@ -22,9 +22,9 @@ smart_glob = true
 show_upparent = true
 
 # Control cursor display in inactive dual-pane column
-# true  - completely hide cursor selection and side indicators on inactive pane (default)
-# false - display cursor on inactive pane dimmed along with the rest of the column
-hide_inactive_cursor = true
+# true  - completely hide cursor selection and side indicators on inactive pane
+# false - display cursor on inactive pane dimmed along with the rest of the column (default)
+hide_inactive_cursor = false
 
 [input]
 # Toggle Vim input behavior (rename, file/folder creation, cd)
