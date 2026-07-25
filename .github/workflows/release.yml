@@ -96,6 +96,7 @@ jobs:
 
       - name: Publish to Winget
         if: env.WINGET_TOKEN != ''
+        continue-on-error: true
         uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: aroum.che
@@ -106,6 +107,7 @@ jobs:
 
       - name: Update Homebrew Formula
         if: env.HOMEBREW_TAP_TOKEN != ''
+        continue-on-error: true
         uses: mislav/bump-homebrew-formula-action@v3
         with:
           formula-name: che
@@ -114,3 +116,14 @@ jobs:
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Publish to Snapcraft Store
+        if: env.SNAPCRAFT_TOKEN != ''
+        continue-on-error: true
+        uses: snapcore/action-publish@v1
+        with:
+          snap: '*.snap'
+          release: stable
+          store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
+        env:
+          SNAPCRAFT_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}

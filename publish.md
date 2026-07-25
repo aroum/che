@@ -56,7 +56,7 @@ Installable via `winget install aroum.che`.
 
 ## 🐧 3. Snapcraft (Snap Store for Linux)
 
-Installable via `snap install che`.
+Installable via `snap install che-fm`.
 
 ---
 

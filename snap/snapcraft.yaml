@@ -1,6 +1,6 @@
-name: che
+name: che-fm
 base: core24
-adopt-info: che
+adopt-info: che-fm
 summary: Dual-pane terminal file manager written in Rust, based on async I/O.
 description: |
   Che is a dual-pane terminal file manager written in Rust based on Yazi.

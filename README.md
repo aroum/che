@@ -1,144 +1,184 @@
-<div align="center">
-	<sup>Special thanks to:</sup><br>
+# che — ⚡ Dual-Pane Terminal File Manager
 
-|<a href="https://go.warp.dev/yazi" target="_blank"><img alt="Warp sponsorship" width=350 src="https://github.com/warpdotdev/brand-assets/blob/main/Github/Sponsor/Warp-Github-LG-02.png"><br><b>Warp, built for coding with multiple AI agents</b><br><sup>Available for macOS, Linux and Windows</sup></a>|<a href="https://git-tower.com/?utm_source=yazi&utm_medium=referral" target="_blank"><img alt="Tower sponsorship" width=350 src="https://github.com/user-attachments/assets/c561a30f-2c5e-4f33-bbec-2bf9df26431a"><br><b>The most powerful Git client for Mac and Windows</b></a>|
-|-|-|
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-</div>
+**che** is a modern, blazing-fast dual-pane terminal file manager written in Rust and built on non-blocking async I/O. It combines the convenience and efficiency of classic dual-pane file managers (Total Commander, Double Commander, Midnight Commander) with the powerful architecture and rich plugin ecosystem of Yazi.
 
-## Yazi - ⚡️ Blazing Fast Terminal File Manager
+---
 
-Yazi (means "duck") is a terminal file manager written in Rust, based on non-blocking async I/O. It aims to provide an efficient, user-friendly, and customizable file management experience.
+## 💡 Motivation
 
-💡 A new article explaining its internal workings: [Why is Yazi Fast?](https://yazi-rs.github.io/blog/why-is-yazi-fast)
+I really like dual-pane file managers, but everything I see on platforms other than Windows feels quite limited. I wanted a simple, fast, and feature-rich dual-pane file manager.
 
-- 🚀 **Full Asynchronous Support**: All I/O operations are asynchronous, CPU tasks are spread across multiple threads, making the most of available resources.
-- 💪 **Powerful Async Task Scheduling and Management**: Provides real-time progress updates, task cancellation, and internal task priority assignment.
-- 🖼️ **Built-in Support for Multiple Image Protocols**: Also integrated with Überzug++ and Chafa, covering almost all terminals.
-- 🌟 **Built-in Code Highlighting and Image Decoding**: Combined with the pre-loading mechanism, greatly accelerates image and normal file loading.
-- 🔌 **Concurrent Plugin System**: UI plugins (rewriting most of the UI), functional plugins, custom previewer/preloader/spotter/fetcher; Just some pieces of Lua.
-- ☁️ **Virtual Filesystem**: Remote file management, custom search engines.
-- 📡 **Data Distribution Service**: Built on a client-server architecture (no additional server process required), integrated with a Lua-based publish-subscribe model, achieving cross-instance communication and state persistence.
-- 📦 **Package Manager**: Install plugins and themes with one command, keeping them up-to-date, or pin them to a specific version.
-- 🧰 Integration with ripgrep, fd, fzf, zoxide
-- 💫 Vim-like input/pick/confirm/which/notify component, auto-completion for cd paths
-- 🏷️ Multi-Tab Support, Cross-directory selection, Scrollable Preview (for videos, PDFs, archives, code, directories, etc.)
-- 🔄 Bulk Renaming, Archive Extraction, Visual Mode, File Chooser, [Git Integration](https://github.com/yazi-rs/plugins/tree/main/git.yazi), [Mount Manager](https://github.com/yazi-rs/plugins/tree/main/mount.yazi)
-- 🎨 Theme System, Mouse Support, Trash Bin, Custom Layouts, CSI u, OSC 52
-- 🪟 Dual-Pane Mode, Per-Pane Independent Tabs, Cross-Pane Copy/Move (MC-style F5/F6), Single/Dual Toggle, Preview Toggle
-- ... and more!
+The Ranger-style layout (continuous nested columns) adopted by Yazi and almost all modern terminal file managers doesn't quite fit my workflow. However, **Yazi is an incredibly powerful, fast file manager with an excellent architecture and plugin ecosystem**.
 
-https://github.com/sxyazi/yazi/assets/17523360/92ff23fa-0cd5-4f04-b387-894c12265cc7
+Instead of building everything from scratch, I created a fork and reimagined it around a native dual-pane experience.
 
-## dual-yazi 快速开始
+---
 
-dual-yazi 是 [yazi](https://github.com/sxyazi/yazi) 的 fork, 在上游基础上强化了双面板 (dual-pane) 体验, 并提供 `--dual` 启动标志, 让双面板成为一等公民.
+## ⚡ Key Features & Differences from Yazi
 
-### 安装 (macOS / Linux, 通过 Homebrew)
+Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class citizen and builds upon it with enhanced functionality:
 
-```sh
-# 如果之前装过官方 yazi, 先卸载 (二者 binary 同名, 会冲突)
-brew uninstall yazi
+1. **Dual-Pane Mode by Default**:
+   * Launches directly into a dual-pane interface with two independent file columns.
+   * Toggle to single-pane mode using the `--single` CLI flag or press `Ctrl+W o`.
+2. **Native Cross-Pane File Operations (MC/DC Style)**:
+   * **`F5` / `Shift+F5`**: Copy selected files/folders to the opposite pane (`Shift` forces overwrite).
+   * **`F6` / `Shift+F6`**: Move selected files/folders to the opposite pane (`Shift` forces overwrite).
+   * **`=`**: Synchronize opposite pane directory to match the current pane's CWD.
+3. **Double Commander Style Overwrite Dialog** (`overwrite_dialog = true`):
+   * Comprehensive conflict popup with inline hotkeys: `[O]verwrite`, `Overwrite [A]ll`, `Overwrite Ol[d]er`, `[S]kip`, `Skip A[l]l`, `Auto [R]ename`, `Co[m]pare`, `[C]ancel`.
+4. **Fast Disk & Volume Picker** (`g m` / `disks`):
+   * Cross-platform disk and mounted volume selector.
+   * Single matching drive opens immediately on keypress (e.g. `s` for `soft`) without pressing Enter. Multiple matches cycle selection iteratively.
+5. **Letter Jump Navigation Mode (`JUMP`)**:
+   * Toggle with `Ctrl+J`. Mappings allow instant cursor jumping to matching filenames by typing their initial letter.
+6. **Smart Auto-Switch to Glob Search** (`smart_glob = true`):
+   * Searching with wildcards (e.g. `*.py`, `*.txt`) automatically activates `--glob` in `fd`, while standard regular expressions (e.g. `.*\.py`) continue evaluating as regex.
+7. **File Comments Support (`descript.ion`)**:
+   * Press `c m` (`comment`) to add, view, or edit file comments stored in `descript.ion`.
+8. **Batch Rename Inline Hotkeys (`multirename`)**:
+   * Action buttons feature instant hotkey triggers: `Alt+O` (`[O]K`) and `Alt+C` (`[C]ancel`).
+9. **Virtual Parent Directory Listing** (`show_upparent = true`):
+   * Displays `↑ ..` as the top entry in file lists for fast mouse and keyboard parent navigation.
+10. **Audio Previewer & Album Art Display**:
+    * Integrated previewer for MP3, FLAC, M4A, and WAV files with album art extraction via `ffmpeg` / `exiftool`.
 
-# 通过个人 tap 安装 dual-yazi
-brew install jtianling/tap/dual-yazi
+---
+
+## 🔌 Yazi Compatibility: Configs & Plugins
+
+**`che` is 100% compatible with the Yazi ecosystem!**
+
+* **Yazi Plugins**: Any Lua plugin written for Yazi (such as `starship.yazi`, `git.yazi`, or `mount.yazi`) works out of the box in `che`. `che` implements per-pane Lua state isolation for header components, allowing plugins like `starship.yazi` to render independent prompts for both left and right panes concurrently without code modifications.
+* **Yazi Configuration**: All configuration sections and options from `yazi.toml`, `keymap.toml`, and `theme.toml` are fully supported.
+
+---
+
+## 🛠 Installation
+
+### macOS & Linux (Homebrew)
+
+```bash
+brew tap aroum/che
+brew install che
 ```
 
-也可以先 `brew tap` 再装:
-
-```sh
-brew tap jtianling/tap
-brew install dual-yazi
+To upgrade:
+```bash
+brew update && brew upgrade che
 ```
 
-升级:
+### Build from Source (Cargo)
 
-```sh
-brew update && brew upgrade dual-yazi
+Requires Rust toolchain (1.78+):
+
+```bash
+git clone https://github.com/aroum/che.git
+cd che
+cargo build --release
 ```
 
-### 进入 dual mode
+The compiled binaries (`che` and short alias `ch`) will be located in `target/release/`.
 
-启动时直接以双面板模式打开:
+---
 
-```sh
-yazi --dual
+## 📁 Configuration Path
+
+Configuration files for `che` are isolated in their own directory, ensuring zero conflict with standard Yazi installations:
+
+* **Config Directory**: `~/.config/che/`
+  * `yazi.toml` — Primary configuration settings.
+  * `keymap.toml` — Custom keybindings.
+  * `theme.toml` — UI theme definitions.
+  * `plugins/` — Custom Lua plugins.
+
+### New Options in `yazi.toml`
+
+Customize `che`-specific features in `~/.config/che/yazi.toml`:
+
+```toml
+[mgr]
+# Automatically switch to glob mode for wildcard patterns (*.py, *.txt)
+smart_glob = true
+
+# Display "↑ .." entry at the top of directory listings
+show_upparent = true
+
+[input]
+# Esc key behavior in input dialogs
+# false - Single Esc press immediately closes dialog (default)
+# true  - First Esc switches to Vim Normal mode, second Esc closes
+vim_mode = false
+
+# Auto-highlight filename stem excluding extension during rename
+rename_highlight_stem = true
+
+cursor_blink = false
+
+[confirm]
+# Double Commander style overwrite confirmation dialog
+overwrite_dialog = true
 ```
 
-或者先正常启动 `yazi`, 再用快捷键切换:
+### Command Line Flags (CLI)
 
-| 快捷键 | 动作 |
-| --- | --- |
-| `Ctrl+W o` | 单面板 / 双面板切换 |
-| `Tab` | 在两个面板之间切换焦点 |
-| `Ctrl+W h` / `Ctrl+W l` | 直接聚焦左 / 右面板 |
-| `Ctrl+W p` | 切换右侧 preview |
-| `=` | 把另一侧面板同步到当前目录 |
-| `F5` / `Shift+F5` | 复制选中文件到对面 (Shift 强制覆盖) |
-| `F6` / `Shift+F6` | 移动选中文件到对面 (Shift 强制覆盖) |
+* **`che`** — Launches in default dual-pane mode.
+* **`che --single`** — Launches in single-pane mode.
+* **`che --debug`** — Enables verbose debug event logging.
 
-更详细的 keymap 参见 [`yazi-config/preset/keymap-default.toml`](yazi-config/preset/keymap-default.toml).
+---
 
-## Project status
+## ⌨️ Keybindings & Menu Commands
 
-Public beta, can be used as a daily driver.
+### Pane Navigation & Management
 
-Yazi is currently in heavy development, expect breaking changes.
+| Keybinding | Command (`run = ...`) | Description |
+| :--- | :--- | :--- |
+| **`Tab`** / **`Shift+Tab`** | `pane_switch` | Switch focus between left and right panes |
+| **`Ctrl+W h`** / **`Ctrl+W l`** | `pane_focus` | Focus left / right pane directly |
+| **`Ctrl+W o`** | `dual_toggle` | Toggle between dual-pane and single-pane modes |
+| **`Ctrl+W p`** | `preview_toggle` | Toggle preview pane visibility |
+| **`=`** | `sync_pane` | Synchronize opposite pane CWD with active pane |
+| **`F5`** / **`Shift+F5`** | `copy_to` | Copy selected items to opposite pane |
+| **`F6`** / **`Shift+F6`** | `move_to` | Move selected items to opposite pane |
 
-## Documentation
+### New Features & Jump Mode
 
-- Usage: https://yazi-rs.github.io/docs/installation
-- Features: https://yazi-rs.github.io/features
+| Keybinding | Command (`run = ...`) | Description |
+| :--- | :--- | :--- |
+| **`Ctrl + J`** | `jump_mode` | Toggle letter jump navigation mode (`JUMP`) |
+| **`g` `m`** | `disks` | Open disk and volume selection picker |
+| **`c` `m`** | `comment` | Add / edit file comment (`descript.ion`) |
+| **`Ctrl+Shift+R`** / **`c` `r`** | `plugin multirename` | Launch batch multirename plugin |
+| **`Ctrl+Shift+Y`** / **`c` `y`** | `plugin system_copy` | Copy selected files to OS system clipboard |
 
-## Discussion
+---
 
-- Discord Server (English mainly): https://discord.gg/qfADduSdJu
-- Telegram Group (Chinese mainly): https://t.me/yazi_rs
+## 🚚 Migration from Yazi
 
-## Image Preview
+Migrating your setup from Yazi to **che** takes just a few seconds:
 
-| Platform                                                                     | Protocol                               | Support                                  |
-| ---------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------- |
-| [kitty](https://github.com/kovidgoyal/kitty) (>= 0.28.0)                     | [Kitty unicode placeholders][kgp]      | ✅ Built-in                              |
-| [iTerm2](https://iterm2.com)                                                 | [Inline images protocol][iip]          | ✅ Built-in                              |
-| [WezTerm](https://github.com/wez/wezterm)                                    | [Inline images protocol][iip]          | ✅ Built-in                              |
-| [Konsole](https://invent.kde.org/utilities/konsole)                          | [Kitty old protocol][kgp-old]          | ✅ Built-in                              |
-| [foot](https://codeberg.org/dnkl/foot)                                       | [Sixel graphics format][sixel]         | ✅ Built-in                              |
-| [Ghostty](https://github.com/ghostty-org/ghostty)                            | [Kitty unicode placeholders][kgp]      | ✅ Built-in                              |
-| [Windows Terminal](https://github.com/microsoft/terminal) (>= v1.22.10352.0) | [Sixel graphics format][sixel]         | ✅ Built-in                              |
-| [st with Sixel patch](https://github.com/bakkeby/st-flexipatch)              | [Sixel graphics format][sixel]         | ✅ Built-in                              |
-| [Warp](https://www.warp.dev) (macOS/Linux only)                              | [Inline images protocol][iip]          | ✅ Built-in                              |
-| [Tabby](https://github.com/Eugeny/tabby)                                     | [Inline images protocol][iip]          | ✅ Built-in                              |
-| [VSCode](https://github.com/microsoft/vscode)                                | [Inline images protocol][iip]          | ✅ Built-in                              |
-| [Rio](https://github.com/raphamorim/rio)                                     | [Inline images protocol][iip]          | ❌ Rio renders images at incorrect sizes |
-| [Black Box](https://gitlab.gnome.org/raggesilver/blackbox)                   | [Sixel graphics format][sixel]         | ✅ Built-in                              |
-| [Bobcat](https://github.com/ismail-yilmaz/Bobcat)                            | [Inline images protocol][iip]          | ✅ Built-in                              |
-| X11 / Wayland                                                                | Window system protocol                 | ☑️ [Überzug++][ueberzug] required        |
-| Fallback                                                                     | [ASCII art (Unicode block)][ascii-art] | ☑️ [Chafa][chafa] required (>= 1.16.0)   |
+1. **Copy configuration files**:
+   ```bash
+   mkdir -p ~/.config/che
+   cp -r ~/.config/yazi/* ~/.config/che/
+   ```
+2. **Copy plugins and theme data**:
+   ```bash
+   mkdir -p ~/.local/share/che
+   cp -r ~/.local/share/yazi/* ~/.local/share/che/ 2>/dev/null || true
+   ```
+3. **Launch `che`**:
+   ```bash
+   che
+   ```
 
-See https://yazi-rs.github.io/docs/image-preview for details.
+All existing plugins, keymaps, and themes will function seamlessly in **che**!
 
-<!-- Protocols -->
+---
 
-[kgp]: https://sw.kovidgoyal.net/kitty/graphics-protocol/#unicode-placeholders
-[kgp-old]: https://github.com/sxyazi/yazi/blob/main/yazi-adapter/src/drivers/kgp_old.rs
-[iip]: https://iterm2.com/documentation-images.html
-[sixel]: https://www.vt100.net/docs/vt3xx-gp/chapter14.html
-[ascii-art]: https://en.wikipedia.org/wiki/ASCII_art
+## 📜 License
 
-<!-- Dependencies -->
-
-[ueberzug]: https://github.com/jstkdng/ueberzugpp
-[chafa]: https://hpjansson.org/chafa/
-
-## Special Thanks
-
-<img alt="RustRover logo" align="right" width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/RustRover.svg">
-
-Thanks to RustRover team for providing open-source licenses to support the maintenance of Yazi.
-
-Active code contributors can contact @sxyazi to get a license (if any are still available).
-
-## License
-
-Yazi is MIT-licensed. For more information check the [LICENSE](LICENSE) file.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
