@@ -106,22 +106,10 @@ function Entity:style()
 		if rt.mgr.hide_inactive_cursor then
 			return s
 		else
-			local style
-			if self._file.in_current then
-				style = s:patch(th.indicator.current)
-			elseif self._file.in_preview then
-				style = s:patch(th.indicator.preview)
-			else
-				style = s:patch(th.indicator.parent)
-			end
-			return style:dim(true)
+			return s:patch(th.indicator.current):dim(true)
 		end
-	elseif self._file.in_current then
-		return s:patch(th.indicator.current)
-	elseif self._file.in_preview then
-		return s:patch(th.indicator.preview)
 	else
-		return s:patch(th.indicator.parent)
+		return s:patch(th.indicator.current)
 	end
 end
 
