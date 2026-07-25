@@ -93,3 +93,24 @@ jobs:
         with:
           files: "*.zip"
           generate_release_notes: true
+
+      - name: Publish to Winget
+        if: env.WINGET_TOKEN != ''
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: aroum.che
+          installers-regex: 'che-.*-(x86_64|aarch64)-pc-windows-msvc\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+
+      - name: Update Homebrew Formula
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: che
+          homebrew-tap: aroum/homebrew-che
+          download-url: https://github.com/aroum/che/releases/download/${{ github.ref_name }}/che-${{ github.ref_name }}-x86_64-apple-darwin.zip
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
