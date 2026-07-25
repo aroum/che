@@ -131,8 +131,8 @@ smart_glob = true
 # Display "↑ .." entry at the top of directory listings
 show_upparent = true
 
-# Completely hide cursor and side markers in inactive pane (false = dimmed second cursor, true = hidden)
-hide_inactive_cursor = false
+# Completely hide cursor and side markers in inactive pane (true = hidden by default, false = dimmed second cursor)
+hide_inactive_cursor = true
 
 [input]
 # Esc key behavior in input dialogs
