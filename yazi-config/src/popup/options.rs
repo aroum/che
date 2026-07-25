@@ -13,6 +13,7 @@ pub struct InputCfg {
 	pub position:   Position,
 	pub realtime:   bool,
 	pub completion: bool,
+	pub highlight_stem: bool,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -53,6 +54,7 @@ impl InputCfg {
 		Self {
 			title: YAZI.input.rename_title.clone(),
 			position: Position::new(YAZI.input.rename_origin, YAZI.input.rename_offset),
+			highlight_stem: YAZI.input.rename_highlight_stem,
 			..Default::default()
 		}
 	}
@@ -151,10 +153,15 @@ impl ConfirmCfg {
 	}
 
 	pub fn overwrite(url: &UrlBuf) -> Self {
+		let body_text = if YAZI.confirm.overwrite_dialog {
+			"File already exists! Choose an action:\n\n  [O]verwrite     Overwrite [A]ll    Overwrite Ol[d]er\n  [S]kip          Skip A[l]l         Auto [R]ename\n  Co[m]pare       [C]ancel"
+		} else {
+			&YAZI.confirm.overwrite_body
+		};
 		Self::new(
 			YAZI.confirm.overwrite_title.clone(),
 			YAZI.confirm.overwrite_position(),
-			Some(Text::raw(&YAZI.confirm.overwrite_body)),
+			Some(Text::raw(body_text)),
 			Some(url.to_strand().into_string_lossy().into()),
 		)
 	}

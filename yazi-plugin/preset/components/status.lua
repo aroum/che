@@ -27,7 +27,9 @@ end
 
 function Status:style()
 	local m = th.mode
-	if self._tab.mode.is_select then
+	if self._tab.jump_mode then
+		return { main = ui.Style():fg("black"):bg("magenta"):bold(), alt = m.normal_alt }
+	elseif self._tab.mode.is_select then
 		return { main = m.select_main, alt = m.select_alt }
 	elseif self._tab.mode.is_unset then
 		return { main = m.unset_main, alt = m.unset_alt }
@@ -38,6 +40,10 @@ end
 
 function Status:mode()
 	local mode = tostring(self._tab.mode):sub(1, 3):upper()
+	if self._tab.jump_mode then
+		local char_suffix = self._tab.last_jump_char and (":" .. self._tab.last_jump_char:upper()) or ""
+		mode = "JUMP" .. char_suffix
+	end
 
 	local style = self:style()
 	return ui.Line {

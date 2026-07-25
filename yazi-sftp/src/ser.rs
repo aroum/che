@@ -1,4 +1,7 @@
-use serde::ser::{SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant};
+use serde::ser::{
+	SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
+	SerializeTupleStruct, SerializeTupleVariant,
+};
 
 use crate::Error;
 
@@ -79,7 +82,9 @@ impl<'a> serde::Serializer for &'a mut Serializer {
 		Ok(())
 	}
 
-	fn serialize_none(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 
 	fn serialize_some<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
 	where
@@ -92,7 +97,9 @@ impl<'a> serde::Serializer for &'a mut Serializer {
 		Err(Error::serde("unit not supported"))
 	}
 
-	fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 
 	fn serialize_unit_variant(
 		self,
@@ -145,7 +152,9 @@ impl<'a> serde::Serializer for &'a mut Serializer {
 		Ok(self)
 	}
 
-	fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, Self::Error> { Ok(self) }
+	fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, Self::Error> {
+		Ok(self)
+	}
 
 	fn serialize_tuple_struct(
 		self,
@@ -177,7 +186,9 @@ impl<'a> serde::Serializer for &'a mut Serializer {
 		Err(Error::serde("struct variant not supported"))
 	}
 
-	fn is_human_readable(&self) -> bool { false }
+	fn is_human_readable(&self) -> bool {
+		false
+	}
 }
 
 impl SerializeMap for &mut Serializer {
@@ -198,7 +209,9 @@ impl SerializeMap for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeSeq for &mut Serializer {
@@ -212,7 +225,9 @@ impl SerializeSeq for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeStruct for &mut Serializer {
@@ -226,7 +241,9 @@ impl SerializeStruct for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeStructVariant for &mut Serializer {
@@ -240,7 +257,9 @@ impl SerializeStructVariant for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeTuple for &mut Serializer {
@@ -254,7 +273,9 @@ impl SerializeTuple for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeTupleStruct for &mut Serializer {
@@ -268,7 +289,9 @@ impl SerializeTupleStruct for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }
 
 impl SerializeTupleVariant for &mut Serializer {
@@ -282,5 +305,7 @@ impl SerializeTupleVariant for &mut Serializer {
 		value.serialize(&mut **self)
 	}
 
-	fn end(self) -> Result<Self::Ok, Self::Error> { Ok(()) }
+	fn end(self) -> Result<Self::Ok, Self::Error> {
+		Ok(())
+	}
 }

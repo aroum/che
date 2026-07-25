@@ -10,10 +10,10 @@ Entity = {
 	},
 }
 
-function Entity:new(file) return setmetatable({ _file = file }, { __index = self }) end
+function Entity:new(file, active) return setmetatable({ _file = file, _active = active ~= false }, { __index = self }) end
 
 function Entity:padding()
-	if not self._file.is_hovered then
+	if not self._file.is_hovered or not self._active then
 		return " "
 	end
 
@@ -29,7 +29,7 @@ function Entity:icon()
 	local icon = self._file:icon()
 	if not icon then
 		return ""
-	elseif self._file.is_hovered then
+	elseif self._file.is_hovered and self._active then
 		return icon.text .. " "
 	else
 		return ui.Line(icon.text .. " "):style(icon.style)
@@ -63,7 +63,7 @@ function Entity:highlights()
 end
 
 function Entity:found()
-	if not self._file.is_hovered then
+	if not self._file.is_hovered or not self._active then
 		return ""
 	end
 
@@ -98,7 +98,7 @@ end
 
 function Entity:style()
 	local s = self._file:style() or ui.Style()
-	if not self._file.is_hovered then
+	if not self._file.is_hovered or not self._active then
 		return s
 	elseif self._file.in_current then
 		return s:patch(th.indicator.current)

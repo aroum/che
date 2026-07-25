@@ -13,6 +13,8 @@ sort_fallback  = "alphabetical"
 linemode       = "none"
 show_hidden    = false
 show_symlink   = true
+show_upparent  = false
+smart_glob     = true
 scrolloff      = 5
 mouse_events   = [ "click", "scroll" ]
 
@@ -115,6 +117,8 @@ spotters = [
 	{ mime = "image/{avif,hei?,jxl}", run = "magick" },
 	{ mime = "image/svg+xml", run = "svg" },
 	{ mime = "image/*", run = "image" },
+	# Audio
+	{ mime = "audio/*", run = "audio" },
 	# Video
 	{ mime = "video/*", run = "video" },
 	# Virtual file system
@@ -129,6 +133,8 @@ preloaders = [
 	{ mime = "image/{avif,hei?,jxl}", run = "magick" },
 	{ mime = "image/svg+xml", run = "svg" },
 	{ mime = "image/*", run = "image" },
+	# Audio
+	{ mime = "audio/*", run = "audio" },
 	# Video
 	{ mime = "video/*", run = "video" },
 	# PDF
@@ -148,6 +154,8 @@ previewers = [
 	{ mime = "image/{avif,hei?,jxl}", run = "magick" },
 	{ mime = "image/svg+xml", run = "svg" },
 	{ mime = "image/*", run = "image" },
+	# Audio
+	{ mime = "audio/*", run = "audio" },
 	# Video
 	{ mime = "video/*", run = "video" },
 	# PDF
@@ -175,6 +183,7 @@ previewers = [
 
 [input]
 cursor_blink = false
+vim_mode     = false
 
 # cd
 cd_title  = "Change directory:"
@@ -187,9 +196,10 @@ create_origin = "top-center"
 create_offset = [ 0, 2, 50, 3 ]
 
 # rename
-rename_title  = "Rename:"
-rename_origin = "hovered"
-rename_offset = [ 0, 1, 50, 3 ]
+rename_title          = "Rename:"
+rename_origin         = "hovered"
+rename_offset         = [ 0, 1, 50, 3 ]
+rename_highlight_stem = true
 
 # filter
 filter_title  = "Filter:"
@@ -227,6 +237,7 @@ overwrite_title  = "Overwrite file?"
 overwrite_body   = "Will overwrite the following file:"
 overwrite_origin = "center"
 overwrite_offset = [ 0, 0, 50, 15 ]
+overwrite_dialog = true
 
 # quit
 quit_title  = "Quit?"

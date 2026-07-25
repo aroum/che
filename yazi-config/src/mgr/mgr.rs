@@ -22,6 +22,8 @@ pub struct Mgr {
 	pub linemode:     String,
 	pub show_hidden:  SyncCell<bool>,
 	pub show_symlink: SyncCell<bool>,
+	pub show_upparent: SyncCell<bool>,
+	pub smart_glob:   SyncCell<bool>,
 	pub scrolloff:    SyncCell<u8>,
 	pub mouse_events: SyncCell<MouseEvents>,
 }

@@ -62,6 +62,10 @@ impl UserData for Tab {
 
 		cached_field!(fields, preview, |_, me| Preview::make(me));
 		cached_field!(fields, finder, |_, me| me.finder.as_ref().map(Finder::make).transpose());
+		fields.add_field_method_get("jump_mode", |_, me| Ok(me.jump_mode));
+		fields.add_field_method_get("last_jump_char", |lua, me| {
+			me.last_jump_char.map(|c| lua.create_string(&c.to_string())).transpose()
+		});
 	}
 
 	fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {

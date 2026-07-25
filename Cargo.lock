@@ -5768,11 +5768,14 @@ name = "yazi-cli"
 version = "26.3.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "clap",
  "clap_complete",
  "clap_complete_fig",
  "clap_complete_nushell",
  "crossterm 0.29.0",
+ "ratatui",
+ "regex",
  "serde",
  "serde_json",
  "tokio",

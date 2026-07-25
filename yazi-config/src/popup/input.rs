@@ -6,6 +6,8 @@ use super::{Offset, Origin};
 #[derive(Deserialize, DeserializeOver2)]
 pub struct Input {
 	pub cursor_blink: bool,
+	#[serde(default)]
+	pub vim_mode:     bool,
 
 	// cd
 	pub cd_title:  String,
@@ -21,6 +23,7 @@ pub struct Input {
 	pub rename_title:  String,
 	pub rename_origin: Origin,
 	pub rename_offset: Offset,
+	pub rename_highlight_stem: bool,
 
 	// filter
 	pub filter_title:  String,

@@ -21,12 +21,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 		.add_instructions(&GitclBuilder::default().commit_date(true).sha(true).build()?)?
 		.emit()?;
 
-	if env::var_os("YAZI_GEN_COMPLETIONS").is_none() {
+	if env::var_os("CHE_GEN_COMPLETIONS").or_else(|| env::var_os("GEZI_GEN_COMPLETIONS")).is_none() {
 		return Ok(());
 	}
 
 	let cmd = &mut args::Args::command();
-	let bin = "yazi";
+	let bin = "che";
 	let out = "completions";
 
 	std::fs::create_dir_all(out)?;

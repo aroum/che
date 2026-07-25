@@ -9,6 +9,7 @@ pub struct File {
 	pub url:     UrlBuf,
 	pub cha:     Cha,
 	pub link_to: Option<PathBufDyn>,
+	pub is_upparent: bool,
 }
 
 impl Deref for File {
@@ -26,12 +27,25 @@ impl File {
 	pub fn from_dummy(url: impl Into<UrlBuf>, r#type: Option<ChaType>) -> Self {
 		let url = url.into();
 		let cha = Cha::from_dummy(&url, r#type);
-		Self { url, cha, link_to: None }
+		Self { url, cha, link_to: None, is_upparent: false }
+	}
+
+	#[inline]
+	pub fn make_upparent(parent_url: impl Into<UrlBuf>) -> Self {
+		let url = parent_url.into();
+		let mut cha = Cha::default();
+		cha.mode = crate::cha::ChaMode::T_DIR;
+		Self {
+			url,
+			cha,
+			link_to: None,
+			is_upparent: true,
+		}
 	}
 
 	#[inline]
 	pub fn chdir(&self, wd: &Path) -> Self {
-		Self { url: self.url.rebase(wd), cha: self.cha, link_to: self.link_to.clone() }
+		Self { url: self.url.rebase(wd), cha: self.cha, link_to: self.link_to.clone(), is_upparent: self.is_upparent }
 	}
 }
 
@@ -47,7 +61,13 @@ impl File {
 	pub fn urn(&self) -> PathDyn<'_> { self.url.urn() }
 
 	#[inline]
-	pub fn name(&self) -> Option<Strand<'_>> { self.url.name() }
+	pub fn name(&self) -> Option<Strand<'_>> {
+		if self.is_upparent {
+			Some(Strand::Utf8(".."))
+		} else {
+			self.url.name()
+		}
+	}
 
 	#[inline]
 	pub fn stem(&self) -> Option<Strand<'_>> { self.url.stem() }

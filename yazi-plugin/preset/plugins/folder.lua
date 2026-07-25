@@ -10,7 +10,8 @@ function M:peek(job)
 		return
 	end
 
-	local bound = math.max(0, #folder.files - job.area.h)
+	local limit = math.max(1, job.area.h - 2)
+	local bound = math.max(0, #folder.files - limit)
 	if job.skip > bound then
 		return ya.emit("peek", { bound, only_if = job.file.url, upper_bound = true })
 	end
@@ -21,27 +22,55 @@ function M:peek(job)
 		return ya.preview_widget(job, ui.Text(s):area(job.area):align(ui.Align.CENTER):wrap(ui.Wrap.YES))
 	end
 
+	local files_count = 0
+	local dirs_count = 0
+	local total_size = 0
+	for _, f in ipairs(folder.files) do
+		if f.cha.is_dir then
+			dirs_count = dirs_count + 1
+		else
+			files_count = files_count + 1
+			total_size = total_size + f.cha.len
+		end
+	end
+
+	local chunks = ui.Layout()
+		:direction(ui.Layout.VERTICAL)
+		:constraints({
+			ui.Constraint.Length(1),
+			ui.Constraint.Length(1),
+			ui.Constraint.Fill(1),
+		})
+		:split(job.area)
+
 	local left, right = {}, {}
 	for _, f in ipairs(folder.window) do
 		local entity = Entity:new(f)
 		left[#left + 1], right[#right + 1] = entity:redraw(), Linemode:new(f):redraw()
 
-		local max = math.max(0, job.area.w - right[#right]:width())
+		local max = math.max(0, chunks[3].w - right[#right]:width())
 		left[#left]:truncate { max = max, ellipsis = entity:ellipsis(max) }
 	end
 
+	local info_str = string.format("Files: %d, Dirs: %d, Size: %s", files_count, dirs_count, ya.readable_size(total_size))
+	local info_text = ui.Text(info_str):style(ui.Style():fg("cyan"))
+	local sep_line = ui.Line(string.rep("─", job.area.w)):style(ui.Style():fg("gray"))
+
 	ya.preview_widget(job, {
-		ui.List(left):area(job.area),
-		ui.Text(right):area(job.area):align(ui.Align.RIGHT),
-		table.unpack(Marker:new(job.area, folder):redraw()),
+		info_text:area(chunks[1]),
+		sep_line:area(chunks[2]),
+		ui.List(left):area(chunks[3]),
+		ui.Text(right):area(chunks[3]):align(ui.Align.RIGHT),
+		table.unpack(Marker:new(chunks[3], folder):redraw()),
 	})
 end
 
 function M:seek(job)
 	local folder = cx.active.preview.folder
 	if folder and folder.cwd == job.file.url then
-		local step = math.floor(job.units * job.area.h / 10)
-		local bound = math.max(0, #folder.files - job.area.h)
+		local limit = math.max(1, job.area.h - 2)
+		local step = math.floor(job.units * limit / 10)
+		local bound = math.max(0, #folder.files - limit)
 		ya.emit("peek", {
 			ya.clamp(0, cx.active.preview.skip + step, bound),
 			only_if = job.file.url,

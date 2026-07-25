@@ -14,17 +14,25 @@ pub enum Error {
 }
 
 impl Error {
-	pub(super) fn serde(s: impl Into<Cow<'static, str>>) -> Self { Self::Serde(s.into()) }
+	pub(super) fn serde(s: impl Into<Cow<'static, str>>) -> Self {
+		Self::Serde(s.into())
+	}
 
-	pub(super) fn custom(s: impl Into<Cow<'static, str>>) -> Self { Self::Custom(s.into()) }
+	pub(super) fn custom(s: impl Into<Cow<'static, str>>) -> Self {
+		Self::Custom(s.into())
+	}
 }
 
 impl serde::ser::Error for Error {
-	fn custom<T: std::fmt::Display>(msg: T) -> Self { Self::serde(msg.to_string()) }
+	fn custom<T: std::fmt::Display>(msg: T) -> Self {
+		Self::serde(msg.to_string())
+	}
 }
 
 impl serde::de::Error for Error {
-	fn custom<T: std::fmt::Display>(msg: T) -> Self { Self::serde(msg.to_string()) }
+	fn custom<T: std::fmt::Display>(msg: T) -> Self {
+		Self::serde(msg.to_string())
+	}
 }
 
 impl From<Error> for std::io::Error {
@@ -57,15 +65,21 @@ impl From<Error> for std::io::Error {
 }
 
 impl<T> From<tokio::sync::mpsc::error::SendError<T>> for Error {
-	fn from(_: tokio::sync::mpsc::error::SendError<T>) -> Self { Self::custom("channel closed") }
+	fn from(_: tokio::sync::mpsc::error::SendError<T>) -> Self {
+		Self::custom("channel closed")
+	}
 }
 
 impl From<tokio::sync::oneshot::error::RecvError> for Error {
-	fn from(_: tokio::sync::oneshot::error::RecvError) -> Self { Self::custom("channel closed") }
+	fn from(_: tokio::sync::oneshot::error::RecvError) -> Self {
+		Self::custom("channel closed")
+	}
 }
 
 impl From<tokio::time::error::Elapsed> for Error {
-	fn from(_: tokio::time::error::Elapsed) -> Self { Self::Timeout }
+	fn from(_: tokio::time::error::Elapsed) -> Self {
+		Self::Timeout
+	}
 }
 
 impl std::error::Error for Error {}

@@ -5,7 +5,7 @@ use yazi_dds::Pubsub;
 use yazi_fs::{File, Files, FilesOp, FolderStage, cha::Cha};
 use yazi_macro::err;
 use yazi_proxy::MgrProxy;
-use yazi_shared::{Id, path::{AsPath, PathBufDyn, PathDyn}, url::UrlBuf};
+use yazi_shared::{Id, path::{AsPath, PathBufDyn, PathDyn}, url::{UrlBuf, UrlLike}};
 use yazi_widgets::{Scrollable, Step};
 
 pub struct Folder {
@@ -80,6 +80,7 @@ impl Folder {
 		}
 
 		self.trace = self.trace.take_if(|_| !self.files.is_empty() || self.stage.is_loading());
+		self.set_upparent();
 		self.repos(None);
 
 		(&stage, revision) != (&self.stage, self.files.revision)
@@ -94,14 +95,25 @@ impl Folder {
 	}
 
 	pub fn arrow(&mut self, step: impl Into<Step>) -> bool {
+		let initial_cursor = self.cursor;
+		let initial_offset = self.offset;
+		let step = step.into();
+
 		let mut b = if self.files.is_empty() {
 			(mem::take(&mut self.cursor), mem::take(&mut self.offset)) != (0, 0)
 		} else {
 			self.scroll(step)
 		};
 
-		self.trace = self.hovered().filter(|_| b).map(|h| h.urn().into()).or(self.trace.take());
+		self.trace = self.hovered().filter(|h| !h.is_upparent).filter(|_| b).map(|h| h.urn().into()).or(self.trace.take());
 		b |= self.squeeze_offset();
+
+		let was_loading = self.stage.is_loading();
+		if was_loading {
+			self.cursor = initial_cursor;
+			self.offset = initial_offset;
+			b = false;
+		}
 
 		self.sync_page(false);
 		b
@@ -112,15 +124,24 @@ impl Folder {
 			return self.arrow(0);
 		}
 
-		let new = self.files.position(urn).unwrap_or(self.cursor) as isize;
+		let new = if let Some(pos) = self.files.position(urn) {
+			if self.files[pos].is_upparent {
+				self.cursor
+			} else {
+				pos
+			}
+		} else {
+			self.cursor
+		} as isize;
+
 		self.arrow(new - self.cursor as isize)
 	}
 
 	pub fn repos(&mut self, urn: Option<PathDyn>) -> bool {
 		if let Some(u) = urn {
 			self.hover(u)
-		} else if let Some(u) = &self.trace {
-			self.hover(u.clone().as_path())
+		} else if let Some(u) = self.trace.clone().or_else(|| self.hovered().filter(|h| !h.is_upparent).map(|h| h.urn().into())) {
+			self.hover(u.as_path())
 		} else {
 			self.arrow(0)
 		}
@@ -169,6 +190,12 @@ impl Folder {
 		let start = (page.saturating_sub(1) * limit).min(len.saturating_sub(1));
 		let end = ((page + 2) * limit).min(len);
 		&self.files[start..end]
+	}
+
+	#[inline]
+	pub fn set_upparent(&mut self) {
+		let parent_url = self.url.parent().map(|u| u.to_owned());
+		self.files.set_upparent(parent_url, YAZI.mgr.show_upparent.get());
 	}
 }
 

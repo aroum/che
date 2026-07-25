@@ -12,8 +12,37 @@ impl Input {
 		}
 
 		let o_cur = snap.cursor;
-		render!(self.handle_op(opt.step.add(&snap.value, snap.cursor), false));
-		let n_cur = self.snap().cursor;
+		let n_cur = opt.step.add(&snap.value, snap.cursor);
+
+		if opt.visual {
+			let snap = self.snap_mut();
+			if !matches!(snap.op, InputOp::Select(_)) {
+				snap.op = InputOp::Select(o_cur);
+			}
+			render!(self.handle_op(n_cur, false));
+		} else {
+			let mut handled = false;
+			if let InputOp::Select(start) = snap.op {
+				let snap = self.snap_mut();
+				snap.op = InputOp::None;
+				match opt.step {
+					crate::input::parser::MoveOptStep::Offset(n) if n > 0 => {
+						snap.cursor = start.max(o_cur);
+						handled = true;
+					}
+					crate::input::parser::MoveOptStep::Offset(n) if n < 0 => {
+						snap.cursor = start.min(o_cur);
+						handled = true;
+					}
+					_ => {}
+				}
+			}
+			if !handled {
+				render!(self.handle_op(n_cur, false));
+			} else {
+				render!();
+			}
+		}
 
 		let (limit, snap) = (self.limit, self.snap_mut());
 		if snap.value.is_empty() {

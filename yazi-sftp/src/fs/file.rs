@@ -1,6 +1,15 @@
-use std::{io::{self, SeekFrom}, pin::Pin, sync::Arc, task::{Context, Poll, ready}, time::Duration};
+use std::{
+	io::{self, SeekFrom},
+	pin::Pin,
+	sync::Arc,
+	task::{Context, Poll, ready},
+	time::Duration,
+};
 
-use tokio::{io::{AsyncRead, AsyncSeek, AsyncWrite, ReadBuf}, time::{Timeout, timeout}};
+use tokio::{
+	io::{AsyncRead, AsyncSeek, AsyncWrite, ReadBuf},
+	time::{Timeout, timeout},
+};
 
 use crate::{Error, Operator, Packet, Receiver, Session, fs::Attrs, requests};
 
@@ -12,8 +21,8 @@ pub struct File {
 	closed: bool,
 
 	close_rx: Option<Timeout<Receiver>>,
-	read_rx:  Option<Receiver>,
-	seek_rx:  Option<SeekState>,
+	read_rx: Option<Receiver>,
+	seek_rx: Option<SeekState>,
 	write_rx: Option<(Receiver, usize)>,
 	flush_rx: Option<Timeout<Receiver>>,
 }
@@ -43,8 +52,8 @@ impl File {
 			cursor: 0,
 
 			close_rx: None,
-			read_rx:  None,
-			seek_rx:  None,
+			read_rx: None,
+			seek_rx: None,
 			write_rx: None,
 			flush_rx: None,
 		}

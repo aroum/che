@@ -4,11 +4,13 @@ yazi_macro::mod_flat!(
 	bulk_rename
 	cd
 	close
+	comment
 	copy
 	copy_to
 	create
 	displace
 	displace_do
+	disks
 	download
 	enter
 	escape
@@ -21,7 +23,10 @@ yazi_macro::mod_flat!(
 	forward
 	hardlink
 	hidden
+	flat_toggle
 	hover
+	jump_mode
+	jump_letter
 	leave
 	linemode
 	link
@@ -30,7 +35,9 @@ yazi_macro::mod_flat!(
 	open_do
 	pane_focus
 	pane_only
+	pane_open_other
 	pane_preview
+	pane_swap
 	pane_switch
 	pane_sync_dir
 	paste

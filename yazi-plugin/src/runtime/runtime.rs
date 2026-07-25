@@ -53,6 +53,7 @@ fn mgr() -> Composer<ComposerGet, ComposerSet> {
 			b"linemode" => lua.create_string(&m.linemode)?.into_lua(lua)?,
 			b"show_hidden" => m.show_hidden.get().into_lua(lua)?,
 			b"show_symlink" => m.show_symlink.get().into_lua(lua)?,
+			b"show_upparent" => m.show_upparent.get().into_lua(lua)?,
 			b"scrolloff" => m.scrolloff.get().into_lua(lua)?,
 			b"mouse_events" => lua.to_value_with(&m.mouse_events, SER_OPT)?,
 			_ => return Ok(Value::Nil),

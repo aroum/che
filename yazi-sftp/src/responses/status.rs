@@ -4,9 +4,9 @@ use crate::Error;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Status {
-	pub id:       u32,
-	pub code:     StatusCode,
-	pub message:  String,
+	pub id: u32,
+	pub code: StatusCode,
+	pub message: String,
 	pub language: String,
 }
 
@@ -24,11 +24,17 @@ impl Status {
 			+ 4 + self.language.len()
 	}
 
-	pub fn is_ok(&self) -> bool { self.code == StatusCode::Ok }
+	pub fn is_ok(&self) -> bool {
+		self.code == StatusCode::Ok
+	}
 
-	pub fn is_eof(&self) -> bool { self.code == StatusCode::Eof }
+	pub fn is_eof(&self) -> bool {
+		self.code == StatusCode::Eof
+	}
 
-	pub fn is_failure(&self) -> bool { self.code == StatusCode::Failure }
+	pub fn is_failure(&self) -> bool {
+		self.code == StatusCode::Failure
+	}
 
 	pub(crate) fn connection_lost(id: u32) -> Self {
 		Self {
@@ -42,18 +48,18 @@ impl Status {
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub enum StatusCode {
-	Ok                = 0,
-	Eof               = 1,
-	NoSuchFile        = 2,
-	PermissionDenied  = 3,
-	Failure           = 4,
-	BadMessage        = 5,
-	NoConnection      = 6,
-	ConnectionLost    = 7,
-	OpUnsupported     = 8,
-	InvalidHandle     = 9,
-	NoSuchPath        = 10,
+	Ok = 0,
+	Eof = 1,
+	NoSuchFile = 2,
+	PermissionDenied = 3,
+	Failure = 4,
+	BadMessage = 5,
+	NoConnection = 6,
+	ConnectionLost = 7,
+	OpUnsupported = 8,
+	InvalidHandle = 9,
+	NoSuchPath = 10,
 	FileAlreadyExists = 11,
-	WriteProtect      = 12,
-	NoMedia           = 13,
+	WriteProtect = 12,
+	NoMedia = 13,
 }

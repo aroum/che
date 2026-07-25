@@ -19,9 +19,7 @@ keymap = [
 	{ on = "<Up>",   run = "arrow prev", desc = "Previous file" },
 	{ on = "<Down>", run = "arrow next", desc = "Next file" },
 
-	{ on = "<C-u>", run = "arrow -50%",  desc = "Move cursor up half page" },
 	{ on = "<C-d>", run = "arrow 50%",   desc = "Move cursor down half page" },
-	{ on = "<C-b>", run = "arrow -100%", desc = "Move cursor up one page" },
 	{ on = "<C-f>", run = "arrow 100%",  desc = "Move cursor down one page" },
 
 	{ on = "<S-PageUp>",   run = "arrow -50%",  desc = "Move cursor up half page" },
@@ -64,6 +62,38 @@ keymap = [
 	{ on = [ "<C-w>", "o" ],     run = "pane_only",          desc = "Toggle single/dual pane" },
 	{ on = [ "<C-w>", "p" ],     run = "pane_preview",       desc = "Toggle preview in dual pane" },
 	{ on = "=",                  run = "pane_sync_dir",      desc = "Sync other pane to current directory" },
+	{ on = "<C-Right>",          run = "pane_open_other",    desc = "Open hovered directory in the right/other pane" },
+	{ on = "<C-Left>",           run = "pane_open_other",    desc = "Open hovered directory in the left/other pane" },
+	{ on = "<C-u>",              run = "pane_swap",          desc = "Swap directories of left and right panes" },
+
+	# Double Commander Keybindings (Command replaced with Control)
+	{ on = "<F9>",         run = "shell --block",               desc = "Run terminal" },
+	{ on = "<C-q>",        run = "pane_preview",                desc = "Toggle preview (Quick View)" },
+	{ on = "<C-b>",        run = "flat_toggle",                 desc = "Flat view (list all files recursively)" },
+	{ on = "<C-t>",        run = "tab_create --current",        desc = "New Tab" },
+	{ on = "<C-w>",        run = "close",                       desc = "Close Tab" },
+	{ on = "<C-r>",        run = "reload",                      desc = "Refresh" },
+	{ on = "<C-a>",        run = "toggle_all --state=on",       desc = "Select all" },
+	{ on = "<C-S-a>",      run = "toggle_all --state=off",      desc = "Unselect all" },
+	{ on = "<C-c>",        run = "yank",                        desc = "Copy to clipboard / yank" },
+	{ on = "<C-v>",        run = "paste",                       desc = "Paste" },
+	{ on = "<C-x>",        run = "yank --cut",                  desc = "Cut" },
+	{ on = "<C-PageUp>",   run = "leave",                       desc = "Go to parent directory" },
+	{ on = "<C-PageDown>", run = "enter",                       desc = "Enter directory" },
+	{ on = "<C-\\>",       run = "cd /",                        desc = "Change directory to root" },
+	{ on = "<C-Up>",       run = "tab_create --current",        desc = "Open dir in new tab" },
+	{ on = "<C-S-c>",      run = "copy path",                   desc = "Copy file path to clipboard" },
+	{ on = "<C-S-x>",      run = "copy filename",               desc = "Copy filename to clipboard" },
+	{ on = "<C-S-y>",      run = "plugin system-copy",          desc = "Copy files to system clipboard" },
+	{ on = [ "c", "y" ],   run = "plugin system-copy",          desc = "Copy files to system clipboard" },
+	{ on = "<C-S-r>",      run = "plugin multirename",          desc = "Multi-Rename (Double Commander style)" },
+	{ on = [ "c", "r" ],   run = "plugin multirename",          desc = "Multi-Rename (Double Commander style)" },
+	{ on = [ "c", "m" ],   run = "comment",                     desc = "Edit file/folder comment (descript.ion)" },
+	{ on = "<C-Tab>",      run = "tab_switch 1 --relative",     desc = "Switch to next tab" },
+	{ on = "<C-S-Tab>",    run = "tab_switch -1 --relative",    desc = "Switch to previous tab" },
+	{ on = "<Delete>",     run = "remove",                      desc = "Trash selected files" },
+	{ on = "<S-Delete>",   run = "remove --permanently",        desc = "Permanently delete selected files" },
+	{ on = "<C-Backspace>", run = "remove",                     desc = "Trash selected files" },
 
 	# Tabs
 	{ on = "t", run = "tab_create --current", desc = "Create a new tab in CWD" },
@@ -159,9 +189,11 @@ keymap = [
 	{ on = [ "g", "h" ],       run = "cd ~",             desc = "Go home" },
 	{ on = [ "g", "c" ],       run = "cd ~/.config",     desc = "Go ~/.config" },
 	{ on = [ "g", "d" ],       run = "cd ~/Downloads",   desc = "Go ~/Downloads" },
+	{ on = [ "g", "m" ],       run = "disks",            desc = "Select disk/volume" },
 	{ on = [ "g", "<Space>" ], run = "cd --interactive", desc = "Jump interactively" },
 	{ on = [ "g", "f" ],       run = "follow",           desc = "Follow hovered symlink" },
 	{ on = "<C-g>",            run = "cd --interactive", desc = "Go to folder" },
+	{ on = "<C-j>",            run = "jump_mode",        desc = "Toggle letter jump mode" },
 
 	# Tasks
 	{ on = "w", run = "tasks:show", desc = "Show task manager" },
@@ -249,6 +281,8 @@ keymap = [
 	{ on = "<Enter>", run = "close --submit", desc = "Submit input" },
 	{ on = "<Esc>",   run = "escape",         desc = "Back to normal mode, or cancel input" },
 	{ on = "<C-[>",   run = "escape",         desc = "Back to normal mode, or cancel input" },
+	{ on = "<Up>",    run = "arrow -1",       desc = "Move cursor up to rename previous file" },
+	{ on = "<Down>",  run = "arrow 1",        desc = "Move cursor down to rename next file" },
 
 	# Mode
 	{ on = "i", run = "insert",                          desc = "Enter insert mode" },
@@ -266,8 +300,10 @@ keymap = [
 	# Character-wise movement
 	{ on = "h",       run = "move -1", desc = "Move back a character" },
 	{ on = "l",       run = "move 1",  desc = "Move forward a character" },
-	{ on = "<Left>",  run = "move -1", desc = "Move back a character" },
-	{ on = "<Right>", run = "move 1",  desc = "Move forward a character" },
+	{ on = "<Left>",   run = "move -1", desc = "Move back a character" },
+	{ on = "<Right>",  run = "move 1",  desc = "Move forward a character" },
+	{ on = "<S-Left>",  run = "move -1 --visual", desc = "Select back a character" },
+	{ on = "<S-Right>", run = "move 1 --visual",  desc = "Select forward a character" },
 	{ on = "<C-b>",   run = "move -1", desc = "Move back a character" },
 	{ on = "<C-f>",   run = "move 1",  desc = "Move forward a character" },
 
@@ -339,6 +375,14 @@ keymap = [
 
 	{ on = "n", run = "close",          desc = "Cancel the confirm" },
 	{ on = "y", run = "close --submit", desc = "Submit the confirm" },
+	{ on = "o", run = "close --submit", desc = "Overwrite file" },
+	{ on = "a", run = "close --submit", desc = "Overwrite All" },
+	{ on = "d", run = "close --submit", desc = "Overwrite Older" },
+	{ on = "s", run = "close",          desc = "Skip file" },
+	{ on = "l", run = "close",          desc = "Skip All" },
+	{ on = "r", run = "close --submit", desc = "Auto Rename" },
+	{ on = "m", run = "close",          desc = "Compare" },
+	{ on = "c", run = "close",          desc = "Cancel" },
 
 	{ on = "k", run = "arrow prev", desc = "Previous line" },
 	{ on = "j", run = "arrow next", desc = "Next line" },

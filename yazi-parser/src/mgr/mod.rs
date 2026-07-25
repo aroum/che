@@ -1,6 +1,7 @@
 yazi_macro::mod_flat!(
 	cd
 	close
+	comment
 	copy
 	copy_to
 	create
@@ -8,12 +9,15 @@ yazi_macro::mod_flat!(
 	download
 	escape
 	filter
+	flat_toggle
 	find
 	find_arrow
 	find_do
 	hardlink
 	hidden
 	hover
+	jump_mode
+	jump_letter
 	linemode
 	link
 	move_to
@@ -22,8 +26,10 @@ yazi_macro::mod_flat!(
 	pane_focus
 	pane_only
 	pane_preview
+	pane_open_other
 	pane_switch
 	pane_sync_dir
+	pane_swap
 	paste
 	peek
 	redo

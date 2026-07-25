@@ -34,6 +34,9 @@ pub enum Spark<'a> {
 	Create(yazi_parser::mgr::CreateOpt),
 	Displace(yazi_parser::VoidOpt),
 	DisplaceDo(yazi_parser::mgr::DisplaceDoOpt),
+	Disks(yazi_parser::VoidOpt),
+	JumpMode(yazi_parser::mgr::JumpModeOpt),
+	JumpLetter(yazi_parser::mgr::JumpLetterOpt),
 	Download(yazi_parser::mgr::DownloadOpt),
 	Enter(yazi_parser::VoidOpt),
 	Escape(yazi_parser::mgr::EscapeOpt),
@@ -51,6 +54,7 @@ pub enum Spark<'a> {
 	Forward(yazi_parser::VoidOpt),
 	Hardlink(yazi_parser::mgr::HardlinkOpt),
 	Hidden(yazi_parser::mgr::HiddenOpt),
+	FlatToggle(yazi_parser::mgr::FlatToggleOpt),
 	Hover(yazi_parser::mgr::HoverOpt),
 	Leave(yazi_parser::VoidOpt),
 	Linemode(yazi_parser::mgr::LinemodeOpt),
@@ -63,6 +67,8 @@ pub enum Spark<'a> {
 	PanePreview(yazi_parser::mgr::PanePreviewOpt),
 	PaneSwitch(yazi_parser::mgr::PaneSwitchOpt),
 	PaneSyncDir(yazi_parser::mgr::PaneSyncDirOpt),
+	PaneSwap(yazi_parser::mgr::PaneSwapOpt),
+	PaneOpenOther(yazi_parser::mgr::PaneOpenOtherOpt),
 	Paste(yazi_parser::mgr::PasteOpt),
 	Peek(yazi_parser::mgr::PeekOpt),
 	Quit(yazi_parser::app::QuitOpt),
@@ -70,6 +76,7 @@ pub enum Spark<'a> {
 	Refresh(yazi_parser::VoidOpt),
 	Remove(yazi_parser::mgr::RemoveOpt),
 	RemoveDo(yazi_parser::mgr::RemoveOpt),
+	Comment(yazi_parser::mgr::CommentOpt),
 	Rename(yazi_parser::mgr::RenameOpt),
 	Reveal(yazi_parser::mgr::RevealOpt),
 	Search(yazi_parser::mgr::SearchOpt),
@@ -125,6 +132,7 @@ pub enum Spark<'a> {
 	HelpToggle(yazi_parser::help::ToggleOpt),
 
 	// Input
+	InputArrow(yazi_parser::ArrowOpt),
 	InputBackspace(yazi_widgets::input::parser::BackspaceOpt),
 	InputBackward(yazi_widgets::input::parser::BackwardOpt),
 	InputClose(yazi_parser::input::CloseOpt),
@@ -230,6 +238,9 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::Create(b) => b.into_lua(lua),
 			Self::Displace(b) => b.into_lua(lua),
 			Self::DisplaceDo(b) => b.into_lua(lua),
+			Self::Disks(b) => b.into_lua(lua),
+			Self::JumpMode(b) => b.into_lua(lua),
+			Self::JumpLetter(b) => b.into_lua(lua),
 			Self::Download(b) => b.into_lua(lua),
 			Self::Enter(b) => b.into_lua(lua),
 			Self::Escape(b) => b.into_lua(lua),
@@ -247,6 +258,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::Forward(b) => b.into_lua(lua),
 			Self::Hardlink(b) => b.into_lua(lua),
 			Self::Hidden(b) => b.into_lua(lua),
+			Self::FlatToggle(b) => b.into_lua(lua),
 			Self::Hover(b) => b.into_lua(lua),
 			Self::Leave(b) => b.into_lua(lua),
 			Self::Linemode(b) => b.into_lua(lua),
@@ -259,6 +271,8 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::PanePreview(b) => b.into_lua(lua),
 			Self::PaneSwitch(b) => b.into_lua(lua),
 			Self::PaneSyncDir(b) => b.into_lua(lua),
+			Self::PaneSwap(b) => b.into_lua(lua),
+			Self::PaneOpenOther(b) => b.into_lua(lua),
 			Self::Paste(b) => b.into_lua(lua),
 			Self::Peek(b) => b.into_lua(lua),
 			Self::Quit(b) => b.into_lua(lua),
@@ -266,6 +280,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::Refresh(b) => b.into_lua(lua),
 			Self::Remove(b) => b.into_lua(lua),
 			Self::RemoveDo(b) => b.into_lua(lua),
+			Self::Comment(b) => b.into_lua(lua),
 			Self::Rename(b) => b.into_lua(lua),
 			Self::Reveal(b) => b.into_lua(lua),
 			Self::Search(b) => b.into_lua(lua),
@@ -321,6 +336,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::HelpToggle(b) => b.into_lua(lua),
 
 			// Input
+			Self::InputArrow(b) => b.into_lua(lua),
 			Self::InputBackspace(b) => b.into_lua(lua),
 			Self::InputBackward(b) => b.into_lua(lua),
 			Self::InputClose(b) => b.into_lua(lua),
@@ -371,7 +387,8 @@ try_from_spark!(
 	app:bootstrap,
 	app:focus,
 	mgr:back,
-	mgr:bulk_rename,
+	mgr:displace,
+	mgr:disks,
 	mgr:enter,
 	mgr:escape_filter,
 	mgr:escape_find,
@@ -390,7 +407,7 @@ try_from_spark!(
 );
 
 // App
-try_from_spark!(yazi_parser::ArrowOpt, mgr:arrow, mgr:tab_swap);
+try_from_spark!(yazi_parser::ArrowOpt, mgr:arrow, mgr:tab_swap, input:arrow);
 try_from_spark!(yazi_parser::app::DeprecateOpt, app:deprecate);
 try_from_spark!(yazi_parser::app::MouseOpt, app:mouse);
 try_from_spark!(yazi_parser::app::PluginOpt, app:plugin, app:plugin_do);
@@ -422,7 +439,10 @@ try_from_spark!(yazi_parser::mgr::FindDoOpt, mgr:find_do);
 try_from_spark!(yazi_parser::mgr::FindOpt, mgr:find);
 try_from_spark!(yazi_parser::mgr::HardlinkOpt, mgr:hardlink);
 try_from_spark!(yazi_parser::mgr::HiddenOpt, mgr:hidden);
+try_from_spark!(yazi_parser::mgr::FlatToggleOpt, mgr:flat_toggle);
 try_from_spark!(yazi_parser::mgr::HoverOpt, mgr:hover);
+try_from_spark!(yazi_parser::mgr::JumpModeOpt, mgr:jump_mode);
+try_from_spark!(yazi_parser::mgr::JumpLetterOpt, mgr:jump_letter);
 try_from_spark!(yazi_parser::mgr::LinemodeOpt, mgr:linemode);
 try_from_spark!(yazi_parser::mgr::LinkOpt, mgr:link);
 try_from_spark!(yazi_parser::mgr::MoveToOpt, mgr:move_to);
@@ -433,9 +453,12 @@ try_from_spark!(yazi_parser::mgr::PaneOnlyOpt, mgr:pane_only);
 try_from_spark!(yazi_parser::mgr::PanePreviewOpt, mgr:pane_preview);
 try_from_spark!(yazi_parser::mgr::PaneSwitchOpt, mgr:pane_switch);
 try_from_spark!(yazi_parser::mgr::PaneSyncDirOpt, mgr:pane_sync_dir);
+try_from_spark!(yazi_parser::mgr::PaneSwapOpt, mgr:pane_swap);
+try_from_spark!(yazi_parser::mgr::PaneOpenOtherOpt, mgr:pane_open_other);
 try_from_spark!(yazi_parser::mgr::PasteOpt, mgr:paste);
 try_from_spark!(yazi_parser::mgr::PeekOpt, mgr:peek);
 try_from_spark!(yazi_parser::mgr::RemoveOpt, mgr:remove, mgr:remove_do);
+try_from_spark!(yazi_parser::mgr::CommentOpt, mgr:comment);
 try_from_spark!(yazi_parser::mgr::RenameOpt, mgr:rename);
 try_from_spark!(yazi_parser::mgr::RevealOpt, mgr:reveal);
 try_from_spark!(yazi_parser::mgr::SearchOpt, mgr:search, mgr:search_do);

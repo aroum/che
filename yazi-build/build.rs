@@ -6,20 +6,22 @@ fn main() -> Result<(), Box<dyn Error>> {
 	yazi_tty::init();
 
 	let manifest = env::var_os("CARGO_MANIFEST_DIR").unwrap().to_string_lossy().replace(r"\", "/");
-	let crates = if manifest.contains("/git/checkouts/yazi-") {
-		&["--git", "https://github.com/sxyazi/yazi.git", "yazi-fm", "yazi-cli"]
-	} else if manifest.contains("/registry/src/index.crates.io-") {
-		&["yazi-fm", "yazi-cli"][..]
-	} else {
-		return Ok(());
-	};
+	let crates =
+		if manifest.contains("/git/checkouts/gezi-") || manifest.contains("/git/checkouts/che-") {
+			&["--git", "https://github.com/jtianling/dual-yazi.git", "gezi-fm", "gezi-cli"]
+		} else if manifest.contains("/registry/src/index.crates.io-") {
+			&["gezi-fm", "gezi-cli"][..]
+		} else {
+			return Ok(());
+		};
 
 	let target = env::var("TARGET").unwrap();
 	let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
 	unsafe {
 		env::set_var("CARGO_TARGET_DIR", "target");
 		env::set_var("VERGEN_GIT_SHA", "Crates.io");
-		env::set_var("YAZI_CRATE_BUILD", "1");
+		env::set_var("CHE_CRATE_BUILD", "1");
+		env::set_var("GEZI_CRATE_BUILD", "1");
 
 		env::set_var("JEMALLOC_SYS_WITH_LG_PAGE", "16");
 		env::set_var("JEMALLOC_SYS_WITH_MALLOC_CONF", "narenas:1");

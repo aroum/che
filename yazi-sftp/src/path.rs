@@ -20,11 +20,15 @@ impl Deref for SftpPath<'_> {
 }
 
 impl Default for SftpPath<'_> {
-	fn default() -> Self { SftpPath::Borrowed(typed_path::UnixPath::new("")) }
+	fn default() -> Self {
+		SftpPath::Borrowed(typed_path::UnixPath::new(""))
+	}
 }
 
 impl<'a> From<&'a Self> for SftpPath<'a> {
-	fn from(value: &'a SftpPath) -> Self { SftpPath::Borrowed(value) }
+	fn from(value: &'a SftpPath) -> Self {
+		SftpPath::Borrowed(value)
+	}
 }
 
 impl<'a> From<Cow<'a, [u8]>> for SftpPath<'a> {
@@ -56,7 +60,9 @@ impl<'de> Deserialize<'de> for SftpPath<'_> {
 }
 
 impl<'a> SftpPath<'a> {
-	pub fn len(&self) -> usize { self.as_bytes().len() }
+	pub fn len(&self) -> usize {
+		self.as_bytes().len()
+	}
 
 	pub fn into_owned(self) -> typed_path::UnixPathBuf {
 		match self {
@@ -75,9 +81,13 @@ impl<'a, T> AsSftpPath<'a> for &'a T
 where
 	T: ?Sized + AsRef<typed_path::UnixPath>,
 {
-	fn as_sftp_path(self) -> SftpPath<'a> { SftpPath::Borrowed(self.as_ref()) }
+	fn as_sftp_path(self) -> SftpPath<'a> {
+		SftpPath::Borrowed(self.as_ref())
+	}
 }
 
 impl<'a> AsSftpPath<'a> for &'a SftpPath<'a> {
-	fn as_sftp_path(self) -> SftpPath<'a> { SftpPath::Borrowed(self) }
+	fn as_sftp_path(self) -> SftpPath<'a> {
+		SftpPath::Borrowed(self)
+	}
 }

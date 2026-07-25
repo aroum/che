@@ -26,6 +26,9 @@ pub struct Tab {
 	pub preview: Preview,
 	pub finder:  Option<Finder>,
 	pub search:  Option<JoinHandle<Result<()>>>,
+
+	pub jump_mode:      bool,
+	pub last_jump_char: Option<char>,
 }
 
 impl Default for Tab {
@@ -47,6 +50,9 @@ impl Default for Tab {
 			preview: Default::default(),
 			finder:  Default::default(),
 			search:  Default::default(),
+
+			jump_mode:      false,
+			last_jump_char: None,
 		}
 	}
 }
@@ -100,7 +106,7 @@ impl Tab {
 
 	pub fn selected_or_hovered(&self) -> Box<dyn Iterator<Item = &UrlBuf> + '_> {
 		if self.selected.is_empty() {
-			Box::new(self.hovered().map(|h| &h.url).into_iter())
+			Box::new(self.hovered().filter(|h| !h.is_upparent).map(|h| &h.url).into_iter())
 		} else {
 			Box::new(self.selected.values())
 		}

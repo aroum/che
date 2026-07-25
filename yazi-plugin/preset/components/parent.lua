@@ -27,7 +27,7 @@ function Parent:redraw()
 
 	local left, right = {}, {}
 	for _, f in ipairs(self._folder.window) do
-		local entity = Entity:new(f)
+		local entity = Entity:new(f, self._active)
 		left[#left + 1], right[#right + 1] =
 			self:dim(entity:redraw()), self:dim(Linemode:new(f):redraw())
 

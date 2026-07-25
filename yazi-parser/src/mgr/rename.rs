@@ -1,7 +1,7 @@
 use mlua::{ExternalError, FromLua, IntoLua, Lua, Value};
 use yazi_shared::{SStr, event::ActionCow};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct RenameOpt {
 	pub hovered: bool,
 	pub force:   bool,

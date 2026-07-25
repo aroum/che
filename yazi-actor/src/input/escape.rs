@@ -17,12 +17,20 @@ impl Actor for Escape {
 		use yazi_widgets::input::InputMode as M;
 		let input = &mut cx.input;
 
+		use yazi_config::YAZI;
 		let mode = input.snap().mode;
-		match mode {
-			M::Normal if input.snap_mut().op == InputOp::None => act!(input:close, cx),
-			M::Insert => act!(cmp:close, cx),
-			M::Normal | M::Replace => Ok(().into()),
-		}?;
+		if YAZI.input.vim_mode {
+			match mode {
+				M::Normal if input.snap_mut().op == InputOp::None => act!(input:close, cx),
+				M::Insert if cx.cmp.visible => act!(cmp:close, cx),
+				M::Insert | M::Normal | M::Replace => Ok(().into()),
+			}?;
+		} else {
+			match mode {
+				M::Insert if cx.cmp.visible => act!(cmp:close, cx),
+				_ => act!(input:close, cx),
+			}?;
+		}
 
 		act!(escape, cx.input)?;
 		succ!(render!());

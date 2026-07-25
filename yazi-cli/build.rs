@@ -9,12 +9,13 @@ use vergen_gitcl::{BuildBuilder, Emitter, GitclBuilder};
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let manifest = env::var_os("CARGO_MANIFEST_DIR").unwrap().to_string_lossy().replace(r"\", "/");
-	if env::var_os("YAZI_CRATE_BUILD").is_none()
-		&& (manifest.contains("/git/checkouts/yazi-")
+	if env::var_os("CHE_CRATE_BUILD").or_else(|| env::var_os("GEZI_CRATE_BUILD")).is_none()
+		&& (manifest.contains("/git/checkouts/gezi-")
+			|| manifest.contains("/git/checkouts/che-")
 			|| manifest.contains("/registry/src/index.crates.io-"))
 	{
 		panic!(
-			"Due to Cargo's limitations, the `yazi-fm` and `yazi-cli` crates on crates.io must be built with `cargo install --force yazi-build`"
+			"Due to Cargo's limitations, the `che-fm` and `che-cli` crates on crates.io must be built with `cargo install --force che-build`"
 		);
 	}
 
@@ -27,12 +28,12 @@ fn generate() -> Result<(), Box<dyn Error>> {
 		.add_instructions(&GitclBuilder::default().commit_date(true).sha(true).build()?)?
 		.emit()?;
 
-	if env::var_os("YAZI_GEN_COMPLETIONS").is_none() {
+	if env::var_os("CHE_GEN_COMPLETIONS").or_else(|| env::var_os("GEZI_GEN_COMPLETIONS")).is_none() {
 		return Ok(());
 	}
 
 	let cmd = &mut args::Args::command();
-	let bin = "ya";
+	let bin = "ch";
 	let out = "completions";
 
 	std::fs::create_dir_all(out)?;

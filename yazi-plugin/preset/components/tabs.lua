@@ -3,10 +3,11 @@ Tabs = {
 	_offsets = {},
 }
 
-function Tabs:new(area, pane)
+function Tabs:new(area, pane, pane_idx)
 	return setmetatable({
 		_area = area,
 		_pane = pane,
+		_pane_idx = pane_idx,
 	}, { __index = self })
 end
 
@@ -58,9 +59,15 @@ function Tabs:click(event, up)
 	if up or event.is_middle then
 		return
 	end
+
+	if self._pane_idx and self._pane_idx ~= cx.tabs.idx then
+		ya.emit("pane_switch", {})
+	end
+
 	local tabs = self._pane or cx.tabs
+	local x = event.x - self._area.x
 	for i = #tabs, 1, -1 do
-		if event.x >= self._offsets[i] then
+		if x >= self._offsets[i] then
 			ya.emit("tab_switch", { i - 1 })
 			break
 		end

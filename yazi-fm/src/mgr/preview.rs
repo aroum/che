@@ -13,8 +13,8 @@ impl<'a> Preview<'a> {
 
 impl Widget for Preview<'_> {
 	fn render(self, win: ratatui::layout::Rect, buf: &mut Buffer) {
-		if let Some(lock) = &self.core.active().preview.lock {
-			if *lock.area == LAYOUT.get().preview {
+		if let Some(lock) = &self.core.active().preview.lock
+			&& *lock.area == LAYOUT.get().preview {
 				for w in &lock.data {
 					let rect = w.area().transform(|p| self.core.mgr.area(p));
 					if rect.intersection(win) == rect {
@@ -22,19 +22,5 @@ impl Widget for Preview<'_> {
 					}
 				}
 			}
-		}
-
-		if self.core.mgr.tabs.preview_pane && !self.core.mgr.tabs.single_pane {
-			if let Some(lock) = &self.core.mgr.tabs.other().preview.lock {
-				if lock.area.intersection(win) == *lock.area {
-					for w in &lock.data {
-						let rect = w.area().transform(|p| self.core.mgr.area(p));
-						if rect.intersection(win) == rect {
-							w.render(rect, buf);
-						}
-					}
-				}
-			}
-		}
 	}
 }

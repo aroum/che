@@ -1,1 +1,1 @@
-yazi_macro::mod_flat!(close complete escape show);
+yazi_macro::mod_flat!(arrow close complete escape show);

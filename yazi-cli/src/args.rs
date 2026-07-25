@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 use yazi_shared::Id;
 
 #[derive(Parser)]
-#[command(name = "Ya", about, long_about = None)]
+#[command(name = "Gez", about, long_about = None)]
 pub(super) struct Args {
 	#[command(subcommand)]
 	pub(super) command: Command,
@@ -30,6 +30,8 @@ pub(super) enum Command {
 	PubTo(CommandPubTo),
 	/// Subscribe to messages from all remote instances.
 	Sub(CommandSub),
+	/// Open the multi-rename TUI.
+	Multirename(CommandMultirename),
 }
 
 #[derive(clap::Args)]
@@ -87,7 +89,7 @@ pub(super) struct CommandPub {
 	pub(super) kind: String,
 	/// Send the message with a string body.
 	#[arg(long)]
-	pub(super) str:  Option<String>,
+	pub(super) str: Option<String>,
 	/// Send the message with a JSON body.
 	#[arg(long)]
 	pub(super) json: Option<String>,
@@ -99,10 +101,12 @@ pub(super) struct CommandPub {
 impl CommandPub {
 	#[allow(dead_code)]
 	pub(super) fn receiver() -> Result<Id> {
-		if let Some(s) = std::env::var("YAZI_PID").ok().filter(|s| !s.is_empty()) {
+		if let Some(s) =
+			std::env::var("CHE_PID").or_else(|_| std::env::var("GEZI_PID")).ok().filter(|s| !s.is_empty())
+		{
 			Ok(s.parse()?)
 		} else {
-			bail!("No `YAZI_ID` environment variable found.")
+			bail!("No `CHE_ID` or `GEZI_ID` environment variable found.")
 		}
 	}
 }
@@ -114,16 +118,16 @@ pub(super) struct CommandPubTo {
 	pub(super) receiver: Id,
 	/// Kind of message.
 	#[arg(index = 2)]
-	pub(super) kind:     String,
+	pub(super) kind: String,
 	/// Send the message with a string body.
 	#[arg(long)]
-	pub(super) str:      Option<String>,
+	pub(super) str: Option<String>,
 	/// Send the message with a JSON body.
 	#[arg(long)]
-	pub(super) json:     Option<String>,
+	pub(super) json: Option<String>,
 	/// Send the message as a list of strings.
 	#[arg(long, num_args = 0..)]
-	pub(super) list:     Vec<String>,
+	pub(super) list: Vec<String>,
 }
 
 #[derive(clap::Args)]
@@ -180,3 +184,10 @@ impl_emit_body!(CommandEmitTo);
 
 impl_pub_body!(CommandPub);
 impl_pub_body!(CommandPubTo);
+
+#[derive(clap::Args)]
+pub(super) struct CommandMultirename {
+	/// Files to rename.
+	#[arg(index = 1, num_args = 1..)]
+	pub(super) files: Vec<String>,
+}

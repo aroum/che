@@ -22,6 +22,7 @@ impl<T: StreamExt<Item = Result<String, InputError>>> InputRx<T> {
 			Ok(s) => (Some(s), 1),
 			Err(InputError::Canceled(s)) => (Some(s), 2),
 			Err(InputError::Typed(s)) => (Some(s), 3),
+			Err(InputError::Arrow(s, _)) => (Some(s), 4),
 			_ => (None, 0),
 		}
 	}

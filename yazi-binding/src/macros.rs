@@ -248,7 +248,8 @@ macro_rules! impl_file_fields {
 		$crate::cached_field!($fields, link_to, |_, me| Ok(me.link_to.as_ref().map($crate::Path::new)));
 
 		$crate::cached_field!($fields, name, |lua, me| {
-			me.name().map(|s| lua.create_string(s.encoded_bytes())).transpose()
+			let opt = me.name().map(|s| lua.create_string(s.encoded_bytes())).transpose()?;
+			Ok(Some(opt.unwrap_or_else(|| lua.create_string("").unwrap())))
 		});
 		$crate::cached_field!($fields, path, |_, me| {
 			use yazi_fs::FsUrl;
@@ -259,6 +260,7 @@ macro_rules! impl_file_fields {
 			use yazi_fs::FsUrl;
 			Ok(me.url.cache().map($crate::Path::new))
 		});
+		$fields.add_field_method_get("is_upparent", |_, me| Ok(me.is_upparent));
 	};
 }
 

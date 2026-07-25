@@ -53,3 +53,55 @@ function ya.child_at(pos, children)
 		end
 	end
 end
+
+function ya.attach_state_metatable(t)
+	if type(t) ~= "table" then
+		return t
+	end
+	local mt = getmetatable(t) or {}
+	local orig_index = mt.__index
+	local orig_newindex = mt.__newindex
+
+	mt.__newindex = function(tbl, k, v)
+		if orig_newindex then
+			orig_newindex(tbl, k, v)
+		else
+			rawset(tbl, k, v)
+		end
+
+		if k ~= "_cwd_cache" and k ~= "_id" then
+			local cwd = rawget(tbl, "cwd")
+			if cwd then
+				local cwd_str = tostring(cwd)
+				local cache = rawget(tbl, "_cwd_cache")
+				if not cache then
+					cache = {}
+					rawset(tbl, "_cwd_cache", cache)
+				end
+				cache[cwd_str] = cache[cwd_str] or {}
+				cache[cwd_str][k] = v
+			end
+		end
+	end
+
+	mt.__index = function(tbl, k)
+		if Header and Header._current_rendering and k ~= "_cwd_cache" and k ~= "_id" then
+			local rendering_cwd = tostring(Header._current_rendering._current.cwd)
+			local cache = rawget(tbl, "_cwd_cache")
+			if cache and cache[rendering_cwd] and cache[rendering_cwd][k] ~= nil then
+				return cache[rendering_cwd][k]
+			end
+		end
+
+		if type(orig_index) == "function" then
+			return orig_index(tbl, k)
+		elseif type(orig_index) == "table" then
+			return orig_index[k]
+		else
+			return rawget(tbl, k)
+		end
+	end
+
+	setmetatable(t, mt)
+	return t
+end

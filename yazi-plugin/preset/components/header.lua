@@ -110,9 +110,11 @@ function Header:children_remove(id, side)
 end
 
 function Header:children_redraw(side)
+	Header._current_rendering = self
 	local lines = {}
 	for _, c in ipairs(side == self.RIGHT and self._right or self._left) do
 		lines[#lines + 1] = (type(c[1]) == "string" and self[c[1]] or c[1])(self)
 	end
+	Header._current_rendering = nil
 	return ui.Line(lines)
 end

@@ -1,4 +1,7 @@
-use serde::{Deserializer as _, de::{EnumAccess, MapAccess, SeqAccess, VariantAccess, value::U32Deserializer}};
+use serde::{
+	Deserializer as _,
+	de::{EnumAccess, MapAccess, SeqAccess, VariantAccess, value::U32Deserializer},
+};
 
 use crate::Error;
 
@@ -277,11 +280,13 @@ impl<'de> serde::Deserializer<'de> for &mut Deserializer<'de> {
 		Err(Error::serde("ignored any not supported"))
 	}
 
-	fn is_human_readable(&self) -> bool { false }
+	fn is_human_readable(&self) -> bool {
+		false
+	}
 }
 
 struct SeqDeserializer<'a, 'de: 'a> {
-	de:        &'a mut Deserializer<'de>,
+	de: &'a mut Deserializer<'de>,
 	remaining: usize,
 }
 
@@ -300,7 +305,9 @@ impl<'de> SeqAccess<'de> for SeqDeserializer<'_, 'de> {
 		}
 	}
 
-	fn size_hint(&self) -> Option<usize> { Some(self.remaining) }
+	fn size_hint(&self) -> Option<usize> {
+		Some(self.remaining)
+	}
 }
 
 struct MapDeserializer<'a, 'de: 'a> {
@@ -328,7 +335,9 @@ impl<'de> MapAccess<'de> for MapDeserializer<'_, 'de> {
 impl<'de> VariantAccess<'de> for &mut Deserializer<'de> {
 	type Error = Error;
 
-	fn unit_variant(self) -> Result<(), Self::Error> { Ok(()) }
+	fn unit_variant(self) -> Result<(), Self::Error> {
+		Ok(())
+	}
 
 	fn newtype_variant_seed<T>(self, seed: T) -> Result<T::Value, Self::Error>
 	where

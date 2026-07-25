@@ -4,7 +4,7 @@ use clap::Parser;
 use yazi_shared::{Id, url::UrlBuf};
 
 #[derive(Debug, Default, Parser)]
-#[command(name = "yazi")]
+#[command(name = "che")]
 #[command(after_help = "See https://yazi-rs.github.io/docs/quick-start for a quick starter.")]
 pub struct Args {
 	/// Set the current working entry
@@ -32,9 +32,9 @@ pub struct Args {
 	#[arg(long)]
 	pub remote_events: Option<String>,
 
-	/// Start in dual-pane mode
+	/// Start in single-pane mode
 	#[arg(long)]
-	pub dual: bool,
+	pub single: bool,
 
 	/// Print debug information
 	#[arg(long)]

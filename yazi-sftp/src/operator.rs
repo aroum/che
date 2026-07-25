@@ -3,22 +3,32 @@ use std::{ops::Deref, sync::Arc};
 use russh::{ChannelStream, client::Msg};
 use typed_path::UnixPathBuf;
 
-use crate::{AsSftpPath, Error, Receiver, Session, SftpPath, fs::{Attrs, File, Flags, ReadDir}, requests, responses};
+use crate::{
+	AsSftpPath, Error, Receiver, Session, SftpPath,
+	fs::{Attrs, File, Flags, ReadDir},
+	requests, responses,
+};
 
 pub struct Operator(Arc<Session>);
 
 impl Deref for Operator {
 	type Target = Arc<Session>;
 
-	fn deref(&self) -> &Self::Target { &self.0 }
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
 }
 
 impl From<&Arc<Session>> for Operator {
-	fn from(session: &Arc<Session>) -> Self { Self(session.clone()) }
+	fn from(session: &Arc<Session>) -> Self {
+		Self(session.clone())
+	}
 }
 
 impl Operator {
-	pub fn make(stream: ChannelStream<Msg>) -> Self { Self(Session::make(stream)) }
+	pub fn make(stream: ChannelStream<Msg>) -> Self {
+		Self(Session::make(stream))
+	}
 
 	pub async fn init(&mut self) -> Result<(), Error> {
 		let version: responses::Version = self.send(requests::Init::default()).await?;

@@ -8,16 +8,21 @@ use yazi_shared::{data::Data, event::ActionCow};
 pub struct MoveOpt {
 	pub step:         MoveOptStep,
 	pub in_operating: bool,
+	pub visual:       bool,
 }
 
 impl From<ActionCow> for MoveOpt {
 	fn from(a: ActionCow) -> Self {
-		Self { step: a.first().ok().unwrap_or_default(), in_operating: a.bool("in-operating") }
+		Self {
+			step: a.first().ok().unwrap_or_default(),
+			in_operating: a.bool("in-operating"),
+			visual: a.bool("visual"),
+		}
 	}
 }
 
 impl From<isize> for MoveOpt {
-	fn from(step: isize) -> Self { Self { step: step.into(), in_operating: false } }
+	fn from(step: isize) -> Self { Self { step: step.into(), in_operating: false, visual: false } }
 }
 
 impl FromLua for MoveOpt {
@@ -29,7 +34,7 @@ impl IntoLua for MoveOpt {
 }
 
 // --- Step
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum MoveOptStep {
 	Offset(isize),
 	Bol,

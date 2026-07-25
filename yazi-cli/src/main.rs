@@ -1,6 +1,7 @@
 yazi_macro::mod_pub!(package shared);
 
 yazi_macro::mod_flat!(args);
+mod multirename;
 
 use std::process::ExitCode;
 
@@ -99,6 +100,10 @@ async fn run() -> anyhow::Result<()> {
 			yazi_dds::Client::draw(cmd.kinds.split(',').collect()).await?;
 
 			tokio::signal::ctrl_c().await?;
+		}
+
+		Command::Multirename(cmd) => {
+			multirename::run(cmd.files)?;
 		}
 	}
 

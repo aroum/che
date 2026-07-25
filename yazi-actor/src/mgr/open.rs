@@ -17,6 +17,11 @@ impl Actor for Open {
 	const NAME: &str = "open";
 
 	fn act(cx: &mut Ctx, mut opt: Self::Options) -> Result<Data> {
+		// When the cursor is on the virtual ".." entry, navigate up
+		if cx.hovered().is_some_and(|h| h.is_upparent) {
+			return act!(mgr:leave, cx);
+		}
+
 		if !opt.interactive && ARGS.chooser_file.is_some() {
 			succ!(if !opt.targets.is_empty() {
 				Quit::with_selected(opt.targets)
@@ -39,6 +44,7 @@ impl Actor for Open {
 		if opt.targets.is_empty() {
 			succ!();
 		}
+
 
 		if !opt.interactive
 			&& opt.targets.len() == 1

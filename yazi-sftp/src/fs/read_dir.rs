@@ -4,16 +4,18 @@ use crate::{Error, Operator, Session, SftpPath, fs::DirEntry, requests, response
 
 pub struct ReadDir {
 	session: Arc<Session>,
-	dir:     Arc<typed_path::UnixPathBuf>,
-	handle:  String,
+	dir: Arc<typed_path::UnixPathBuf>,
+	handle: String,
 
-	name:   responses::Name<'static>,
+	name: responses::Name<'static>,
 	cursor: usize,
-	done:   bool,
+	done: bool,
 }
 
 impl Drop for ReadDir {
-	fn drop(&mut self) { Operator::from(&self.session).close(&self.handle).ok(); }
+	fn drop(&mut self) {
+		Operator::from(&self.session).close(&self.handle).ok();
+	}
 }
 
 impl ReadDir {
@@ -39,10 +41,10 @@ impl ReadDir {
 			self.cursor += 1;
 			if &*item.name != b"." && &*item.name != b".." {
 				return Ok(Some(DirEntry {
-					dir:       self.dir.clone(),
-					name:      item.name.into_owned(),
+					dir: self.dir.clone(),
+					name: item.name.into_owned(),
 					long_name: item.long_name.into_owned(),
-					attrs:     item.attrs,
+					attrs: item.attrs,
 				}));
 			}
 		}

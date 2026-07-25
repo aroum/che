@@ -4,17 +4,19 @@ use serde::{Deserialize, Deserializer, Serialize, de::Visitor, ser::SerializeStr
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Attrs {
-	pub size:     Option<u64>,
-	pub uid:      Option<u32>,
-	pub gid:      Option<u32>,
-	pub perm:     Option<u32>,
-	pub atime:    Option<u32>,
-	pub mtime:    Option<u32>,
+	pub size: Option<u64>,
+	pub uid: Option<u32>,
+	pub gid: Option<u32>,
+	pub perm: Option<u32>,
+	pub atime: Option<u32>,
+	pub mtime: Option<u32>,
 	pub extended: HashMap<String, String>,
 }
 
 impl Attrs {
-	pub fn is_empty(&self) -> bool { *self == Self::default() }
+	pub fn is_empty(&self) -> bool {
+		*self == Self::default()
+	}
 
 	pub fn len(&self) -> usize {
 		let mut len = 4;

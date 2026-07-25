@@ -244,13 +244,34 @@ impl Files {
 		}
 	}
 
+	pub fn set_upparent(&mut self, parent_url: Option<yazi_shared::url::UrlBuf>, show_upparent: bool) {
+		self.items.retain(|f| !f.is_upparent);
+		if let Some(parent) = parent_url {
+			if show_upparent {
+				let upparent = File::make_upparent(parent);
+				self.items.insert(0, upparent);
+			}
+		}
+	}
+
+	fn sort_items(&mut self) {
+		let has_upparent = self.items.first().map_or(false, |f| f.is_upparent);
+		if has_upparent {
+			let upparent = self.items.remove(0);
+			self.sorter.sort(&mut self.items, &self.sizes);
+			self.items.insert(0, upparent);
+		} else {
+			self.sorter.sort(&mut self.items, &self.sizes);
+		}
+	}
+
 	pub fn catchup_revision(&mut self) -> bool {
 		if self.version == self.revision {
 			return false;
 		}
 
 		self.version = self.revision;
-		self.sorter.sort(&mut self.items, &self.sizes);
+		self.sort_items();
 		true
 	}
 
@@ -304,14 +325,14 @@ impl Files {
 			self.hidden = hidden;
 			if !items.is_empty() {
 				self.items.extend(items);
-				self.sorter.sort(&mut self.items, &self.sizes);
+				self.sort_items();
 			}
 			return true;
 		}
 
 		let it = mem::take(&mut self.items).into_iter().chain(mem::take(&mut self.hidden));
 		(self.hidden, self.items) = self.split_files(it);
-		self.sorter.sort(&mut self.items, &self.sizes);
+		self.sort_items();
 		true
 	}
 

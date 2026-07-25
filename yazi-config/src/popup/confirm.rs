@@ -21,6 +21,8 @@ pub struct Confirm {
 	pub overwrite_body:   String,
 	pub overwrite_origin: Origin,
 	pub overwrite_offset: Offset,
+	#[serde(default)]
+	pub overwrite_dialog: bool,
 
 	// quit
 	pub quit_title:  String,

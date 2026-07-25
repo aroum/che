@@ -2,10 +2,10 @@
 
 ## Communication
 
-- 永远使用简体中文进行对话
+- Communicate with the user in Russian (Always use Russian for dialogue).
 
-## 禁止读取的文件列表
-**一定要遵守, 内部有敏感内容**
+## Restricted Files List
+**Must be strictly followed, contains sensitive content.**
 - .env
 - .env.local
 - .env.dev
@@ -13,17 +13,18 @@
 
 ## Documentation
 
-- 编写 .md 文档时，也要用中文, 但是标点符合一律使用英文, 但是在英文逗号后面添加一个空格, 句号后面添加两个空格
-- 正式文档写到项目的 docs/ 目录下
-- 用于讨论和评审的计划、方案等文档，写到项目的 discuss/ 目录下
-- 代码中不使用任何解释代码的注释, 包括公用接口也不要写文档, 只在有必要的时候添加意图性的注释, 并且代码中的注释, docstring, 一律使用英文
-- 项目内代码内的字符串, 比如 print, debug 等的输出, 标点符号一律使用英文
-- commit 到项目中时, 不要把编程工具, 比如 claude code 等添加为合作者.
+- When writing .md documents, use English. Use English punctuation; ensure there is a space after commas and two spaces after periods.
+- Official documentation goes into the project's docs/ directory.
+- Planning and discussion documents should be placed in the project's discuss/ directory.
+- Do not use comments to explain code, including public interfaces; only add intentional comments when necessary. All code comments and docstrings must be in English.
+- Strings inside the project code, such as those for print or debug, must use English punctuation.
+- When committing to the project, do not add programming tools (like Claude Code) as collaborators.
+- **CHANGELOG.md:** When adding any new features, flags, or configuration parameters, it is MANDATORY to update the `CHANGELOG.md` file with a detailed description of the changes and configuration examples.
 
 ## Decision Making
 
-- 偏好行动而非提问.  基于现有代码模式和约定做出合理选择, 只在决策真正模糊且不可逆时才询问
-- 当用户说框架名称时, NestJS 和 Next.js 很容易混淆, 注意 Next.js 一定是有"."作为分隔. 存在歧义时注意确认一下
+- Prefer action over asking questions. Make reasonable choices based on existing code patterns and conventions; only ask when the decision is truly ambiguous and irreversible.
+- When the user mentions a framework name, note that NestJS and Next.js are easily confused. Remember that Next.js always has a "." as a separator. If there is any ambiguity, be sure to confirm.
 
 ## Git Operations
 
@@ -32,6 +33,11 @@
 
 ## 网络访问
 如果 WebFetch 获取失败, 请用 Jina MCP 重试, 如果用户没有在项目中配置好 Jina MCP, 注意提示用户.
+
+## Build & Compilation
+
+- Собирать релиз (`cargo build --release`) ТОЛЬКО когда пользователь явно просит об этом.
+- После минорных/промежуточных изменений в коде всегда собирать дебаг-версию (`cargo build`).
 
 ## 权限
 用户在开始 openspec 相关复杂流程实现功能之前, 确认用户 bypass permissions on 或者 yolo 模式, 不然提醒一下用户
@@ -152,6 +158,26 @@ Before marking work complete:
 - Use `clippy` with `#![deny(clippy::all, clippy::pedantic)]` — fix all warnings
 - Derive `Debug` on all public types; derive `Clone`, `PartialEq` only when needed
 - No `unsafe` blocks unless justified with a `// SAFETY:` comment
+
+### Code Style & Formatting Guidelines (`rustfmt.toml`)
+
+Все изменения в коде Rust в проекте форматируются в строгом соответствии с правилами `rustfmt.toml`:
+
+* **Табуляция вместо пробелов (`hard_tabs = true`):**
+  Все отступы в исходном коде Rust выполняются исключительно символом **Табуляции (`\t`)** с базовым размером табуляции 2 (`tab_spaces = 2`). Никаких 4-х пробелов.
+* **Выравнивание полей структур и вариантов enum (`struct_field_align_threshold = 99`):**
+  Поля структур и варианты перечислений выравниваются двоеточиями вертикально в одну колонку.
+* **Группировка импортов (`group_imports = "StdExternalCrate"`):**
+  Импорты разделены на 3 блока пустой строкой:
+  1. `std::...`
+  2. Внешние библиотеки (`anyhow`, `serde`, `ratatui`, `crossterm` и др.)
+  3. Внутренние модули проекта (`yazi_...`, `crate::...`, `super::...`)
+* **Однострочные методы (`fn_single_line = true`):**
+  Короткие методы записываются в одну строку: `pub fn title(&self) -> &str { &self.title }`.
+* **Сокращенный синтаксис структур (`use_field_init_shorthand = true`):**
+  Использовать имя переменной напрямую при опущенном ключе структуры (`Self { title, items }`).
+* **Оператор проброса ошибок (`use_try_shorthand = true`):**
+  Использовать оператор `?` вместо `match` / `if let Err`.
 
 ### Database
 

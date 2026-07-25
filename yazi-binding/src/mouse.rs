@@ -32,5 +32,11 @@ impl UserData for MouseEvent {
 			use crossterm::event::MouseEventKind as K;
 			Ok(matches!(me.kind, K::Down(b) | K::Up(b) | K::Drag(b) if b == MouseButton::Middle))
 		});
+		fields.add_field_method_get("is_shift", |_, me| {
+			Ok(me.modifiers.contains(crossterm::event::KeyModifiers::SHIFT))
+		});
+		fields.add_field_method_get("is_ctrl", |_, me| {
+			Ok(me.modifiers.contains(crossterm::event::KeyModifiers::CONTROL))
+		});
 	}
 }

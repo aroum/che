@@ -5,7 +5,9 @@ yazi_macro::mod_flat!(alias bytes chars completion_token condition debounce env 
 pub fn init() {
 	LOCAL_SET.with(tokio::task::LocalSet::new);
 
-	LOG_LEVEL.replace(<_>::from(std::env::var("YAZI_LOG").unwrap_or_default()));
+	LOG_LEVEL.replace(<_>::from(
+		std::env::var("CHE_LOG").or_else(|_| std::env::var("GEZI_LOG")).unwrap_or_default(),
+	));
 
 	#[cfg(unix)]
 	USERS_CACHE.with(<_>::default);

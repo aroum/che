@@ -9,6 +9,7 @@ use yazi_shared::{Id, UndoOp, data::Data, url::{UrlBuf, UrlLike}};
 use yazi_vfs::{VfsFile, maybe_exists, provider};
 use yazi_watcher::WATCHER;
 
+use yazi_widgets::input::InputError;
 use crate::{Actor, Ctx};
 
 pub struct Rename;
@@ -26,37 +27,66 @@ impl Actor for Rename {
 		}
 
 		let Some(hovered) = cx.hovered() else { succ!() };
+		if hovered.is_upparent {
+			succ!();
+		}
 
 		let name = Self::empty_url_part(&hovered.url, &opt.empty);
 		let cursor = match opt.cursor.as_ref() {
 			"start" => Some(0),
-			"before_ext" => name
-				.chars()
-				.rev()
-				.position(|c| c == '.')
-				.filter(|_| hovered.is_file())
-				.map(|i| name.chars().count() - i - 1)
-				.filter(|&i| i != 0),
+			"before_ext" => {
+				let len = name.chars().count();
+				name
+					.chars()
+					.rev()
+					.position(|c| c == '.')
+					.filter(|_| hovered.is_file())
+					.map(|i| len - i - 1)
+					.filter(|&i| i != 0)
+					.or(Some(len))
+			}
 			_ => None,
 		};
 
 		let (tab, old) = (cx.tab().id, hovered.url_owned());
 		let mut input = InputProxy::show(InputCfg::rename().with_value(name).with_cursor(cursor));
 
-		tokio::spawn(async move {
-			let Some(Ok(name)) = input.recv().await else { return };
-			if name.is_empty() {
-				return;
-			}
+		let rename_opt = yazi_parser::mgr::RenameOpt {
+			hovered: opt.hovered,
+			force: opt.force,
+			empty: opt.empty.clone(),
+			cursor: opt.cursor.clone(),
+		};
 
-			let Some(Ok(new)) = old.parent().map(|u| u.try_join(name)) else {
-				return;
+		tokio::spawn(async move {
+			let result = input.recv().await;
+			let (name, step) = match result {
+				Some(Ok(name)) => (name, None),
+				Some(Err(InputError::Arrow(name, step))) => (name, Some(step)),
+				_ => return,
 			};
 
-			if opt.force || !maybe_exists(&new).await || provider::must_identical(&old, &new).await {
-				Self::r#do(tab, old, new).await.ok();
-			} else if ConfirmProxy::show(ConfirmCfg::overwrite(&new)).await {
-				Self::r#do(tab, old, new).await.ok();
+			let old_name = old.name().map(|s| s.to_string_lossy()).unwrap_or_default();
+			let changed = !name.is_empty() && name != old_name;
+
+			if changed {
+				if let Some(Ok(new)) = old.parent().map(|u| u.try_join(&name)) {
+					if opt.force || !maybe_exists(&new).await || provider::must_identical(&old, &new).await {
+						Self::r#do(tab, old, new).await.ok();
+					} else if ConfirmProxy::show(ConfirmCfg::overwrite(&new)).await {
+						Self::r#do(tab, old, new).await.ok();
+					}
+				}
+			}
+
+			if let Some(step) = step {
+				MgrProxy::arrow(step.to_string());
+				let action = yazi_macro::relay!(mgr:rename)
+					.with("hovered", rename_opt.hovered)
+					.with("force", rename_opt.force)
+					.with("empty", rename_opt.empty)
+					.with("cursor", rename_opt.cursor);
+				yazi_macro::emit!(Call(action));
 			}
 		});
 		succ!();

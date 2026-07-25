@@ -53,13 +53,19 @@ where
 {
 	let (from, to) = (from.as_url(), to.as_url());
 
-	match (from.kind().is_local(), to.kind().is_local()) {
+	let res = match (from.kind().is_local(), to.kind().is_local()) {
 		(true, true) => Local::new(from).await?.copy(to.loc(), attrs).await,
 		(false, false) if from.scheme().covariant(to.scheme()) => {
 			Providers::new(from).await?.copy(to.loc(), attrs).await
 		}
 		(true, false) | (false, true) | (false, false) => super::copy_impl(from, to, attrs).await,
+	};
+	if res.is_ok() {
+		if let (Some(f), Some(t)) = (from.loc().as_os().ok(), to.loc().as_os().ok()) {
+			super::descr::copy_description(f, t);
+		}
 	}
+	res
 }
 
 pub async fn copy_with_progress<U, V, A>(
@@ -74,7 +80,7 @@ where
 {
 	let (from, to) = (from.as_url(), to.as_url());
 
-	match (from.kind().is_local(), to.kind().is_local()) {
+	let res = match (from.kind().is_local(), to.kind().is_local()) {
 		(true, true) => Local::new(from).await?.copy_with_progress(to.loc(), attrs),
 		(false, false) if from.scheme().covariant(to.scheme()) => {
 			Providers::new(from).await?.copy_with_progress(to.loc(), attrs)
@@ -82,7 +88,13 @@ where
 		(true, false) | (false, true) | (false, false) => {
 			Ok(super::copy_with_progress_impl(from.to_owned(), to.to_owned(), attrs.into()))
 		}
+	};
+	if res.is_ok() {
+		if let (Some(f), Some(t)) = (from.loc().as_os().ok(), to.loc().as_os().ok()) {
+			super::descr::copy_description(f, t);
+		}
 	}
+	res
 }
 
 pub async fn create<U>(url: U) -> io::Result<RwFile>
@@ -199,7 +211,13 @@ pub async fn remove_file<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.remove_file().await
+	let res = Providers::new(url.as_url()).await?.remove_file().await;
+	if res.is_ok() {
+		if let Some(path) = url.as_url().loc().as_os().ok() {
+			super::descr::write_description(path, "");
+		}
+	}
+	res
 }
 
 pub async fn rename<U, V>(from: U, to: V) -> io::Result<()>
@@ -208,11 +226,17 @@ where
 	V: AsUrl,
 {
 	let (from, to) = (from.as_url(), to.as_url());
-	if from.scheme().covariant(to.scheme()) {
+	let res = if from.scheme().covariant(to.scheme()) {
 		Providers::new(from).await?.rename(to.loc()).await
 	} else {
 		Err(io::Error::from(io::ErrorKind::CrossesDevices))
+	};
+	if res.is_ok() {
+		if let (Some(f), Some(t)) = (from.loc().as_os().ok(), to.loc().as_os().ok()) {
+			super::descr::move_description(f, t);
+		}
 	}
+	res
 }
 
 pub async fn symlink<U, S, F>(link: U, original: S, is_dir: F) -> io::Result<()>

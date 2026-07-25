@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Write<'a> {
-	pub id:     u32,
+	pub id: u32,
 	pub handle: Cow<'a, str>,
 	pub offset: u64,
-	pub data:   Cow<'a, [u8]>,
+	pub data: Cow<'a, [u8]>,
 }
 
 impl Write<'_> {

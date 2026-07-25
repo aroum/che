@@ -74,7 +74,7 @@ crossterm = { workspace = true, features = [ "use-dev-tty", "libc" ] }
 tikv-jemallocator = "0.6.1"
 
 [[bin]]
-name = "yazi"
+name = "che"
 path = "src/main.rs"
 
 [package.metadata.binstall]

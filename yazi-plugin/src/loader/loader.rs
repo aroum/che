@@ -28,6 +28,7 @@ impl Default for Loader {
 		let cache = HashMap::from_iter([
 			// Plugins
 			("archive".to_owned(), preset!("plugins/archive").into()),
+			("audio".to_owned(), preset!("plugins/audio").into()),
 			("code".to_owned(), preset!("plugins/code").into()),
 			("dds".to_owned(), preset!("plugins/dds").into()),
 			("empty".to_owned(), preset!("plugins/empty").into()),
@@ -45,11 +46,13 @@ impl Default for Loader {
 			("mime.local".to_owned(), preset!("plugins/mime-local").into()),
 			("mime.remote".to_owned(), preset!("plugins/mime-remote").into()),
 			("multi".to_owned(), preset!("plugins/multi").into()),
+			("multirename".to_owned(), preset!("plugins/multirename").into()),
 			("noop".to_owned(), preset!("plugins/noop").into()),
 			("null".to_owned(), preset!("plugins/null").into()),
 			("pdf".to_owned(), preset!("plugins/pdf").into()),
 			("session".to_owned(), preset!("plugins/session").into()),
 			("svg".to_owned(), preset!("plugins/svg").into()),
+			("system-copy".to_owned(), preset!("plugins/system-copy").into()),
 			("vfs".to_owned(), preset!("plugins/vfs").into()),
 			("video".to_owned(), preset!("plugins/video").into()),
 			("zoxide".to_owned(), preset!("plugins/zoxide").into()),
@@ -108,6 +111,12 @@ impl Loader {
 
 		let t = self.load_new(lua, id).await?;
 		t.raw_set("_id", lua.create_string(id)?)?;
+
+		if let Ok(ya) = lua.globals().raw_get::<Table>("ya") {
+			if let Ok(attach) = ya.raw_get::<mlua::Function>("attach_state_metatable") {
+				_ = attach.call::<Table>(t.clone());
+			}
+		}
 
 		loaded.raw_set(id, t.clone())?;
 		Ok(t)

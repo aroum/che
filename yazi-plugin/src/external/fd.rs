@@ -36,12 +36,21 @@ pub fn fd(opt: FdOpt) -> Result<UnboundedReceiver<File>> {
 	Ok(rx)
 }
 
+use yazi_config::YAZI;
+
 fn spawn(program: &str, opt: &FdOpt) -> std::io::Result<Child> {
-	Command::new(program)
-		.arg("--base-directory")
-		.arg(&*opt.cwd.as_url().unified_path())
-		.arg("--regex")
-		.arg(if opt.hidden { "--hidden" } else { "--no-hidden" })
+	let is_glob = YAZI.mgr.smart_glob.get() && opt.subject.starts_with('*') && !opt.subject.contains(".*");
+	let mut cmd = Command::new(program);
+	cmd.arg("--base-directory")
+		.arg(&*opt.cwd.as_url().unified_path());
+
+	if is_glob {
+		cmd.arg("--glob");
+	} else {
+		cmd.arg("--regex");
+	}
+
+	cmd.arg(if opt.hidden { "--hidden" } else { "--no-hidden" })
 		.args(&opt.args)
 		.arg(&opt.subject)
 		.kill_on_drop(true)

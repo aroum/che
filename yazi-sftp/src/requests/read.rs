@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Read<'a> {
-	pub id:     u32,
+	pub id: u32,
 	pub handle: Cow<'a, str>,
 	pub offset: u64,
-	pub len:    u32,
+	pub len: u32,
 }
 
 impl<'a> Read<'a> {

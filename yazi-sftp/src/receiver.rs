@@ -5,11 +5,11 @@ use tokio::sync::oneshot;
 use crate::{Packet, Session};
 
 pub struct Receiver {
-	rx:       oneshot::Receiver<Packet<'static>>,
+	rx: oneshot::Receiver<Packet<'static>>,
 	received: bool,
 
 	session: Arc<Session>,
-	id:      u32,
+	id: u32,
 }
 
 impl Drop for Receiver {

@@ -4,7 +4,7 @@ pub struct Xdg;
 
 impl Xdg {
 	pub fn config_dir() -> PathBuf {
-		if let Some(p) = env::var_os("YAZI_CONFIG_HOME").map(PathBuf::from)
+		if let Some(p) = env::var_os("CHE_CONFIG_HOME").or_else(|| env::var_os("GEZI_CONFIG_HOME")).map(PathBuf::from)
 			&& p.is_absolute()
 		{
 			return p;
@@ -13,7 +13,7 @@ impl Xdg {
 		#[cfg(windows)]
 		{
 			dirs::config_dir()
-				.map(|p| p.join("yazi").join("config"))
+				.map(|p| p.join("che").join("config"))
 				.expect("Failed to get config directory")
 		}
 		#[cfg(unix)]
@@ -22,7 +22,7 @@ impl Xdg {
 				.map(PathBuf::from)
 				.filter(|p| p.is_absolute())
 				.or_else(|| dirs::home_dir().map(|h| h.join(".config")))
-				.map(|p| p.join("yazi"))
+				.map(|p| p.join("che"))
 				.expect("Failed to get config directory")
 		}
 	}
@@ -30,7 +30,7 @@ impl Xdg {
 	pub fn state_dir() -> PathBuf {
 		#[cfg(windows)]
 		{
-			dirs::data_dir().map(|p| p.join("yazi").join("state")).expect("Failed to get state directory")
+			dirs::data_dir().map(|p| p.join("che").join("state")).expect("Failed to get state directory")
 		}
 		#[cfg(unix)]
 		{
@@ -38,7 +38,7 @@ impl Xdg {
 				.map(PathBuf::from)
 				.filter(|p| p.is_absolute())
 				.or_else(|| dirs::home_dir().map(|h| h.join(".local/state")))
-				.map(|p| p.join("yazi"))
+				.map(|p| p.join("che"))
 				.expect("Failed to get state directory")
 		}
 	}
@@ -53,12 +53,13 @@ impl Xdg {
 			#[cfg(unix)]
 			{
 				use uzers::Users;
-				p.push(format!("yazi-{}", yazi_shared::USERS_CACHE.get_current_uid()))
+				p.push(format!("che-{}", yazi_shared::USERS_CACHE.get_current_uid()))
 			}
 			#[cfg(not(unix))]
-			p.push("yazi");
+			p.push("che");
 
 			p
 		})
 	}
 }
+

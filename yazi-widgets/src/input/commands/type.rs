@@ -24,6 +24,16 @@ impl Input {
 		let s = replace_cow(replace_cow(s, "\r", " "), "\n", " ");
 
 		let snap = self.snap_mut();
+		if let crate::input::op::InputOp::Select(start) = snap.op {
+			let end = snap.cursor;
+			let range = if start < end { start..end } else { end..start };
+			let start_idx = snap.idx(range.start).unwrap();
+			let end_idx = snap.idx(range.end).unwrap();
+			snap.value.drain(start_idx..end_idx);
+			snap.cursor = range.start;
+			snap.op = crate::input::op::InputOp::None;
+		}
+
 		if snap.cursor < 1 {
 			snap.value.insert_str(0, &s);
 		} else {

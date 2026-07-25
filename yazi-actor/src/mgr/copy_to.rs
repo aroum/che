@@ -1,6 +1,6 @@
 use anyhow::Result;
 use yazi_core::mgr::Yanked;
-use yazi_macro::{act, succ};
+use yazi_macro::{act, render, succ};
 use yazi_parser::mgr::CopyToOpt;
 use yazi_proxy::NotifyProxy;
 use yazi_shared::{UndoOp, data::Data, url::UrlBufCov};
@@ -25,8 +25,9 @@ impl Actor for CopyTo {
 
 		let dest = cx.tabs().other().cwd().clone();
 
-		if opt.force && cx.tab().cwd() == &dest {
-			succ!(NotifyProxy::push_warn("Copy", "Both panes are in the same directory"));
+		if cx.tab().cwd() == &dest {
+			NotifyProxy::push_warn("Copy", "Both panes are in the same directory");
+			succ!(render!());
 		}
 
 		cx.core.tasks.file_copy(&yanked, &dest, opt.force, false);

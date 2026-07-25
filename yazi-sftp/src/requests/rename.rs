@@ -4,9 +4,9 @@ use crate::{AsSftpPath, SftpPath};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Rename<'a> {
-	pub id:   u32,
+	pub id: u32,
 	pub from: SftpPath<'a>,
-	pub to:   SftpPath<'a>,
+	pub to: SftpPath<'a>,
 }
 
 impl<'a> Rename<'a> {
@@ -18,5 +18,7 @@ impl<'a> Rename<'a> {
 		Self { id: 0, from: from.as_sftp_path(), to: to.as_sftp_path() }
 	}
 
-	pub fn len(&self) -> usize { size_of_val(&self.id) + 4 + self.from.len() + 4 + self.to.len() }
+	pub fn len(&self) -> usize {
+		size_of_val(&self.id) + 4 + self.from.len() + 4 + self.to.len()
+	}
 }

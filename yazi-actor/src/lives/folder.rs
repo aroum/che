@@ -34,7 +34,10 @@ impl Folder {
 			Some(w) => w,
 			None => {
 				let limit = LAYOUT.get().preview.height as usize;
-				inner.offset..inner.files.len().min(inner.offset + limit)
+				let len = inner.files.len();
+				let start = inner.offset.min(len);
+				let end = len.min(start + limit);
+				start..end
 			}
 		};
 

@@ -32,8 +32,11 @@ yazi-shim   = { path = "../yazi-shim", version = "26.2.2" }
 
 # External dependencies
 anyhow     = { workspace = true }
+chrono     = { workspace = true }
 clap       = { workspace = true }
 crossterm  = { workspace = true }
+ratatui    = { workspace = true }
+regex      = { workspace = true }
 serde      = { workspace = true }
 serde_json = { workspace = true }
 tokio      = { workspace = true }
@@ -57,7 +60,7 @@ vergen-gitcl          = { version = "9.1.0", features = [ "build" ] }
 crossterm = { workspace = true, features = [ "use-dev-tty", "libc" ] }
 
 [[bin]]
-name = "ya"
+name = "ch"
 path = "src/main.rs"
 
 [package.metadata.binstall]

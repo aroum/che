@@ -1,21 +1,33 @@
-use std::{any::TypeId, collections::HashMap, io::{self, ErrorKind}, sync::Arc, time::Duration};
+use std::{
+	any::TypeId,
+	collections::HashMap,
+	io::{self, ErrorKind},
+	sync::Arc,
+	time::Duration,
+};
 
 use parking_lot::Mutex;
 use russh::{ChannelStream, client::Msg};
 use serde::Serialize;
-use tokio::{io::{AsyncReadExt, AsyncWriteExt, ReadHalf, WriteHalf}, select, sync::{mpsc, oneshot}};
+use tokio::{
+	io::{AsyncReadExt, AsyncWriteExt, ReadHalf, WriteHalf},
+	select,
+	sync::{mpsc, oneshot},
+};
 
 use crate::{Error, Id, Packet, Receiver, responses};
 
 pub struct Session {
-	tx:                    mpsc::UnboundedSender<Vec<u8>>,
-	id:                    Id,
-	pub(super) callback:   Mutex<HashMap<u32, oneshot::Sender<Packet<'static>>>>,
+	tx: mpsc::UnboundedSender<Vec<u8>>,
+	id: Id,
+	pub(super) callback: Mutex<HashMap<u32, oneshot::Sender<Packet<'static>>>>,
 	pub(super) extensions: Mutex<HashMap<String, String>>,
 }
 
 impl Drop for Session {
-	fn drop(&mut self) { self.tx.send(vec![]).ok(); }
+	fn drop(&mut self) {
+		self.tx.send(vec![]).ok();
+	}
 }
 
 impl Session {
@@ -130,5 +142,7 @@ impl Session {
 		}
 	}
 
-	pub fn is_closed(self: &Arc<Self>) -> bool { self.tx.is_closed() }
+	pub fn is_closed(self: &Arc<Self>) -> bool {
+		self.tx.is_closed()
+	}
 }

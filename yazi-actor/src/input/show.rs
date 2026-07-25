@@ -47,7 +47,11 @@ impl Actor for Show {
 		// TODO: remove this
 		if let Some(cursor) = opt.cfg.cursor {
 			input.snap_mut().cursor = cursor;
-			act!(r#move, input)?;
+			if opt.cfg.highlight_stem && cursor > 0 {
+				input.snap_mut().op = yazi_widgets::input::InputOp::Select(0);
+			} else {
+				act!(r#move, input)?;
+			}
 		}
 
 		succ!(render!());

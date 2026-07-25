@@ -24,6 +24,6 @@ impl VfsFile for File {
 
 		let cha = Cha::from_follow(&url, cha).await;
 
-		Self { url, cha, link_to }
+		Self { url, cha, link_to, is_upparent: false }
 	}
 }

@@ -101,6 +101,9 @@ impl<'a> Executor<'a> {
 		on!(forward);
 		on!(reveal);
 		on!(follow);
+		on!(disks);
+		on!(jump_mode);
+		on!(jump_letter);
 
 		// Toggle
 		on!(toggle);
@@ -121,6 +124,7 @@ impl<'a> Executor<'a> {
 		on!(remove);
 		on!(remove_do);
 		on!(create);
+		on!(comment);
 		on!(rename);
 		on!(undo);
 		on!(undo_push);
@@ -159,7 +163,10 @@ impl<'a> Executor<'a> {
 		on!(pane_focus);
 		on!(pane_only);
 		on!(pane_preview);
+		on!(flat_toggle);
 		on!(pane_sync_dir);
+		on!(pane_swap);
+		on!(pane_open_other);
 
 		// VFS
 		on!(download);
@@ -269,6 +276,7 @@ impl<'a> Executor<'a> {
 		on!(escape);
 		on!(show);
 		on!(close);
+		on!(arrow);
 
 		match mode {
 			InputMode::Normal => {

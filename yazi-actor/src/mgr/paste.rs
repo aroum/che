@@ -1,7 +1,7 @@
 use anyhow::Result;
 use yazi_macro::{act, succ};
 use yazi_parser::mgr::PasteOpt;
-use yazi_shared::{UndoOp, data::Data};
+use yazi_shared::{UndoOp, data::Data, url::UrlLike};
 
 use crate::{Actor, Ctx};
 
@@ -18,6 +18,11 @@ impl Actor for Paste {
 
 		let dest = tab.cwd().clone();
 		if mgr.yanked.cut {
+			if mgr.yanked.iter().any(|u| u.parent().map_or(false, |p| p == dest)) {
+				yazi_proxy::NotifyProxy::push_warn("Paste", "Source and destination directories are the same");
+				succ!();
+			}
+
 			cx.core.tasks.file_cut(&mgr.yanked, &dest, opt.force);
 			mgr.undo.push(UndoOp::Move { pairs: vec![], overwritten: vec![] });
 
