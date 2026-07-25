@@ -13,7 +13,9 @@ Entity = {
 function Entity:new(file, active) return setmetatable({ _file = file, _active = active ~= false }, { __index = self }) end
 
 function Entity:padding()
-	if not self._file.is_hovered or not self._active then
+	if not self._file.is_hovered then
+		return " "
+	elseif not self._active and rt.mgr.hide_inactive_cursor then
 		return " "
 	end
 
@@ -98,8 +100,22 @@ end
 
 function Entity:style()
 	local s = self._file:style() or ui.Style()
-	if not self._file.is_hovered or not self._active then
+	if not self._file.is_hovered then
 		return s
+	elseif not self._active then
+		if rt.mgr.hide_inactive_cursor then
+			return s
+		else
+			local style
+			if self._file.in_current then
+				style = s:patch(th.indicator.current)
+			elseif self._file.in_preview then
+				style = s:patch(th.indicator.preview)
+			else
+				style = s:patch(th.indicator.parent)
+			end
+			return style:dim(true)
+		end
 	elseif self._file.in_current then
 		return s:patch(th.indicator.current)
 	elseif self._file.in_preview then

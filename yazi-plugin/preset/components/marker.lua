@@ -17,7 +17,7 @@ function Marker:decorate(style)
 
 	local s = ui.Style():patch(style)
 	if not self._active then
-		s:patch(ui.Style():dim(false))
+		s = s:dim(true)
 	end
 	return s
 end

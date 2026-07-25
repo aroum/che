@@ -19,13 +19,14 @@ pub struct Mgr {
 	pub sort_fallback:  SyncCell<SortFallback>,
 
 	// Display
-	pub linemode:     String,
-	pub show_hidden:  SyncCell<bool>,
-	pub show_symlink: SyncCell<bool>,
-	pub show_upparent: SyncCell<bool>,
-	pub smart_glob:   SyncCell<bool>,
-	pub scrolloff:    SyncCell<u8>,
-	pub mouse_events: SyncCell<MouseEvents>,
+	pub linemode:             String,
+	pub show_hidden:          SyncCell<bool>,
+	pub show_symlink:         SyncCell<bool>,
+	pub show_upparent:        SyncCell<bool>,
+	pub hide_inactive_cursor: SyncCell<bool>,
+	pub smart_glob:           SyncCell<bool>,
+	pub scrolloff:            SyncCell<u8>,
+	pub mouse_events:         SyncCell<MouseEvents>,
 }
 
 impl Mgr {
