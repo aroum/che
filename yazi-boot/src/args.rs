@@ -5,7 +5,7 @@ use yazi_shared::{Id, url::UrlBuf};
 
 #[derive(Debug, Default, Parser)]
 #[command(name = "che")]
-#[command(after_help = "See https://yazi-rs.github.io/docs/quick-start for a quick starter.")]
+#[command(after_help = "See https://github.com/aroum/che for documentation.")]
 pub struct Args {
 	/// Set the current working entry
 	#[arg(index = 1, num_args = 1..=9)]

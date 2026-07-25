@@ -18,7 +18,7 @@ impl Actor for Title {
 	const NAME: &str = "title";
 
 	fn act(cx: &mut Ctx, opt: Self::Options) -> Result<Data> {
-		let s = opt.value.unwrap_or_else(|| format!("Yazi: {}", cx.tab().name()).into());
+		let s = opt.value.unwrap_or_else(|| format!("che: {}", cx.tab().name()).into());
 		execute!(TTY.writer(), SetTitle(&s))?;
 
 		yazi_term::STATE.set(TermState { title: !s.is_empty(), ..yazi_term::STATE.get() });

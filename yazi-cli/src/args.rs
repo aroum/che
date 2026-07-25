@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 use yazi_shared::Id;
 
 #[derive(Parser)]
-#[command(name = "Gez", about, long_about = None)]
+#[command(name = "ch", about, long_about = None)]
 pub(super) struct Args {
 	#[command(subcommand)]
 	pub(super) command: Command,
