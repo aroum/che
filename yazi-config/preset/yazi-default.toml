@@ -59,11 +59,11 @@ reveal = [
 	{ run = "clear; exiftool %s1; echo 'Press enter to exit'; read _", desc = "Show EXIF", for = "unix", block = true },
 ]
 extract = [
-	{ run = "ya pub extract --list %s", desc = "Extract here" },
+	{ run = "ch pub extract --list %s", desc = "Extract here" },
 ]
 download = [
-	{ run = "ya emit download --open %S", desc = "Download and open" },
-	{ run = "ya emit download %S",        desc = "Download" },
+	{ run = "ch emit download --open %S", desc = "Download and open" },
+	{ run = "ch emit download %S",        desc = "Download" },
 ]
 
 [open]

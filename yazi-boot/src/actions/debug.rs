@@ -18,8 +18,8 @@ impl Actions {
 		writeln!(s, "    Rustc    : {}", Self::rustc())?;
 		writeln!(s, "    Backtrace: {:?}", env::var_os("RUST_BACKTRACE"))?;
 
-		writeln!(s, "\nYa")?;
-		writeln!(s, "    Version: {}", Self::process_output("ya", "--version"))?;
+		writeln!(s, "\nCh")?;
+		writeln!(s, "    Version: {}", Self::process_output("ch", "--version"))?;
 
 		writeln!(s, "\nConfig")?;
 		writeln!(s, "    Init             : {}", Self::config_state("init.lua"))?;
@@ -147,7 +147,7 @@ impl Actions {
 						.next()
 						.unwrap_or_default()
 						.to_owned();
-				if name.as_ref() == "ya" {
+				if name.as_ref() == "ch" {
 					line.trim_start_matches("Ya ").to_owned()
 				} else {
 					Regex::new(r"\d+\.\d+(\.\d+-\d+|\.\d+|\b)")
