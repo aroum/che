@@ -15,6 +15,9 @@ impl Actor for Copy {
 
 	fn act(cx: &mut Ctx, opt: Self::Options) -> Result<Data> {
 		act!(mgr:escape_visual, cx)?;
+		if opt.r#type == "dirname" {
+			yazi_proxy::deprecate!("`copy dirname` is deprecated, use `copy dirpath` instead");
+		}
 
 		let mut s = Vec::<u8>::new();
 		let mut it = if opt.hovered {
@@ -26,11 +29,18 @@ impl Actor for Copy {
 
 		while let Some(u) = it.next() {
 			match opt.r#type.as_ref() {
-				// TODO: rename to "url"
 				"path" => {
 					s.extend_from_slice(&opt.separator.transform(&u.to_strand()));
 				}
-				"dirname" => {
+				"url" => {
+					s.extend_from_slice(&opt.separator.transform(&u.to_strand()));
+				}
+				"dirpath" | "dirname" => {
+					if let Some(p) = u.parent() {
+						s.extend_from_slice(&opt.separator.transform(&p.to_strand()));
+					}
+				}
+				"dirurl" => {
 					if let Some(p) = u.parent() {
 						s.extend_from_slice(&opt.separator.transform(&p.to_strand()));
 					}
@@ -49,7 +59,7 @@ impl Actor for Copy {
 		}
 
 		// Copy the CWD path regardless even if the directory is empty
-		if s.is_empty() && opt.r#type == "dirname" {
+		if s.is_empty() && matches!(&*opt.r#type, "dirpath" | "dirname" | "dirurl") {
 			s.extend_from_slice(&opt.separator.transform(&cx.cwd().to_strand()));
 		}
 
