@@ -18,6 +18,7 @@ hide_inactive_cursor = true
 smart_glob     = true
 scrolloff      = 5
 mouse_events   = [ "click", "scroll" ]
+archive_vfs    = true
 
 [preview]
 wrap            = "no"

@@ -186,6 +186,14 @@ impl UrlBuf {
 			domain: Pool::<str>::intern(domain),
 		})
 	}
+
+	#[inline]
+	pub fn into_archive(self, domain: impl AsRef<str>) -> Result<Self, PathDynError> {
+		Ok(Self::Archive {
+			loc:    LocBuf::<PathBuf>::zeroed(self.into_loc().into_os()?),
+			domain: Pool::<str>::intern(domain),
+		})
+	}
 }
 
 impl Debug for UrlBuf {

@@ -154,7 +154,14 @@ pub async fn metadata<U>(url: U) -> io::Result<Cha>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.metadata().await
+	let url = url.as_url();
+	if url.is_archive() {
+		let is_dir = url.loc().to_string_lossy().ends_with('/')
+			|| url.loc().as_os().ok().map_or(false, |p| p.as_os_str().is_empty());
+		let mode = if is_dir { yazi_fs::cha::ChaMode::T_DIR } else { yazi_fs::cha::ChaMode::T_FILE };
+		return Ok(Cha { kind: yazi_fs::cha::ChaKind::empty(), mode, ..Default::default() });
+	}
+	Providers::new(url).await?.metadata().await
 }
 
 pub async fn must_identical<U, V>(a: U, b: V) -> bool
@@ -268,7 +275,9 @@ pub async fn symlink_metadata<U>(url: U) -> io::Result<Cha>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.symlink_metadata().await
+	let url = url.as_url();
+	if url.is_archive() { return metadata(url).await; }
+	Providers::new(url).await?.symlink_metadata().await
 }
 
 pub async fn trash<U>(url: U) -> io::Result<UrlBuf>

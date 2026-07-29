@@ -4,7 +4,7 @@ use yazi_fs::File;
 use yazi_macro::{act, succ};
 use yazi_parser::mgr::{OpenDoOpt, OpenOpt};
 use yazi_proxy::MgrProxy;
-use yazi_shared::data::Data;
+use yazi_shared::{data::Data, url::UrlLike};
 use yazi_vfs::VfsFile;
 
 use crate::{Actor, Ctx, mgr::Quit};
@@ -46,9 +46,17 @@ impl Actor for Open {
 		}
 
 
+		let is_archive_hovered = cx.hovered().is_some_and(|h| {
+			h.url.ext().is_some_and(|ext| {
+				let ext = ext.to_string_lossy().to_lowercase();
+				matches!(ext.as_str(), "zip" | "rar" | "7z" | "tar" | "gz" | "tgz" | "xz" | "bz2" | "zst")
+			})
+		});
+
 		if !opt.interactive
 			&& opt.targets.len() == 1
-			&& cx.hovered().is_some_and(|h| h.is_dir())
+			&& (cx.hovered().is_some_and(|h| h.is_dir())
+				|| (is_archive_hovered && yazi_config::YAZI.mgr.archive_vfs.get()))
 		{
 			return act!(mgr:enter, cx);
 		}

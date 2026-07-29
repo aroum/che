@@ -16,10 +16,15 @@ All new options can be configured in `~/.config/che/yazi.toml`.
 # false - pass all search queries directly as regex (--regex)
 smart_glob = true
 
-# Render a virtual parent navigation entry "↑ .." at the top of directory listings
+# Display "↑ .." entry at the top of directory listings
 # true  - display "↑ .." as the first entry in directory lists (default)
-# false - hide the "↑ .." entry
+# false - hide virtual parent entry
 show_upparent = true
+
+# Virtual archive browsing
+# true  - enter supported archives (.zip, .tar, .7z, etc.) as virtual directories (default)
+# false - default opener / extraction behavior
+archive_vfs = true
 
 # Control cursor display in inactive dual-pane column
 # true  - completely hide cursor selection and side indicators on inactive pane (default)

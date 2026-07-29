@@ -20,7 +20,7 @@ impl Actor for Leave {
 			.or_else(|| cx.cwd().parent());
 
 		let Some(mut url) = url else { succ!() };
-		if url.is_search() {
+		if url.is_search() || (url.is_archive() && url.parent().is_none()) {
 			url = url.as_regular()?;
 		}
 

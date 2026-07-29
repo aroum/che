@@ -27,6 +27,7 @@ pub struct Mgr {
 	pub smart_glob:           SyncCell<bool>,
 	pub scrolloff:            SyncCell<u8>,
 	pub mouse_events:         SyncCell<MouseEvents>,
+	pub archive_vfs:          SyncCell<bool>,
 }
 
 impl Mgr {

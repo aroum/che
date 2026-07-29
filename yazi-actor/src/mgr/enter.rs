@@ -13,10 +13,21 @@ impl Actor for Enter {
 	const NAME: &str = "enter";
 
 	fn act(cx: &mut Ctx, _: Self::Options) -> Result<Data> {
-		let Some(h) = cx.hovered().filter(|h| h.is_dir()) else { succ!() };
+		let Some(h) = cx.hovered() else { succ!() };
 
-		let url = if h.url.is_search() { h.url.to_regular()? } else { h.url.clone() };
+		let is_archive_ext = h.url.ext().is_some_and(|ext| {
+			let ext = ext.to_string_lossy().to_lowercase();
+			matches!(ext.as_str(), "zip" | "rar" | "7z" | "tar" | "gz" | "tgz" | "xz" | "bz2" | "zst")
+		});
 
-		act!(mgr:cd, cx, (url, CdSource::Enter))
+		if h.is_dir() {
+			let url = if h.url.is_search() { h.url.to_regular()? } else { h.url.clone() };
+			act!(mgr:cd, cx, (url, CdSource::Enter))
+		} else if is_archive_ext && yazi_config::YAZI.mgr.archive_vfs.get() {
+			let url = h.url.clone().into_archive("1")?;
+			act!(mgr:cd, cx, (url, CdSource::Enter))
+		} else {
+			succ!()
+		}
 	}
 }
