@@ -10,7 +10,11 @@ pub async fn absolute<'a, U>(url: &'a U) -> io::Result<UrlCow<'a>>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.absolute().await
+	let u = url.as_url();
+	if u.is_archive() {
+		return Ok(u.into());
+	}
+	Providers::new(u).await?.absolute().await
 }
 
 pub async fn calculate<U>(url: U) -> io::Result<u64>
@@ -29,21 +33,33 @@ pub async fn canonicalize<U>(url: U) -> io::Result<UrlBuf>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.canonicalize().await
+	let u = url.as_url();
+	if u.is_archive() {
+		return Ok(u.to_owned());
+	}
+	Providers::new(u).await?.canonicalize().await
 }
 
 pub async fn capabilities<U>(url: U) -> io::Result<Capabilities>
 where
 	U: AsUrl,
 {
-	Ok(Providers::new(url.as_url()).await?.capabilities())
+	let u = url.as_url();
+	if u.is_archive() {
+		return Ok(Capabilities { symlink: false });
+	}
+	Ok(Providers::new(u).await?.capabilities())
 }
 
 pub async fn casefold<U>(url: U) -> io::Result<UrlBuf>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.casefold().await
+	let u = url.as_url();
+	if u.is_archive() {
+		return Ok(u.to_owned());
+	}
+	Providers::new(u).await?.casefold().await
 }
 
 pub async fn copy<U, V>(from: U, to: V, attrs: Attrs) -> io::Result<u64>
@@ -52,6 +68,9 @@ where
 	V: AsUrl,
 {
 	let (from, to) = (from.as_url(), to.as_url());
+	if to.is_archive() {
+		return super::archive::copy(&from.to_owned(), &to.to_owned()).await;
+	}
 
 	let res = match (from.kind().is_local(), to.kind().is_local()) {
 		(true, true) => Local::new(from).await?.copy(to.loc(), attrs).await,
@@ -79,6 +98,23 @@ where
 	A: Into<Attrs>,
 {
 	let (from, to) = (from.as_url(), to.as_url());
+	if to.is_archive() {
+		let (from, to) = (from.to_owned(), to.to_owned());
+		let (tx, rx) = mpsc::channel(10);
+		tokio::spawn(async move {
+			let res = super::archive::copy(&from, &to).await;
+			match res {
+				Ok(n) => {
+					tx.send(Ok(n)).await.ok();
+					tx.send(Ok(0)).await.ok();
+				}
+				Err(e) => {
+					tx.send(Err(e)).await.ok();
+				}
+			}
+		});
+		return Ok(rx);
+	}
 
 	let res = match (from.kind().is_local(), to.kind().is_local()) {
 		(true, true) => Local::new(from).await?.copy_with_progress(to.loc(), attrs),
@@ -101,28 +137,40 @@ pub async fn create<U>(url: U) -> io::Result<RwFile>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.create().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
+	Providers::new(url).await?.create().await
 }
 
 pub async fn create_dir<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.create_dir().await
+	let url = url.as_url();
+	if url.is_archive() { return Ok(()); }
+	Providers::new(url).await?.create_dir().await
 }
 
 pub async fn create_dir_all<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.create_dir_all().await
+	let url = url.as_url();
+	if url.is_archive() { return Ok(()); }
+	Providers::new(url).await?.create_dir_all().await
 }
 
 pub async fn create_new<U>(url: U) -> io::Result<RwFile>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.create_new().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
+	Providers::new(url).await?.create_new().await
 }
 
 pub async fn hard_link<U, V>(original: U, link: V) -> io::Result<()>
@@ -143,10 +191,14 @@ where
 	U: AsUrl,
 	V: AsUrl,
 {
-	if let (Some(a), Some(b)) = (a.as_url().as_local(), b.as_url().as_local()) {
+	let (a_url, b_url) = (a.as_url(), b.as_url());
+	if a_url.is_archive() || b_url.is_archive() {
+		return Ok(a_url == b_url);
+	}
+	if let (Some(a), Some(b)) = (a_url.as_local(), b_url.as_local()) {
 		yazi_fs::provider::local::identical(a, b).await
 	} else {
-		Err(io::Error::new(io::ErrorKind::Unsupported, "Unsupported filesystem"))
+		Ok(a_url == b_url)
 	}
 }
 
@@ -154,10 +206,51 @@ pub async fn metadata<U>(url: U) -> io::Result<Cha>
 where
 	U: AsUrl,
 {
+	use yazi_shared::url::UrlLike;
+	use yazi_fs::provider::DirReader;
+	use yazi_fs::provider::FileHolder;
+	use yazi_shared::strand::StrandLike;
+
 	let url = url.as_url();
 	if url.is_archive() {
-		let is_dir = url.loc().to_string_lossy().ends_with('/')
-			|| url.loc().as_os().ok().map_or(false, |p| p.as_os_str().is_empty());
+		let url_owned = url.to_owned();
+		let is_dir = if let Url::Archive { loc, .. } = url {
+			let (_, _, urn) = loc.triple();
+			let urn_s = urn.to_string_lossy();
+			// Empty urn = archive root = directory
+			// Non-empty urn without trailing slash = look up actual type
+			if urn_s.is_empty() {
+				true
+			} else if let Some(parent_url) = url_owned.parent().map(|u| u.to_owned()) {
+				let target_name = urn_s.trim_end_matches('/').to_string();
+				match super::archive::ReadDir::new(&parent_url).await {
+					Ok(mut rd) => {
+						let mut result = false;
+						loop {
+							match rd.next().await {
+								Ok(Some(e)) => {
+									let entry_name = e.name();
+								let name_str = entry_name.to_string_lossy();
+									if name_str == target_name {
+										result = e.metadata().await.map(|c| c.is_dir()).unwrap_or(false);
+										break;
+									}
+								}
+								_ => break,
+							}
+						}
+						result
+					}
+					// Fallback: treat as file if urn has extension, dir otherwise
+					Err(_) => std::path::Path::new(urn_s.as_ref()).extension().is_none(),
+				}
+			} else {
+				// No parent → archive root
+				true
+			}
+		} else {
+			true
+		};
 		let mode = if is_dir { yazi_fs::cha::ChaMode::T_DIR } else { yazi_fs::cha::ChaMode::T_FILE };
 		return Ok(Cha { kind: yazi_fs::cha::ChaKind::empty(), mode, ..Default::default() });
 	}
@@ -176,51 +269,79 @@ pub async fn open<U>(url: U) -> io::Result<RwFile>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.open().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return super::archive::open(&url.to_owned()).await;
+	}
+	Providers::new(url).await?.open().await
 }
 
 pub async fn read_dir<U>(url: U) -> io::Result<ReadDir>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.read_dir().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return Ok(ReadDir::Archive(super::archive::ReadDir::new(&url.to_owned()).await?));
+	}
+	Providers::new(url).await?.read_dir().await
 }
 
 pub async fn read_link<U>(url: U) -> io::Result<PathBufDyn>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.read_link().await
+	let u = url.as_url();
+	if u.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::NotFound, "Archive entries are not symlinks"));
+	}
+	Providers::new(u).await?.read_link().await
 }
 
 pub async fn remove_dir<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.remove_dir().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return super::archive::remove_dir(&url.to_owned()).await;
+	}
+	Providers::new(url).await?.remove_dir().await
 }
 
 pub async fn remove_dir_all<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.remove_dir_all().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return super::archive::remove_dir(&url.to_owned()).await;
+	}
+	Providers::new(url).await?.remove_dir_all().await
 }
 
 pub async fn remove_dir_clean<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.remove_dir_clean().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return super::archive::remove_dir(&url.to_owned()).await;
+	}
+	Providers::new(url).await?.remove_dir_clean().await
 }
 
 pub async fn remove_file<U>(url: U) -> io::Result<()>
 where
 	U: AsUrl,
 {
-	let res = Providers::new(url.as_url()).await?.remove_file().await;
+	let url_ref = url.as_url();
+	if url_ref.is_archive() {
+		return super::archive::remove_file(&url_ref.to_owned()).await;
+	}
+	let res = Providers::new(url_ref).await?.remove_file().await;
 	if res.is_ok() {
-		if let Some(path) = url.as_url().loc().as_os().ok() {
+		if let Some(path) = url_ref.loc().as_os().ok() {
 			super::descr::write_description(path, "");
 		}
 	}
@@ -233,6 +354,9 @@ where
 	V: AsUrl,
 {
 	let (from, to) = (from.as_url(), to.as_url());
+	if from.is_archive() || to.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
 	let res = if from.scheme().covariant(to.scheme()) {
 		Providers::new(from).await?.rename(to.loc()).await
 	} else {
@@ -252,6 +376,9 @@ where
 	S: AsStrand,
 	F: AsyncFnOnce() -> io::Result<bool>,
 {
+	if link.as_url().is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
 	Providers::new(link.as_url()).await?.symlink(original, is_dir).await
 }
 
@@ -260,6 +387,9 @@ where
 	U: AsUrl,
 	S: AsStrand,
 {
+	if link.as_url().is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
 	Providers::new(link.as_url()).await?.symlink_dir(original).await
 }
 
@@ -268,6 +398,9 @@ where
 	U: AsUrl,
 	S: AsStrand,
 {
+	if link.as_url().is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
 	Providers::new(link.as_url()).await?.symlink_file(original).await
 }
 
@@ -284,7 +417,11 @@ pub async fn trash<U>(url: U) -> io::Result<UrlBuf>
 where
 	U: AsUrl,
 {
-	Providers::new(url.as_url()).await?.trash().await
+	let url = url.as_url();
+	if url.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	}
+	Providers::new(url).await?.trash().await
 }
 
 pub fn try_absolute<'a, U>(url: U) -> Option<UrlCow<'a>>

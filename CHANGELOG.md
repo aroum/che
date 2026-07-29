@@ -150,6 +150,15 @@ overwrite_dialog = true
 
 ---
 
+### 13. Read & Write Virtual Archive VFS (`archive_vfs`)
+* **Description:** Full read, write, extract, move, and delete support for virtual archive files (`.zip`, `.7z`, etc.).
+  * **Preview & Extract:** Stream file bytes via `7zz x -so` for seamless previewing and copying files out of archives.
+  * **Add & Move Into Archive (`<F5>` / `<F6>`):** Copy and move files into archives using `7zz a -si`.
+  * **Delete (`d` / `Delete`):** Remove files and directories from archives using `7zz d`.
+  * **UI Sync:** Automatically trigger watcher refreshes upon archive operations so directory listings update instantly.
+
+---
+
 ## ⌨️ Summary of New Hotkeys and Commands
 
 | Hotkey | Command (`run = ...`) | Description |
@@ -159,6 +168,6 @@ overwrite_dialog = true
 | **`c` `m`** | `comment` | Add / edit file comment (`descript.ion`) |
 | **`Ctrl + Shift + R`** / **`c` `r`** | `plugin multirename` | Open batch multirename TUI plugin |
 | **`Ctrl + Shift + Y`** / **`c` `y`** | `plugin system_copy` | Copy selected files to OS clipboard |
-| **`F5`** | `copy_to` | Copy selected files to opposite pane |
-| **`F6`** | `move_to` | Move selected files to opposite pane |
+| **`F5`** | `copy_to` | Copy selected files to opposite pane (supports archives) |
+| **`F6`** | `move_to` | Move selected files to opposite pane (supports archives) |
 | **`Tab`** / **`Shift + Tab`** | `pane_switch` | Switch focus between left and right panes |

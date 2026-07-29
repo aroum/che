@@ -54,11 +54,11 @@ impl From<String> for LogLevel {
 impl AsRef<str> for LogLevel {
 	fn as_ref(&self) -> &str {
 		match self {
-			Self::None => "yazi=NONE",
-			Self::Error => "yazi=ERROR",
-			Self::Warn => "yazi=WARN",
-			Self::Info => "yazi=INFO",
-			Self::Debug => "yazi=DEBUG",
+			Self::None => "OFF",
+			Self::Error => "ERROR",
+			Self::Warn => "WARN",
+			Self::Info => "INFO",
+			Self::Debug => "DEBUG",
 		}
 	}
 }

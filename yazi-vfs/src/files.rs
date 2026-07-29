@@ -2,7 +2,7 @@ use std::io;
 
 use tokio::{select, sync::mpsc::{self, UnboundedReceiver}};
 use yazi_fs::{File, Files, FilesOp, cha::Cha, mounts::PARTITIONS, provider::{DirReader, FileHolder}};
-use yazi_shared::url::UrlBuf;
+use yazi_shared::url::{UrlBuf, UrlLike};
 
 use crate::{VfsCha, VfsFile, VfsFilesOp, provider::{self, DirEntry}};
 
@@ -68,6 +68,9 @@ impl VfsFiles for Files {
 
 	async fn assert_stale(dir: &UrlBuf, cha: Cha) -> Option<Cha> {
 		use std::io::ErrorKind;
+		if dir.is_archive() {
+			return Some(provider::metadata(dir).await.unwrap_or_default());
+		}
 		match Cha::from_url(dir).await {
 			Ok(c) if !c.is_dir() => FilesOp::issue_error(dir, ErrorKind::NotADirectory).await,
 			Ok(c) if c.hits(cha) && !PARTITIONS.read().timeless(cha) => {}

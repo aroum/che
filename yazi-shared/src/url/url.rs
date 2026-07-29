@@ -119,9 +119,8 @@ impl<'a> Url<'a> {
 	#[inline]
 	pub fn is_internal(self) -> bool {
 		match self {
-			Self::Regular(_) | Self::Sftp { .. } => true,
+			Self::Regular(_) | Self::Sftp { .. } | Self::Archive { .. } => true,
 			Self::Search { .. } => !self.uri().is_empty(),
-			Self::Archive { .. } => false,
 		}
 	}
 
@@ -291,8 +290,8 @@ impl<'a> Url<'a> {
 				loc:    LocBuf::<PathBuf>::floated(joined.try_into()?, loc.base()),
 				domain: domain.intern(),
 			},
-			Self::Archive { domain, .. } => UrlBuf::Archive {
-				loc:    LocBuf::<PathBuf>::zeroed(joined.into_os()?),
+			Self::Archive { loc, domain } => UrlBuf::Archive {
+				loc:    LocBuf::<PathBuf>::floated(joined.try_into()?, loc.base()),
 				domain: domain.intern(),
 			},
 
@@ -467,5 +466,21 @@ impl<'a> Url<'a> {
 			Self::Archive { loc, .. } => loc.urn().as_path(),
 			Self::Sftp { loc, .. } => loc.urn().as_path(),
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::url::UrlLike;
+
+	#[test]
+	fn test_url_is_internal_archive() {
+		if std::panic::catch_unwind(|| crate::init()).is_err() {
+			// Already initialized in another parallel test thread
+		}
+		let url = UrlBuf::from(PathBuf::from("/path/to/archive.zip")).into_archive("1").unwrap();
+		assert!(url.is_internal());
+		assert!(url.is_archive());
 	}
 }

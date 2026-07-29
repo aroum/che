@@ -61,6 +61,9 @@ async fn _unique_name(mut url: UrlBuf, append: bool) -> io::Result<UrlBuf> {
 }
 
 pub async fn unique_file(u: UrlBuf, is_dir: bool) -> io::Result<UrlBuf> {
+	if u.is_archive() {
+		return Ok(u);
+	}
 	let result = if is_dir {
 		provider::create_dir(&u).await
 	} else {

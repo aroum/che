@@ -21,8 +21,7 @@ impl Reporter {
 		for url in urls.into_iter().map(Into::into) {
 			match url.as_url().kind() {
 				SchemeKind::Regular | SchemeKind::Search => self.report_local(url),
-				SchemeKind::Archive => {}
-				SchemeKind::Sftp => self.report_remote(url),
+				SchemeKind::Archive | SchemeKind::Sftp => self.report_remote(url),
 			}
 		}
 	}
