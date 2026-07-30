@@ -21,7 +21,7 @@ impl ReadDir {
 		let (base_path, target_dir) = match url.as_url() {
 			yazi_shared::url::Url::Archive { loc, .. } => {
 				let (base, rest, urn) = loc.triple();
-				let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+				let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 				let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 				(clean_base, target)
 			}
@@ -191,7 +191,7 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 	let (base_path, target_file) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -227,7 +227,7 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 	let (base_path, target_file) = match to.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -275,7 +275,7 @@ pub async fn remove_file(url: &UrlBuf) -> io::Result<()> {
 	let (base_path, target_file) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -311,7 +311,7 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 	let (base_path, target_dir) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -350,7 +350,7 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	let (from_base, old_target) = match from.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -360,7 +360,7 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	let (to_base, new_target) = match to.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
 			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
 			(clean_base, target)
 		}
@@ -401,6 +401,11 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	async fn has_7zip() -> bool {
+		tokio::process::Command::new("7zz").arg("--help").output().await.is_ok()
+			|| tokio::process::Command::new("7z").arg("--help").output().await.is_ok()
+	}
 	use std::path::PathBuf;
 
 	#[tokio::test]
@@ -420,7 +425,7 @@ mod tests {
 	#[tokio::test]
 	async fn test_read_real_test_zip() {
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
@@ -456,7 +461,7 @@ mod tests {
 	#[tokio::test]
 	async fn test_archive_operations_protection() {
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
@@ -493,7 +498,7 @@ mod tests {
 	async fn test_archive_open_and_copy_out() {
 		use tokio::io::AsyncReadExt;
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
@@ -547,7 +552,7 @@ mod tests {
 	async fn test_archive_rename() {
 		use tokio::io::AsyncReadExt;
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
@@ -579,7 +584,7 @@ mod tests {
 	async fn test_archive_copy_internal() {
 		use tokio::io::AsyncReadExt;
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
@@ -616,7 +621,7 @@ mod tests {
 	async fn test_archive_move_internal() {
 		use tokio::io::AsyncReadExt;
 		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
-		if !test_zip.exists() {
+		if !test_zip.exists() || !has_7zip().await {
 			return;
 		}
 
