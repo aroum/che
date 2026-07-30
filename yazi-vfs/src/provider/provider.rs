@@ -354,8 +354,10 @@ where
 	V: AsUrl,
 {
 	let (from, to) = (from.as_url(), to.as_url());
-	if from.is_archive() || to.is_archive() {
-		return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Archive is read-only"));
+	if from.is_archive() && to.is_archive() {
+		return super::archive::rename(&from.to_owned(), &to.to_owned()).await;
+	} else if from.is_archive() || to.is_archive() {
+		return Err(io::Error::new(io::ErrorKind::CrossesDevices, "Cannot rename between archive and local filesystem"));
 	}
 	let res = if from.scheme().covariant(to.scheme()) {
 		Providers::new(from).await?.rename(to.loc()).await

@@ -216,6 +216,10 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 		}
 	};
 
+	if !output.status.success() || output.stdout.is_empty() {
+		return Err(io::Error::new(io::ErrorKind::NotFound, format!("File {target_file} not found in archive")));
+	}
+
 	Ok(super::RwFile::Archive(std::io::Cursor::new(output.stdout)))
 }
 
@@ -342,6 +346,58 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 	Ok(())
 }
 
+pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
+	let (from_base, old_target) = match from.as_url() {
+		yazi_shared::url::Url::Archive { loc, .. } => {
+			let (base, rest, urn) = loc.triple();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			(clean_base, target)
+		}
+		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "From is not an archive URL")),
+	};
+
+	let (to_base, new_target) = match to.as_url() {
+		yazi_shared::url::Url::Archive { loc, .. } => {
+			let (base, rest, urn) = loc.triple();
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).trim_matches('/').to_string();
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			(clean_base, target)
+		}
+		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "To is not an archive URL")),
+	};
+
+	if from_base != to_base {
+		return Err(io::Error::new(io::ErrorKind::CrossesDevices, "Cannot rename across different archives"));
+	}
+
+	let mut cmd = Command::new("7zz");
+	cmd.args(["rn", "-sccUTF-8"]);
+	cmd.arg(&from_base);
+	cmd.arg(&old_target);
+	cmd.arg(&new_target);
+	cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+
+	let output = match cmd.output().await {
+		Ok(o) => o,
+		Err(_) => {
+			let mut cmd2 = Command::new("7z");
+			cmd2.args(["rn", "-sccUTF-8"]);
+			cmd2.arg(&from_base);
+			cmd2.arg(&old_target);
+			cmd2.arg(&new_target);
+			cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+			cmd2.output().await?
+		}
+	};
+
+	if !output.status.success() {
+		return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to rename {old_target} to {new_target} in archive")));
+	}
+
+	Ok(())
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -426,11 +482,7 @@ mod tests {
 			Some(std::io::ErrorKind::PermissionDenied)
 		);
 
-		// 4. rename / trash: should return PermissionDenied
-		assert_eq!(
-			crate::provider::rename(&sub_file, &url).await.err().map(|e| e.kind()),
-			Some(std::io::ErrorKind::PermissionDenied)
-		);
+		// 4. trash: should return PermissionDenied
 		assert_eq!(
 			crate::provider::trash(&sub_file).await.err().map(|e| e.kind()),
 			Some(std::io::ErrorKind::PermissionDenied)
@@ -488,6 +540,110 @@ mod tests {
 		assert!(remove_res.is_ok(), "remove_file failed: {:?}", remove_res.err());
 
 		let _ = tokio::fs::remove_file(tmp_dest).await;
+		let _ = tokio::fs::remove_file(tmp_zip).await;
+	}
+
+	#[tokio::test]
+	async fn test_archive_rename() {
+		use tokio::io::AsyncReadExt;
+		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
+		if !test_zip.exists() {
+			return;
+		}
+
+		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
+			// Already initialized
+		}
+
+		let tmp_zip = std::env::temp_dir().join("test_rename.zip");
+		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;
+
+		let archive_url = UrlBuf::from(tmp_zip.clone()).into_archive("1").unwrap();
+		let old_url = archive_url.try_join("test_folder/AGENTS.md").unwrap();
+		let new_url = archive_url.try_join("test_folder/AGENTS_RENAMED.md").unwrap();
+
+		// Rename inside archive
+		let rename_res = crate::provider::rename(&old_url, &new_url).await;
+		assert!(rename_res.is_ok(), "rename failed: {:?}", rename_res.err());
+
+		// Verify renamed file can be opened and read
+		let mut renamed_file = crate::provider::open(&new_url).await.unwrap();
+		let mut buf = Vec::new();
+		renamed_file.read_to_end(&mut buf).await.unwrap();
+		assert!(!buf.is_empty());
+
+		let _ = tokio::fs::remove_file(tmp_zip).await;
+	}
+
+	#[tokio::test]
+	async fn test_archive_copy_internal() {
+		use tokio::io::AsyncReadExt;
+		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
+		if !test_zip.exists() {
+			return;
+		}
+
+		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
+			// Already initialized
+		}
+
+		let tmp_zip = std::env::temp_dir().join("test_copy_internal.zip");
+		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;
+
+		let archive_url = UrlBuf::from(tmp_zip.clone()).into_archive("1").unwrap();
+		let src_url = archive_url.try_join("test_folder/AGENTS.md").unwrap();
+		let dst_url = archive_url.try_join("test_folder/subfolder/AGENTS_COPIED.md").unwrap();
+
+		// Copy file between subfolders inside the archive
+		let copied_bytes = crate::provider::copy(&src_url, &dst_url, yazi_fs::provider::Attrs::default()).await.unwrap();
+		assert!(copied_bytes > 0);
+
+		// Verify both original and copied files exist and can be opened
+		let mut src_file = crate::provider::open(&src_url).await.unwrap();
+		let mut src_buf = Vec::new();
+		src_file.read_to_end(&mut src_buf).await.unwrap();
+
+		let mut dst_file = crate::provider::open(&dst_url).await.unwrap();
+		let mut dst_buf = Vec::new();
+		dst_file.read_to_end(&mut dst_buf).await.unwrap();
+
+		assert_eq!(src_buf, dst_buf);
+
+		let _ = tokio::fs::remove_file(tmp_zip).await;
+	}
+
+	#[tokio::test]
+	async fn test_archive_move_internal() {
+		use tokio::io::AsyncReadExt;
+		let test_zip = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/test.zip");
+		if !test_zip.exists() {
+			return;
+		}
+
+		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
+			// Already initialized
+		}
+
+		let tmp_zip = std::env::temp_dir().join("test_move_internal.zip");
+		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;
+
+		let archive_url = UrlBuf::from(tmp_zip.clone()).into_archive("1").unwrap();
+		let src_url = archive_url.try_join("test_folder/README.md").unwrap();
+		let dst_url = archive_url.try_join("test_folder/subfolder/README_MOVED.md").unwrap();
+
+		// Move (rename) file between subfolders inside the archive
+		let move_res = crate::provider::rename(&src_url, &dst_url).await;
+		assert!(move_res.is_ok(), "move failed: {:?}", move_res.err());
+
+		// Verify moved file exists in new location
+		let mut dst_file = crate::provider::open(&dst_url).await.unwrap();
+		let mut dst_buf = Vec::new();
+		dst_file.read_to_end(&mut dst_buf).await.unwrap();
+		assert!(!dst_buf.is_empty());
+
+		// Verify original file location fails to open
+		assert!(crate::provider::open(&src_url).await.is_err());
+
 		let _ = tokio::fs::remove_file(tmp_zip).await;
 	}
 }
