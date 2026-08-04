@@ -94,16 +94,16 @@ jobs:
           files: "*.zip"
           generate_release_notes: true
 
-      # - name: Publish to Winget
-      #   if: env.WINGET_TOKEN != ''
-      #   continue-on-error: true
-      #   uses: vedantmgoyal9/winget-releaser@main
-      #   with:
-      #     identifier: aroum.che
-      #     installers-regex: 'che-.*-(x86_64|aarch64)-pc-windows-msvc\.zip$'
-      #     token: ${{ secrets.WINGET_TOKEN }}
-      #   env:
-      #     WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      - name: Publish to Winget
+        if: env.WINGET_TOKEN != ''
+        continue-on-error: true
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: aroum.che
+          installers-regex: 'che-.*-(x86_64|aarch64)-pc-windows-msvc\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
 
       - name: Update Homebrew Formula
         if: env.HOMEBREW_TAP_TOKEN != ''

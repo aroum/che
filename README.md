@@ -86,7 +86,9 @@ brew install che
 ```
 
 ### 🪟 Windows Package Manager (Winget)
-> ⏳ **Winget (Coming Soon)** — Package submission to Microsoft (`winget install aroum.che`) is currently under review ([PR #407686](https://github.com/microsoft/winget-pkgs/pull/407686)).
+```cmd
+winget install aroum.che
+```
 
 ### 🐧 Snapcraft (Linux)
 ```bash

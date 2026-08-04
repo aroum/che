@@ -50,7 +50,7 @@ end
 
 ## 🪟 2. Windows Package Manager (Winget)
 
-Installable via `winget install aroum.che` (Currently under review in Microsoft winget-pkgs [PR #407686](https://github.com/microsoft/winget-pkgs/pull/407686)).
+Installable via `winget install aroum.che`.  Automated releases are published to `microsoft/winget-pkgs` using `vedantmgoyal9/winget-releaser`.
 
 ---
 

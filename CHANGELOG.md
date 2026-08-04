@@ -4,6 +4,17 @@ This document tracks all new features, configuration options, utilities, and key
 
 ---
 
+## 🚀 Automated Winget Releases & CLI `--logging`
+
+### 🪟 Automated Winget Distribution
+- **Official Winget package approval**: `che` is now officially published on Windows Package Manager as `aroum.che`.  
+- **Automated GitHub Action**: `.github/workflows/release.yml` now automatically submits published releases to `microsoft/winget-pkgs` using `winget-releaser`.
+
+### 📜 Verbose Logging CLI Option (`--logging`)
+- **Interactive logging support**: Added `--logging` CLI flag (`che --logging`) which initializes file logging to `~/.local/state/che/yazi.log` without exiting.
+
+---
+
 ## ⚙️ New Configuration Options (`yazi.toml`)
 
 All new options can be configured in `~/.config/che/yazi.toml`.
