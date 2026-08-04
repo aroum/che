@@ -10,6 +10,11 @@ pub static BOOT: RoCell<Boot> = RoCell::new();
 
 pub fn init() {
 	ARGS.with(<_>::parse);
+	if ARGS.logging {
+		unsafe {
+			std::env::set_var("CHE_LOG", "debug");
+		}
+	}
 	BOOT.init(<_>::from(&*ARGS));
 
 	actions::Actions::act(&ARGS);
