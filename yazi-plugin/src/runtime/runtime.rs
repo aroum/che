@@ -28,6 +28,7 @@ fn args() -> Composer<ComposerGet, ComposerSet> {
 			b"entries" => lua.create_sequence_from(ARGS.entries.iter().map(Url::new))?.into_lua(lua),
 			b"cwd_file" => ARGS.cwd_file.as_ref().map(Url::new).into_lua(lua),
 			b"chooser_file" => ARGS.chooser_file.as_ref().map(Url::new).into_lua(lua),
+			b"debug" => ARGS.debug.into_lua(lua),
 			_ => Ok(Value::Nil),
 		}
 	}

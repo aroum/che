@@ -37,7 +37,7 @@ pub struct Args {
 	pub single: bool,
 
 	/// Print debug information
-	#[arg(long)]
+	#[arg(long, alias = "logging")]
 	pub debug: bool,
 
 	/// Print version
