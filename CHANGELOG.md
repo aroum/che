@@ -157,6 +157,11 @@ overwrite_dialog = true
   * **Delete (`d` / `Delete`):** Remove files and directories from archives using `7zz d`.
   * **UI Sync:** Automatically trigger watcher refreshes upon archive operations so directory listings update instantly.
 
+### 14. Restore Closed Tabs History (`tab_restore`)
+* **Description:** Support for restoring recently closed tabs (up to 10 last closed tabs per pane).
+  * **Hotkey:** `T` or `Ctrl + Shift + T` triggers `tab_restore`.
+  * **Optimization:** When a tab is closed, background processes and heavy preview locks are immediately released (`shutdown()`), while full navigation state (CWD, scroll position, history backstack, and file selections) is retained in a lightweight bounded queue (`VecDeque<Tab>`).
+
 ---
 
 ## ⌨️ Summary of New Hotkeys and Commands
@@ -171,3 +176,4 @@ overwrite_dialog = true
 | **`F5`** | `copy_to` | Copy selected files to opposite pane (supports archives) |
 | **`F6`** | `move_to` | Move selected files to opposite pane (supports archives) |
 | **`Tab`** / **`Shift + Tab`** | `pane_switch` | Switch focus between left and right panes |
+| **`T`** / **`Ctrl + Shift + T`** | `tab_restore` | Restore last closed tab (up to 10 tabs history) |

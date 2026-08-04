@@ -157,6 +157,7 @@ impl<'a> Executor<'a> {
 		on!(tab_create);
 		on!(tab_rename);
 		on!(tab_close);
+		on!(tab_restore);
 		on!(tab_switch);
 		on!(tab_swap);
 		on!(pane_switch);

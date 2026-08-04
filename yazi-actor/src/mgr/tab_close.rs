@@ -19,7 +19,8 @@ impl Actor for TabClose {
 			succ!();
 		}
 
-		pane.items.remove(opt.idx).shutdown();
+		let tab = pane.items.remove(opt.idx);
+		pane.push_closed(tab);
 
 		if opt.idx > pane.cursor {
 			pane.set_idx(pane.cursor);

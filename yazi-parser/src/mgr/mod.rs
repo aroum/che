@@ -45,6 +45,7 @@ yazi_macro::mod_flat!(
 	tab_close
 	tab_create
 	tab_rename
+	tab_restore
 	tab_switch
 	toggle
 	toggle_all

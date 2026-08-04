@@ -91,6 +91,7 @@ pub enum Spark<'a> {
 	TabClose(yazi_parser::mgr::TabCloseOpt),
 	TabCreate(yazi_parser::mgr::TabCreateOpt),
 	TabRename(yazi_parser::mgr::TabRenameOpt),
+	TabRestore(yazi_parser::mgr::TabRestoreOpt),
 	TabSwap(yazi_parser::ArrowOpt),
 	TabSwitch(yazi_parser::mgr::TabSwitchOpt),
 	Toggle(yazi_parser::mgr::ToggleOpt),
@@ -295,6 +296,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::TabClose(b) => b.into_lua(lua),
 			Self::TabCreate(b) => b.into_lua(lua),
 			Self::TabRename(b) => b.into_lua(lua),
+			Self::TabRestore(b) => b.into_lua(lua),
 			Self::TabSwap(b) => b.into_lua(lua),
 			Self::TabSwitch(b) => b.into_lua(lua),
 			Self::Toggle(b) => b.into_lua(lua),
@@ -470,6 +472,7 @@ try_from_spark!(yazi_parser::mgr::StashOpt, mgr:stash);
 try_from_spark!(yazi_parser::mgr::TabCloseOpt, mgr:tab_close);
 try_from_spark!(yazi_parser::mgr::TabCreateOpt, mgr:tab_create);
 try_from_spark!(yazi_parser::mgr::TabRenameOpt, mgr:tab_rename);
+try_from_spark!(yazi_parser::mgr::TabRestoreOpt, mgr:tab_restore);
 try_from_spark!(yazi_parser::mgr::TabSwitchOpt, mgr:tab_switch);
 try_from_spark!(yazi_parser::mgr::ToggleAllOpt, mgr:toggle_all);
 try_from_spark!(yazi_parser::mgr::ToggleOpt, mgr:toggle);
