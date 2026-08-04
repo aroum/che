@@ -105,7 +105,9 @@ impl Folder {
 			self.scroll(step)
 		};
 
-		self.trace = self.hovered().filter(|h| !h.is_upparent).filter(|_| b).map(|h| h.urn().into()).or(self.trace.take());
+		if b {
+			self.trace = self.hovered().filter(|h| !h.is_upparent).map(|h| h.urn().into());
+		}
 		b |= self.squeeze_offset();
 
 		let was_loading = self.stage.is_loading();
