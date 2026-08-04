@@ -29,6 +29,7 @@ fn args() -> Composer<ComposerGet, ComposerSet> {
 			b"cwd_file" => ARGS.cwd_file.as_ref().map(Url::new).into_lua(lua),
 			b"chooser_file" => ARGS.chooser_file.as_ref().map(Url::new).into_lua(lua),
 			b"debug" => ARGS.debug.into_lua(lua),
+			b"logging" => ARGS.logging.into_lua(lua),
 			_ => Ok(Value::Nil),
 		}
 	}

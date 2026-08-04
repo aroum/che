@@ -37,8 +37,12 @@ pub struct Args {
 	pub single: bool,
 
 	/// Print debug information
-	#[arg(long, alias = "logging")]
+	#[arg(long)]
 	pub debug: bool,
+
+	/// Enable verbose logging to log file
+	#[arg(long)]
+	pub logging: bool,
 
 	/// Print version
 	#[arg(short = 'V', long)]
