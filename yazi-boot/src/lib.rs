@@ -8,13 +8,16 @@ use yazi_shared::RoCell;
 pub static ARGS: RoCell<Args> = RoCell::new();
 pub static BOOT: RoCell<Boot> = RoCell::new();
 
-pub fn init() {
+pub fn init_args() {
 	ARGS.with(<_>::parse);
 	if ARGS.logging {
 		unsafe {
 			std::env::set_var("CHE_LOG", "debug");
 		}
 	}
+}
+
+pub fn init() {
 	BOOT.init(<_>::from(&*ARGS));
 
 	actions::Actions::act(&ARGS);
