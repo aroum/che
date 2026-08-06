@@ -2,7 +2,7 @@ use ratatui::{buffer::Buffer, layout::{Constraint, Layout, Rect}, widgets::{Bloc
 use ratatui::widgets::BorderType;
 use yazi_config::THEME;
 use yazi_core::Core;
-use yazi_widgets::clear::Clear;
+use yazi_widgets::Clear;
 
 use super::Cand;
 
