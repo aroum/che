@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use yazi_codegen::DeserializeOver2;
-use yazi_fs::{Xdg, create_owned_dir_blocking};
+use yazi_fs::Xdg;
 use yazi_shared::{SStr, timestamp_us};
 
 use super::PreviewWrap;
@@ -59,7 +59,7 @@ impl Preview {
 			bail!("[preview].cache_dir must be either empty or an absolute path.");
 		};
 
-		create_owned_dir_blocking(&self.cache_dir)
+		std::fs::create_dir_all(&self.cache_dir)
 			.context(format!("Failed to create cache directory: {}", self.cache_dir.display()))?;
 
 		Ok(self)
