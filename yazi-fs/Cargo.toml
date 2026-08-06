@@ -29,12 +29,14 @@ hashbrown        = { workspace = true }
 parking_lot      = { workspace = true }
 percent-encoding = { workspace = true }
 rand             = { workspace = true }
-regex            = { workspace = true }
-scopeguard       = { workspace = true }
-serde            = { workspace = true }
-tokio            = { workspace = true }
-tracing          = { workspace = true }
-typed-path       = { workspace = true }
+regex                 = { workspace = true }
+regex-syntax          = { workspace = true }
+scopeguard            = { workspace = true }
+serde                 = { workspace = true }
+tokio                 = { workspace = true }
+tracing               = { workspace = true }
+typed-path            = { workspace = true }
+unicode-normalization = { workspace = true }
 
 [target."cfg(unix)".dependencies]
 libc  = { workspace = true }
