@@ -43,9 +43,8 @@ impl Widget for Which<'_> {
 			.style(THEME.which.mask)
 			.border_type(BorderType::Rounded)
 			.border_style(THEME.which.border);
-		block.render(area, buf);
-
 		let inner = block.inner(area);
+		block.render(area, buf);
 		let chunks = {
 			use Constraint::*;
 			Layout::horizontal(match cols {
