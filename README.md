@@ -45,6 +45,9 @@ Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class c
    * Displays `↑ ..` as the top entry in file lists for fast mouse and keyboard parent navigation.
 10. **Audio Previewer & Album Art Display**:
     * Integrated previewer for MP3, FLAC, M4A, and WAV files with album art extraction via `ffmpeg` / `exiftool`.
+11. **Tab Close & Restore (Undo Closed Tab)**:
+    * **`Ctrl+W`**: Close the active tab, or exit if it is the last remaining tab.
+    * **`close-and-restore-tab` Integration**: Preserves closed tab state and history.  Re-open recently closed tabs with full session state restoration.
 
 ---
 

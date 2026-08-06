@@ -4,6 +4,14 @@ This document tracks all new features, configuration options, utilities, and key
 
 ---
 
+## 📅 Versioning & CalVer Transition (`26.8.6`)
+
+### 📌 Calendar Versioning (`yy.mm.dd`)
+- **CalVer standard**: `che` transitions from SemVer to Calendar Versioning (`yy.mm.dd`, e.g., `26.8.6`).
+- **Manifests synchronization**: All package manifests (`Cargo.toml`), internal dependencies, and project documentation now adhere strictly to CalVer `26.8.6`.
+
+---
+
 ## 🐛 Bug Fixes & Folder Preview Theme Binding
 
 ### 🛡 Vim Motion Yank Panic Fix

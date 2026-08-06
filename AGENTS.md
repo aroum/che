@@ -20,6 +20,7 @@
 - Strings inside the project code, such as those for print or debug, must use English punctuation.
 - When committing to the project, do not add programming tools (like Claude Code) as collaborators.
 - **CHANGELOG.md:** When adding any new features, flags, or configuration parameters, it is MANDATORY to update the `CHANGELOG.md` file with a detailed description of the changes and configuration examples.
+- **Versioning Scheme:** The project follows Calendar Versioning (CalVer) with the format `yy.mm.dd` (e.g., `26.8.6`).  All package manifests, release documentation, and version definitions must strictly adhere to this scheme.
 
 ## Decision Making
 
