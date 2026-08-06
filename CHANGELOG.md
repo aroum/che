@@ -4,6 +4,16 @@ This document tracks all new features, configuration options, utilities, and key
 
 ---
 
+## 🐛 Bug Fixes & Folder Preview Theme Binding
+
+### 🛡 Vim Motion Yank Panic Fix
+- **Prevent unwrap panic on input bounds**: Fixed a crash in `yazi-widgets/src/input/snap.rs` and `input.rs` when performing Vim motions (`y`, `d`, etc.) near or beyond string boundaries during file renaming.
+
+### 🎨 Folder Preview Separator Theme Binding
+- **Dynamic separator styling**: Fixed `yazi-plugin/preset/plugins/folder.lua` to dynamically inherit its horizontal line separator style from `th.mgr.border_style` instead of hardcoded gray.
+
+---
+
 ## 🚀 Automated Winget Releases & CLI `--logging`
 
 ### 🪟 Automated Winget Distribution

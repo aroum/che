@@ -66,13 +66,14 @@ impl InputSnap {
 			.char_indices()
 			.nth(n)
 			.map(|(i, _)| i)
-			.or_else(|| if n == self.count() { Some(self.len()) } else { None })
+			.or_else(|| if n >= self.count() { Some(self.len()) } else { None })
 	}
 
 	#[inline]
 	pub(super) fn slice(&self, range: Range<usize>) -> &str {
-		let (s, e) = (self.idx(range.start), self.idx(range.end));
-		&self.value[s.unwrap()..e.unwrap()]
+		let s = self.idx(range.start).unwrap_or(0).min(self.len());
+		let e = self.idx(range.end).unwrap_or_else(|| self.len()).min(self.len()).max(s);
+		&self.value[s..e]
 	}
 
 	#[inline]

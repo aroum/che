@@ -54,7 +54,7 @@ function M:peek(job)
 
 	local info_str = string.format("Files: %d, Dirs: %d, Size: %s", files_count, dirs_count, ya.readable_size(total_size))
 	local info_text = ui.Text(info_str):style(ui.Style():fg("cyan"))
-	local sep_line = ui.Line(string.rep("─", job.area.w)):style(ui.Style():fg("gray"))
+	local sep_line = ui.Line(string.rep("─", job.area.w)):style(th.mgr.border_style)
 
 	ya.preview_widget(job, {
 		info_text:area(chunks[1]),

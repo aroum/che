@@ -31,9 +31,10 @@ impl Input {
 			}
 			InputOp::Delete(cut, insert, _) => {
 				let range = snap.op.range(cursor, include).unwrap();
-				let Range { start, end } = snap.idx(range.start)..snap.idx(range.end);
+				let start = snap.idx(range.start).unwrap_or(0).min(snap.len());
+				let end = snap.idx(range.end).unwrap_or_else(|| snap.len()).min(snap.len()).max(start);
 
-				let drain = snap.value.drain(start.unwrap()..end.unwrap()).collect::<String>();
+				let drain = snap.value.drain(start..end).collect::<String>();
 				if cut {
 					futures::executor::block_on(CLIPBOARD.set(&drain));
 				}
@@ -44,8 +45,9 @@ impl Input {
 			}
 			InputOp::Yank(_) => {
 				let range = snap.op.range(cursor, include).unwrap();
-				let Range { start, end } = snap.idx(range.start)..snap.idx(range.end);
-				let yanked = &snap.value[start.unwrap()..end.unwrap()];
+				let start = snap.idx(range.start).unwrap_or(0).min(snap.len());
+				let end = snap.idx(range.end).unwrap_or_else(|| snap.len()).min(snap.len()).max(start);
+				let yanked = &snap.value[start..end];
 
 				snap.op = InputOp::None;
 				futures::executor::block_on(CLIPBOARD.set(yanked));
