@@ -28,8 +28,50 @@ impl Default for Key {
 	}
 }
 
+fn map_cyrillic(c: char) -> char {
+	match c {
+		'й' | 'Й' => 'q',
+		'ц' | 'Ц' => 'w',
+		'у' | 'У' => 'e',
+		'к' | 'К' => 'r',
+		'е' | 'Е' => 't',
+		'н' | 'Н' => 'y',
+		'г' | 'Г' => 'u',
+		'ш' | 'Ш' => 'i',
+		'щ' | 'Щ' => 'o',
+		'з' | 'З' => 'p',
+		'х' | 'Х' => '[',
+		'ъ' | 'Ъ' => ']',
+		'ф' | 'Ф' => 'a',
+		'ы' | 'Ы' => 's',
+		'в' | 'В' => 'd',
+		'а' | 'А' => 'f',
+		'п' | 'П' => 'g',
+		'р' | 'Р' => 'h',
+		'о' | 'О' => 'j',
+		'л' | 'Л' => 'k',
+		'д' | 'Д' => 'l',
+		'ж' | 'Ж' => ';',
+		'э' | 'Э' => '\'',
+		'я' | 'Я' => 'z',
+		'ч' | 'Ч' => 'x',
+		'с' | 'С' => 'c',
+		'м' | 'М' => 'v',
+		'и' | 'И' => 'b',
+		'т' | 'Т' => 'n',
+		'ь' | 'Ь' => 'm',
+		'б' | 'Б' => ',',
+		'ю' | 'Ю' => '.',
+		'ё' | 'Ё' => '`',
+		_ => c,
+	}
+}
+
 impl From<KeyEvent> for Key {
-	fn from(value: KeyEvent) -> Self {
+	fn from(mut value: KeyEvent) -> Self {
+		if let KeyCode::Char(c) = value.code {
+			value.code = KeyCode::Char(map_cyrillic(c));
+		}
 		// For alphabet:
 		//   Unix    :  <S-a> => Char("A") + SHIFT
 		//   Windows :  <S-a> => Char("A") + SHIFT
