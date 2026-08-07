@@ -13,6 +13,11 @@ impl<'a> Preview<'a> {
 
 impl Widget for Preview<'_> {
 	fn render(self, win: ratatui::layout::Rect, buf: &mut Buffer) {
+		let tabs = &self.core.mgr.tabs;
+		if !tabs.single_pane && !tabs.preview_pane {
+			return;
+		}
+
 		if let Some(lock) = &self.core.active().preview.lock
 			&& *lock.area == LAYOUT.get().preview {
 				for w in &lock.data {
