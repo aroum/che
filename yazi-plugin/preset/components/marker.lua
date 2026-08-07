@@ -2,11 +2,12 @@ Marker = {
 	_id = "marker",
 }
 
-function Marker:new(area, folder, active)
+function Marker:new(area, folder, active, side)
 	return setmetatable({
 		_area = area,
 		_folder = folder,
 		_active = active ~= false,
+		_side = side or "left",
 	}, { __index = self })
 end
 
@@ -36,8 +37,9 @@ function Marker:redraw()
 		end
 
 		local y = math.min(self._area.y + last[1], self._area.y + self._area.h) - 1
+		local x = self._side == "right" and self._area.x or math.max(0, self._area.x - 1)
 		local rect = ui.Rect {
-			x = math.max(0, self._area.x - 1),
+			x = x,
 			y = y,
 			w = 1,
 			h = math.min(1 + last[2] - last[1], self._area.y + self._area.h - y),

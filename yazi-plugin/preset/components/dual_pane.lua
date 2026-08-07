@@ -70,7 +70,7 @@ function DualPane:build()
 
 			table.insert(self._children, Header:new(self._right_chunks[1], cx.tabs[2]))
 			table.insert(self._children, Tabs:new(self._right_chunks[2], cx.tabs:pane(2), 2))
-			table.insert(self._children, Tab:new(self._right_chunks[3], cx.tabs[2], true, ratio_no_preview))
+			table.insert(self._children, Tab:new(self._right_chunks[3], cx.tabs[2], true, ratio_no_preview, "right"))
 			table.insert(self._children, Status:new(self._right_chunks[4], cx.tabs[2]))
 		end
 	else
@@ -82,7 +82,7 @@ function DualPane:build()
 			Status:new(self._left_chunks[4], cx.tabs[1]),
 			Header:new(self._right_chunks[1], cx.tabs[2]),
 			Tabs:new(self._right_chunks[2], cx.tabs:pane(2), 2),
-			Tab:new(self._right_chunks[3], cx.tabs[2], cx.tabs.idx == 2, ratio),
+			Tab:new(self._right_chunks[3], cx.tabs[2], cx.tabs.idx == 2, ratio, "right"),
 			Status:new(self._right_chunks[4], cx.tabs[2]),
 		}
 	end

@@ -2,8 +2,8 @@ Tab = {
 	_id = "tab",
 }
 
-function Tab:new(area, tab, active, ratio)
-	local me = setmetatable({ _area = area, _tab = tab, _active = active ~= false, _ratio = ratio }, { __index = self })
+function Tab:new(area, tab, active, ratio, side)
+	local me = setmetatable({ _area = area, _tab = tab, _active = active ~= false, _ratio = ratio, _side = side or "left" }, { __index = self })
 	me:layout()
 	me:build()
 	return me
@@ -30,7 +30,7 @@ function Tab:build()
 	if c[3].w > 0 then
 		table.insert(self._children, Preview:new(c[3]:pad(ui.Pad.x(1)), self._tab, self._active))
 	end
-	table.insert(self._children, Rail:new(c, self._tab, self._active))
+	table.insert(self._children, Rail:new(c, self._tab, self._active, self._side))
 end
 
 function Tab:reflow()

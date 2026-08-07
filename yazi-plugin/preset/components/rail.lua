@@ -2,8 +2,8 @@ Rail = {
 	_id = "rail",
 }
 
-function Rail:new(chunks, tab, active)
-	local me = setmetatable({ _chunks = chunks, _tab = tab, _active = active ~= false }, { __index = self })
+function Rail:new(chunks, tab, active, side)
+	local me = setmetatable({ _chunks = chunks, _tab = tab, _active = active ~= false, _side = side or "left" }, { __index = self })
 	me:build()
 	return me
 end
@@ -22,8 +22,8 @@ function Rail:build()
 		ui.Bar(ui.Edge.LEFT):area(self._chunks[3]):symbol(th.mgr.border_symbol):style(self:style(th.mgr.border_style)),
 	}
 	self._children = {
-		Marker:new(self._chunks[1], self._tab.parent, self._active),
-		Marker:new(self._chunks[2], self._tab.current, self._active),
+		Marker:new(self._chunks[1], self._tab.parent, self._active, "left"),
+		Marker:new(self._chunks[2], self._tab.current, self._active, self._side),
 	}
 end
 
