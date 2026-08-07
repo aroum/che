@@ -13,10 +13,9 @@ impl Actor for PaneSyncDir {
 	const NAME: &str = "pane_sync_dir";
 
 	fn act(cx: &mut Ctx, _: Self::Options) -> Result<Data> {
-		let other = match cx.tabs().active_pane {
-			0 => 1,
-			1 => 0,
-			_ => succ!(),
+		let other = match Self::other_pane(cx.tabs().active_pane) {
+			Some(idx) => idx,
+			None => succ!(),
 		};
 
 		let cwd = cx.cwd().clone();
@@ -29,9 +28,9 @@ impl Actor for PaneSyncDir {
 		act!(mgr:cd, cx, (cwd, CdSource::Cd))?;
 
 		// Switch back to original pane
-		let original = match other {
-			0 => 1,
-			_ => 0,
+		let original = match Self::other_pane(other) {
+			Some(idx) => idx,
+			None => 0,
 		};
 		cx.tabs_mut().set_active_pane(original);
 		let cx = &mut Ctx::renew(cx);
@@ -40,5 +39,27 @@ impl Actor for PaneSyncDir {
 		act!(mgr:peek, cx, true)?;
 		act!(app:title, cx).ok();
 		succ!(render!());
+	}
+}
+
+impl PaneSyncDir {
+	pub fn other_pane(active: usize) -> Option<usize> {
+		match active {
+			0 => Some(1),
+			1 => Some(0),
+			_ => None,
+		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_other_pane_index() {
+		assert_eq!(PaneSyncDir::other_pane(0), Some(1));
+		assert_eq!(PaneSyncDir::other_pane(1), Some(0));
+		assert_eq!(PaneSyncDir::other_pane(2), None);
 	}
 }

@@ -244,6 +244,43 @@ impl Display for Key {
 			_ => "Unknown",
 		};
 
-		write!(f, "{code}>")
+		if code.is_empty() {
+			write!(f, ">")
+		} else {
+			write!(f, "{code}>")
+		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+
+	use super::*;
+
+	#[test]
+	fn test_cyrillic_mapping_and_modifiers() {
+		// Russian 'к' maps to 'r'
+		let k_event = KeyEvent::new(KeyCode::Char('к'), KeyModifiers::NONE);
+		let key_k = Key::from(k_event);
+		assert_eq!(key_k.code, KeyCode::Char('r'));
+		assert!(!key_k.shift);
+
+		// Russian 'К' (Shift + 'к') maps to 'R' with shift flag
+		let shift_k_event = KeyEvent::new(KeyCode::Char('К'), KeyModifiers::SHIFT);
+		let key_shift_k = Key::from(shift_k_event);
+		assert_eq!(key_shift_k.code, KeyCode::Char('R'));
+		assert!(key_shift_k.shift);
+
+		// Ctrl + Shift + Russian 'к' maps to Ctrl + Shift + 'R' (<C-S-r>)
+		let ctrl_shift_k = KeyEvent::new(KeyCode::Char('к'), KeyModifiers::CONTROL | KeyModifiers::SHIFT);
+		let key_ctrl_shift_k = Key::from(ctrl_shift_k);
+		assert_eq!(key_ctrl_shift_k.code, KeyCode::Char('R'));
+		assert!(key_ctrl_shift_k.ctrl);
+		assert!(key_ctrl_shift_k.shift);
+
+		// Russian 'о' maps to 'j'
+		let o_event = KeyEvent::new(KeyCode::Char('о'), KeyModifiers::NONE);
+		assert_eq!(Key::from(o_event).code, KeyCode::Char('j'));
 	}
 }
