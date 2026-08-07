@@ -13,17 +13,17 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-yazi-binding = { path = "../yazi-binding", version = "26.8.6" }
-yazi-config  = { path = "../yazi-config", version = "26.8.6" }
-yazi-dds     = { path = "../yazi-dds", version = "26.8.6" }
-yazi-fs      = { path = "../yazi-fs", version = "26.8.6" }
-yazi-macro   = { path = "../yazi-macro", version = "26.8.6" }
-yazi-parser  = { path = "../yazi-parser", version = "26.8.6" }
-yazi-plugin  = { path = "../yazi-plugin", version = "26.8.6" }
-yazi-proxy   = { path = "../yazi-proxy", version = "26.8.6" }
-yazi-shared  = { path = "../yazi-shared", version = "26.8.6" }
-yazi-term    = { path = "../yazi-term", version = "26.8.6" }
-yazi-vfs     = { path = "../yazi-vfs", version = "26.8.6" }
+yazi-binding = { path = "../yazi-binding", version = "26.8.7" }
+yazi-config  = { path = "../yazi-config", version = "26.8.7" }
+yazi-dds     = { path = "../yazi-dds", version = "26.8.7" }
+yazi-fs      = { path = "../yazi-fs", version = "26.8.7" }
+yazi-macro   = { path = "../yazi-macro", version = "26.8.7" }
+yazi-parser  = { path = "../yazi-parser", version = "26.8.7" }
+yazi-plugin  = { path = "../yazi-plugin", version = "26.8.7" }
+yazi-proxy   = { path = "../yazi-proxy", version = "26.8.7" }
+yazi-shared  = { path = "../yazi-shared", version = "26.8.7" }
+yazi-term    = { path = "../yazi-term", version = "26.8.7" }
+yazi-vfs     = { path = "../yazi-vfs", version = "26.8.7" }
 
 # External dependencies
 anyhow                 = { workspace = true }

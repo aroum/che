@@ -19,7 +19,7 @@ panic         = "abort"
 strip         = true
 
 [build-dependencies]
-yazi-tty = { path = "../yazi-tty", version = "26.8.6" }
+yazi-tty = { path = "../yazi-tty", version = "26.8.7" }
 
 [[bin]]
 name = "yazi-build"

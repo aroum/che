@@ -13,8 +13,8 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-yazi-macro  = { path = "../yazi-macro", version = "26.8.6" }
-yazi-shared = { path = "../yazi-shared", version = "26.8.6" }
+yazi-macro  = { path = "../yazi-macro", version = "26.8.7" }
+yazi-shared = { path = "../yazi-shared", version = "26.8.7" }
 
 # External dependencies
 parking_lot = { workspace = true }

@@ -4,6 +4,19 @@ This document tracks all new features, configuration options, utilities, and key
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.8.7`)
+
+### ⚡ Key Fixes & UI Enhancements
+- **Input Popup & Rename Dialog**: Fixed actor action dispatch (`InputShow`), registered `InputShow` and `ShowOpt` in `yazi-dds/src/spark/spark.rs`.
+- **Glob Filter Normalization Order**: Fixed normalization order in `Filter::new` so wildcard glob patterns (e.g. `*.sh`) operate cleanly across case modes.
+- **Cyrillic Keyboard Shortcuts**: Fixed `Shift` modifier preservation for Cyrillic layout keys in `yazi-config/src/keymap/key.rs` (`Ctrl+Shift+к` ➔ `<C-S-r>`).
+- **Overwrite Confirmation Dialog**: Refactored `copy_to` and `move_to` actors to asynchronously prompt confirmation dialog before overwriting existing files.
+- **Right Pane Markers Positioning**: Positioned right pane `Marker` components immediately after the central separator `│` (`x = self._area.x`) for visual balance in dual-pane layout.
+- **Unit Testing**: Added comprehensive unit tests for Cyrillic key mapping, rename cursor calculation, pane sync, glob filtering, and bulk rename graph prioritization.
+- **CalVer Manifest Sync**: Updated workspace manifests, lockfile, and release scripts to `26.8.7`.
+
+---
+
 ## 📅 Versioning & CalVer Transition (`26.8.6`)
 
 ### 📌 Calendar Versioning (`yy.mm.dd`)
