@@ -330,12 +330,12 @@ mod tests {
 		crate::init_tests();
 
 		let root: UrlBuf = "/".parse()?;
-		assert!(root.key().is_empty());
+		assert!(root.urn().is_empty());
 		assert!(root.pair().is_none());
 
 		let child: UrlBuf = "/foo".parse()?;
-		assert_eq!(child.key(), "foo");
-		assert!(!child.key().has_root());
+		assert_eq!(child.urn().as_strand(), "foo");
+		assert!(!child.urn().has_root());
 
 		Ok(())
 	}
