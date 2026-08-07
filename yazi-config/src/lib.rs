@@ -59,7 +59,7 @@ fn try_init_flavor(light: bool, merge: bool) -> anyhow::Result<()> {
 		preset = parse(
 			"theme.toml",
 			error_with_input(
-				preset.deserialize_over_with(toml::de::Deserializer::from(theme)),
+				preset.deserialize_over_with(theme),
 				&theme_str,
 			),
 		)?;

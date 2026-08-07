@@ -284,7 +284,6 @@ impl<'a> Executor<'a> {
 		}
 
 		on!(escape);
-		on!(show);
 		on!(close);
 		on!(arrow);
 
