@@ -335,6 +335,6 @@ mod tests {
 		let root = max_common_root(&[url.clone()]);
 		let rep = StrandBuf::from("new_file.txt");
 		let replaced = BulkRename::replace_url(&url, root, &rep).unwrap();
-		assert_eq!(replaced.display().to_string(), "/tmp/test/new_file.txt");
+		assert_eq!(replaced.display().to_string().replace('\\', "/"), "/tmp/test/new_file.txt");
 	}
 }
