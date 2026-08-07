@@ -192,7 +192,7 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -228,7 +228,7 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Target is not an archive URL")),
@@ -276,7 +276,7 @@ pub async fn remove_file(url: &UrlBuf) -> io::Result<()> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -312,7 +312,7 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -351,7 +351,7 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "From is not an archive URL")),
@@ -361,7 +361,7 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
 			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "To is not an archive URL")),
@@ -429,9 +429,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		// Root of archive
 		let url = UrlBuf::from(test_zip.clone()).into_archive("1").unwrap();
@@ -465,9 +463,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		let url = UrlBuf::from(test_zip.clone()).into_archive("1").unwrap();
 		let sub_file = url.try_join("test_folder/README.md").unwrap();
@@ -502,9 +498,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		let url = UrlBuf::from(test_zip.clone()).into_archive("1").unwrap();
 		let sub_file = url.try_join("test_folder/subfolder/sample.txt").unwrap();
@@ -556,9 +550,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		let tmp_zip = std::env::temp_dir().join("test_rename.zip");
 		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;
@@ -588,9 +580,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		let tmp_zip = std::env::temp_dir().join("test_copy_internal.zip");
 		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;
@@ -625,9 +615,7 @@ mod tests {
 			return;
 		}
 
-		if std::panic::catch_unwind(|| yazi_shared::init()).is_err() {
-			// Already initialized
-		}
+		yazi_shared::init_tests();
 
 		let tmp_zip = std::env::temp_dir().join("test_move_internal.zip");
 		let _ = tokio::fs::copy(&test_zip, &tmp_zip).await;

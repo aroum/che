@@ -12,12 +12,6 @@ rust-version.workspace = true
 [lints]
 workspace = true
 
-[profile.release]
-codegen-units = 1
-lto           = true
-panic         = "abort"
-strip         = true
-
 [build-dependencies]
 yazi-tty = { path = "../yazi-tty", version = "26.8.7" }
 
