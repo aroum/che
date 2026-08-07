@@ -1,9 +1,11 @@
 use anyhow::Result;
+use yazi_config::popup::ConfirmCfg;
 use yazi_core::mgr::Yanked;
-use yazi_macro::{act, render, succ};
+use yazi_macro::{act, emit, relay, render, succ};
 use yazi_parser::mgr::MoveToOpt;
-use yazi_proxy::NotifyProxy;
-use yazi_shared::{UndoOp, data::Data, url::UrlBufCov};
+use yazi_proxy::{ConfirmProxy, NotifyProxy};
+use yazi_shared::{UndoOp, data::Data, url::{UrlBufCov, UrlLike}};
+use yazi_vfs::maybe_exists;
 
 use crate::{Actor, Ctx};
 
@@ -30,9 +32,31 @@ impl Actor for MoveTo {
 			succ!(render!());
 		}
 
-		cx.core.tasks.file_cut(&yanked, &dest, opt.force);
-		cx.mgr.undo.push(UndoOp::Move { pairs: vec![], overwritten: vec![] });
-		act!(mgr:escape_select, cx)?;
-		act!(mgr:unyank, cx)
+		if opt.force {
+			cx.core.tasks.file_cut(&yanked, &dest, true);
+			cx.mgr.undo.push(UndoOp::Move { pairs: vec![], overwritten: vec![] });
+			act!(mgr:escape_select, cx)?;
+			act!(mgr:unyank, cx)?;
+			succ!();
+		}
+
+		tokio::spawn(async move {
+			let mut has_conflict = false;
+			for u in yanked.iter() {
+				if let Some(Ok(to)) = u.name().map(|n| dest.try_join(n)) {
+					if maybe_exists(&to).await {
+						has_conflict = true;
+						if !ConfirmProxy::show(ConfirmCfg::overwrite(&to)).await {
+							return;
+						}
+						break;
+					}
+				}
+			}
+
+			emit!(Call(relay!(mgr:move_to).with("force", has_conflict)));
+		});
+
+		succ!()
 	}
 }

@@ -66,7 +66,9 @@ impl<'a> Dispatcher<'a> {
 
 	#[inline]
 	fn dispatch_key(&mut self, key: KeyEvent) -> Result<Data> {
-		Router::new(self.app).route(Key::from(key))?;
+		let parsed = Key::from(key);
+		tracing::info!("Received key event: {:?}, mapped to Key: {:?}", key, parsed);
+		Router::new(self.app).route(parsed)?;
 		succ!();
 	}
 

@@ -84,10 +84,14 @@ impl From<KeyEvent> for Key {
 		// for consistent behavior between OSs.
 
 		let shift = match (value.code, value.modifiers) {
-			(KeyCode::Char(c), _) => c.is_ascii_uppercase(),
+			(KeyCode::Char(c), m) => c.is_ascii_uppercase() || m.contains(KeyModifiers::SHIFT),
 			(KeyCode::BackTab, _) => false,
 			(_, m) => m.contains(KeyModifiers::SHIFT),
 		};
+
+		if shift && let KeyCode::Char(c) = value.code && c.is_ascii_lowercase() {
+			value.code = KeyCode::Char(c.to_ascii_uppercase());
+		}
 
 		Self {
 			code: value.code,

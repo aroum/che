@@ -168,6 +168,9 @@ impl<'a> Executor<'a> {
 		on!(pane_preview);
 		on!(flat_toggle);
 		on!(pane_sync_dir);
+		if action.name == "sync_pane" {
+			return act!(mgr:pane_sync_dir, cx, action);
+		}
 		on!(pane_swap);
 		on!(pane_open_other);
 
@@ -284,6 +287,7 @@ impl<'a> Executor<'a> {
 			};
 		}
 
+		on!(show);
 		on!(escape);
 		on!(close);
 		on!(arrow);

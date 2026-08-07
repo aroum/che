@@ -20,6 +20,7 @@ impl Actor for Rename {
 	const NAME: &str = "rename";
 
 	fn act(cx: &mut Ctx, opt: Self::Options) -> Result<Data> {
+		tracing::info!("Rename action act() called with opt: {:?}", opt);
 		act!(mgr:escape_visual, cx)?;
 
 		if !opt.hovered && !cx.tab().selected.is_empty() {

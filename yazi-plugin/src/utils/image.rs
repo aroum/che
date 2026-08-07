@@ -19,6 +19,11 @@ impl Utils {
 
 	pub(super) fn image_show(lua: &Lua) -> mlua::Result<Function> {
 		lua.create_async_function(|lua, (url, rect): (UrlRef, Rect)| async move {
+			let preview_layout = yazi_config::LAYOUT.get().preview;
+			if preview_layout.is_empty() || *rect != preview_layout {
+				return (Value::Nil, Error::custom("Preview area is disabled or layout mismatch"))
+					.into_lua_multi(&lua);
+			}
 			let path = url.as_url().unified_path();
 			match ADAPTOR.get().image_show(path, *rect).await {
 				Ok(area) => Rect::from(area).into_lua_multi(&lua),

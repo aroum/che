@@ -11,9 +11,30 @@ pub struct Filter {
 	regex: Regex,
 }
 
+fn glob_to_regex(s: &str) -> String {
+	if s.contains('*') || s.contains('?') {
+		let mut res = String::with_capacity(s.len() * 2);
+		for c in s.chars() {
+			match c {
+				'*' => res.push_str(".*"),
+				'?' => res.push('.'),
+				'.' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '^' | '$' | '|' | '\\' => {
+					res.push('\\');
+					res.push(c);
+				}
+				_ => res.push(c),
+			}
+		}
+		res
+	} else {
+		s.to_owned()
+	}
+}
+
 impl Filter {
 	pub fn new(s: &str, case: FilterCase) -> Result<Self> {
-		let pat = Normalizer::normalize(s)?;
+		let glob_pat = glob_to_regex(s);
+		let pat = Normalizer::normalize(&glob_pat)?;
 		let regex = match case {
 			FilterCase::Smart => {
 				let uppercase = pat.chars().any(|c| c.is_uppercase());
@@ -64,5 +85,19 @@ impl From<&Action> for FilterCase {
 			(_, false) => Self::Sensitive,
 			(_, true) => Self::Insensitive,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_glob_filter() {
+		let filter = Filter::new("*.sh", FilterCase::Smart).unwrap();
+		assert!(filter.matches("test.sh"));
+		assert!(filter.matches("build_app.sh"));
+		assert!(!filter.matches("test.py"));
+		assert!(!filter.matches("README.md"));
 	}
 }

@@ -147,6 +147,7 @@ pub enum Spark<'a> {
 	InputKill(yazi_widgets::input::parser::KillOpt),
 	InputMove(yazi_widgets::input::parser::MoveOpt),
 	InputPaste(yazi_widgets::input::parser::PasteOpt),
+	InputShow(Box<yazi_parser::input::ShowOpt>),
 
 	// Notify
 	NotifyPush(yazi_parser::notify::PushOpt),
@@ -353,6 +354,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::InputKill(b) => b.into_lua(lua),
 			Self::InputMove(b) => b.into_lua(lua),
 			Self::InputPaste(b) => b.into_lua(lua),
+			Self::InputShow(b) => b.into_lua(lua),
 
 			// Notify
 			Self::NotifyPush(b) => b.into_lua(lua),
@@ -429,6 +431,7 @@ try_from_spark!(yazi_parser::confirm::CloseOpt, confirm:close);
 try_from_spark!(yazi_parser::confirm::ShowOpt, confirm:show);
 try_from_spark!(yazi_parser::help::ToggleOpt, help:toggle);
 try_from_spark!(yazi_parser::input::CloseOpt, input:close);
+try_from_spark!(yazi_parser::input::ShowOpt, input:show);
 try_from_spark!(yazi_parser::mgr::BulkExitOpt, mgr:bulk_exit);
 try_from_spark!(yazi_parser::mgr::CdOpt, mgr:cd);
 try_from_spark!(yazi_parser::mgr::CloseOpt, mgr:close);

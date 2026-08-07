@@ -13,7 +13,7 @@ pub struct Args {
 
 	/// Write the cwd on exit to this file
 	#[arg(long)]
-	pub cwd_file:     Option<PathBuf>,
+	pub cwd_file: Option<PathBuf>,
 	/// Write the selected files to this file on open fired
 	#[arg(long)]
 	pub chooser_file: Option<PathBuf>,
@@ -24,10 +24,10 @@ pub struct Args {
 
 	/// Use the specified client ID, must be a globally unique number
 	#[arg(long)]
-	pub client_id:     Option<Id>,
+	pub client_id: Option<Id>,
 	/// Report the specified local events to stdout
 	#[arg(long)]
-	pub local_events:  Option<String>,
+	pub local_events: Option<String>,
 	/// Report the specified remote events to stdout
 	#[arg(long)]
 	pub remote_events: Option<String>,

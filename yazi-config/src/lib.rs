@@ -56,13 +56,8 @@ fn try_init_flavor(light: bool, merge: bool) -> anyhow::Result<()> {
 		let flavor_str = parse("theme.toml", Flavor::from_theme(&theme, &theme_str))?.read(light)?;
 
 		preset = preset.deserialize_over(&flavor_str)?;
-		preset = parse(
-			"theme.toml",
-			error_with_input(
-				preset.deserialize_over_with(theme),
-				&theme_str,
-			),
-		)?;
+		preset =
+			parse("theme.toml", error_with_input(preset.deserialize_over_with(theme), &theme_str))?;
 	}
 
 	THEME.init(preset.reshape(light)?);

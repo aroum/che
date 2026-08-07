@@ -14,6 +14,7 @@ impl Widget for Input<'_> {
 	fn render(self, _: Rect, buf: &mut Buffer) {
 		let input = &self.core.input;
 		let area = self.core.mgr.area(input.position);
+		tracing::info!("Input widget rendering with area: {:?}, visible: {}", area, input.visible);
 
 		yazi_widgets::Clear.render(area, buf);
 
