@@ -45,7 +45,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Rustfmt
-        run: rustfmt +nightly --check **/*.rs
+        run: cargo +nightly fmt --check
 
   stylua:
     runs-on: ubuntu-22.04
