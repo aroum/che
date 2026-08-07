@@ -3,7 +3,10 @@ Tab = {
 }
 
 function Tab:new(area, tab, active, ratio, side)
-	local me = setmetatable({ _area = area, _tab = tab, _active = active ~= false, _ratio = ratio, _side = side or "left" }, { __index = self })
+	local me = setmetatable(
+		{ _area = area, _tab = tab, _active = active ~= false, _ratio = ratio, _side = side or "left" },
+		{ __index = self }
+	)
 	me:layout()
 	me:build()
 	return me

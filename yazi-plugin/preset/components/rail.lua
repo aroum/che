@@ -3,7 +3,10 @@ Rail = {
 }
 
 function Rail:new(chunks, tab, active, side)
-	local me = setmetatable({ _chunks = chunks, _tab = tab, _active = active ~= false, _side = side or "left" }, { __index = self })
+	local me = setmetatable(
+		{ _chunks = chunks, _tab = tab, _active = active ~= false, _side = side or "left" },
+		{ __index = self }
+	)
 	me:build()
 	return me
 end
