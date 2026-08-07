@@ -28,8 +28,8 @@ body:
   - type: textarea
     id: debug
     attributes:
-      label: "`yazi --debug` output"
-      description: Please run `yazi --debug` and paste the debug information here.
+      label: "`che --logging` output"
+      description: Please run `che --logging` and paste the log file content here.
       render: Shell
     validations:
       required: true

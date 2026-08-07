@@ -1,14 +1,8 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
-  - name: 🚧 Build Issues
-    url: https://github.com/sxyazi/yazi/discussions/new?category=3-build-issues
-    about: If you have issues building Yazi from source code
-  - name: 📝 Documentation Improvement
-    url: https://github.com/yazi-rs/yazi-rs.github.io
-    about: If you'd like to help improve the documentation
-  - name: 💬 GitHub Discussions
-    url: https://github.com/sxyazi/yazi/discussions/new?category=1-q-a
-    about: When you have questions that are not bug reports or feature requests
-  - name: 🌐 Discord Server / Telegram Group
-    url: https://github.com/sxyazi/yazi#discussion
-    about: If you'd prefer more realtime conversation with the community
+  - name: Build Issues
+    url: https://github.com/aroum/che/discussions
+    about: Please ask build questions on Github Discussions
+  - name: Q&A
+    url: https://github.com/aroum/che/discussions
+    about: Please ask questions on Github Discussionsversation with the community
