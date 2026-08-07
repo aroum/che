@@ -17,3 +17,5 @@ result-*
 .codex
 test/
 .mcp.json
+/che-debug*
+*.log
