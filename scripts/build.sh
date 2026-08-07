@@ -10,7 +10,7 @@ cargo build --release --locked --target "$1"
 
 # Copy the binaries to a known location
 mkdir -p "target/release"
-cp "target/$1/release/ya" "target/release/ya"
+cp "target/$1/release/ch" "target/release/ch"
 cp "target/$1/release/che" "target/release/che"
 
 # Package deb
@@ -21,7 +21,7 @@ fi
 
 # Create the artifact
 mkdir -p "$ARTIFACT_NAME/completions"
-cp "target/release/ya" "$ARTIFACT_NAME"
+cp "target/release/ch" "$ARTIFACT_NAME"
 cp "target/release/che" "$ARTIFACT_NAME"
 cp yazi-cli/completions/* "$ARTIFACT_NAME/completions"
 cp yazi-boot/completions/* "$ARTIFACT_NAME/completions"
