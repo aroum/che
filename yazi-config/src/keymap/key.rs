@@ -273,7 +273,8 @@ mod tests {
 		assert!(key_shift_k.shift);
 
 		// Ctrl + Shift + Russian 'к' maps to Ctrl + Shift + 'R' (<C-S-r>)
-		let ctrl_shift_k = KeyEvent::new(KeyCode::Char('к'), KeyModifiers::CONTROL | KeyModifiers::SHIFT);
+		let mods = KeyModifiers::CONTROL | KeyModifiers::SHIFT;
+		let ctrl_shift_k = KeyEvent::new(KeyCode::Char('к'), mods);
 		let key_ctrl_shift_k = Key::from(ctrl_shift_k);
 		assert_eq!(key_ctrl_shift_k.code, KeyCode::Char('R'));
 		assert!(key_ctrl_shift_k.ctrl);
