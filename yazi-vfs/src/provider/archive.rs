@@ -22,7 +22,7 @@ impl ReadDir {
 			yazi_shared::url::Url::Archive { loc, .. } => {
 				let (base, rest, urn) = loc.triple();
 				let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-				let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches('/'));
+				let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
 				(clean_base, target)
 			}
 			_ => (url.loc().as_os().map_or_else(|_| std::path::PathBuf::new(), std::path::PathBuf::from), String::new()),
