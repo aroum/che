@@ -2,7 +2,7 @@
 set -euo pipefail
 
 export ARTIFACT_NAME="che-$1"
-export YAZI_GEN_COMPLETIONS=1
+export CHE_GEN_COMPLETIONS=1
 
 # Build the target
 git config --global --add safe.directory "*"
