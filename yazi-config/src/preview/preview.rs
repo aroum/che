@@ -71,4 +71,3 @@ impl Preview {
 		Ok(self)
 	}
 }
-}

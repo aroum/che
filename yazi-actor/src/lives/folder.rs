@@ -33,7 +33,7 @@ impl Folder {
 		let window = match window {
 			Some(w) => w,
 			None => {
-				let limit = LAYOUT.get().preview.height as usize;
+				let limit = LAYOUT.get().current.height as usize;
 				let len = inner.files.len();
 				let start = inner.offset.min(len);
 				let end = len.min(start + limit);
