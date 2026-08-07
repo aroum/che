@@ -309,4 +309,32 @@ mod tests {
 			&[("b", "b_"), ("a", "a_"), ("c", "c_")],
 		);
 	}
+
+	#[test]
+	fn test_long_chain_renaming() {
+		let sorted = BulkRename::prioritized_paths(
+			vec![Tuple::new(0, "1"), Tuple::new(1, "2"), Tuple::new(2, "3"), Tuple::new(3, "4")],
+			vec![Tuple::new(0, "2"), Tuple::new(1, "3"), Tuple::new(2, "4"), Tuple::new(3, "5")],
+		);
+		let res: Vec<_> = sorted.iter().map(|(o, n)| (o.to_str().unwrap(), n.to_str().unwrap())).collect();
+		assert_eq!(res, vec![("4", "5"), ("3", "4"), ("2", "3"), ("1", "2")]);
+	}
+
+	#[test]
+	fn test_cyclic_three_way_rename() {
+		let sorted = BulkRename::prioritized_paths(
+			vec![Tuple::new(0, "a"), Tuple::new(1, "b"), Tuple::new(2, "c")],
+			vec![Tuple::new(0, "b"), Tuple::new(1, "c"), Tuple::new(2, "a")],
+		);
+		assert_eq!(sorted.len(), 3);
+	}
+
+	#[test]
+	fn test_replace_url() {
+		let url = UrlBuf::from(Path::new("/tmp/test/old_file.txt"));
+		let root = max_common_root(&[url.clone()]);
+		let rep = StrandBuf::from("new_file.txt");
+		let replaced = BulkRename::replace_url(&url, root, &rep).unwrap();
+		assert_eq!(replaced.display().to_string(), "/tmp/test/new_file.txt");
+	}
 }

@@ -37,7 +37,7 @@ impl Filter {
 		let pat = Normalizer::normalize(&glob_pat)?;
 		let regex = match case {
 			FilterCase::Smart => {
-				let uppercase = pat.chars().any(|c| c.is_uppercase());
+				let uppercase = s.chars().any(|c| c.is_uppercase());
 				RegexBuilder::new(&pat).case_insensitive(!uppercase).build()?
 			}
 			FilterCase::Sensitive => Regex::new(&pat)?,
@@ -93,11 +93,39 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn test_glob_filter() {
+	fn test_glob_filter_wildcards() {
 		let filter = Filter::new("*.sh", FilterCase::Smart).unwrap();
 		assert!(filter.matches("test.sh"));
 		assert!(filter.matches("build_app.sh"));
 		assert!(!filter.matches("test.py"));
 		assert!(!filter.matches("README.md"));
+
+		let filter_question = Filter::new("file?.txt", FilterCase::Smart).unwrap();
+		assert!(filter_question.matches("file1.txt"));
+		assert!(filter_question.matches("fileA.txt"));
+		assert!(!filter_question.matches("file12.txt"));
+	}
+
+	#[test]
+	fn test_glob_filter_case_flags() {
+		// Smart case (lowercase pattern -> case insensitive)
+		let smart_lower = Filter::new("*.sh", FilterCase::Smart).unwrap();
+		assert!(smart_lower.matches("script.sh"));
+		assert!(smart_lower.matches("SCRIPT.SH"));
+
+		// Smart case (uppercase pattern -> case sensitive)
+		let smart_upper = Filter::new("*.SH", FilterCase::Smart).unwrap();
+		assert!(smart_upper.matches("SCRIPT.SH"));
+		assert!(!smart_upper.matches("script.sh"));
+
+		// Sensitive case
+		let sensitive = Filter::new("*.sh", FilterCase::Sensitive).unwrap();
+		assert!(sensitive.matches("script.sh"));
+		assert!(!sensitive.matches("SCRIPT.SH"));
+
+		// Insensitive case
+		let insensitive = Filter::new("*.SH", FilterCase::Insensitive).unwrap();
+		assert!(insensitive.matches("script.sh"));
+		assert!(insensitive.matches("SCRIPT.SH"));
 	}
 }
