@@ -59,6 +59,7 @@ fn mgr() -> Composer<ComposerGet, ComposerSet> {
 			b"hide_inactive_cursor" => m.hide_inactive_cursor.get().into_lua(lua)?,
 			b"scrolloff" => m.scrolloff.get().into_lua(lua)?,
 			b"mouse_events" => lua.to_value_with(&m.mouse_events, SER_OPT)?,
+			b"dual_pane_min_width" => m.dual_pane_min_width.get().into_lua(lua)?,
 			_ => return Ok(Value::Nil),
 		}
 		.into_lua(lua)

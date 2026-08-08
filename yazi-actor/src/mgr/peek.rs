@@ -16,7 +16,7 @@ impl Actor for Peek {
 		let Some(hovered) = cx.hovered().cloned() else {
 			succ!(cx.tab_mut().preview.reset());
 		};
-		if cx.term.is_none() {
+		if cx.term.is_none() || (!cx.mgr.tabs.single_pane && !cx.mgr.tabs.preview_pane) {
 			succ!(cx.tab_mut().preview.reset_image());
 		}
 

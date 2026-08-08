@@ -21,9 +21,10 @@ Instead of building everything from scratch, I created a fork and reimagined it 
 
 Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class citizen and builds upon it with enhanced functionality:
 
-1. **Dual-Pane Mode by Default**:
+1. **Dual-Pane Mode by Default & Adaptive Window Fallback**:
    * Launches directly into a dual-pane interface with two independent file columns.
    * Toggle to single-pane mode using the `--single` CLI flag or press `Ctrl+W o`.
+   * **Adaptive Narrow Layout**: When the terminal window is resized below the configured width threshold (`dual_pane_min_width = 80` in `yazi.toml`), `che` automatically switches to a single-pane layout.  Pressing `Ctrl+Q` in narrow mode seamlessly swaps the active file list pane with a full-screen preview pane.
 2. **Native Cross-Pane File Operations (MC/DC Style)**:
    * **`F5` / `Shift+F5`**: Copy selected files/folders to the opposite pane (`Shift` forces overwrite).
    * **`F6` / `Shift+F6`**: Move selected files/folders to the opposite pane (`Shift` forces overwrite).
@@ -186,6 +187,20 @@ overwrite_dialog = true
 | **`c` `m`**                      | `comment`             | Add / edit file comment (`descript.ion`)    |
 | **`Ctrl+Shift+R`** / **`c` `r`** | `plugin multirename`  | Launch batch multirename plugin             |
 | **`Ctrl+Shift+Y`** / **`c` `y`** | `plugin system_copy`  | Copy selected files to OS system clipboard  |
+
+---
+
+## ⚙️ Configuration (`yazi.toml`)
+
+You can customize **che** behavior by adding configuration options to `~/.config/che/yazi.toml`:
+
+```toml
+[manager]
+# Terminal width threshold (in columns).
+# When width is below this value, che automatically falls back to single-pane mode.
+# In narrow mode, press Ctrl+Q to toggle full-screen preview.
+dual_pane_min_width = 80
+```
 
 ---
 

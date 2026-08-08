@@ -10,6 +10,23 @@ function DualPane:new(area)
 end
 
 function DualPane:layout()
+	local threshold = MANAGER and MANAGER.dual_pane_min_width or 80
+	self._is_narrow = self._area.w < threshold
+
+	if self._is_narrow then
+		local active_pane = cx.tabs:pane(cx.tabs.idx)
+		self._narrow_chunks = ui.Layout()
+			:direction(ui.Layout.VERTICAL)
+			:constraints({
+				ui.Constraint.Length(1),
+				ui.Constraint.Length(Tabs.height(active_pane)),
+				ui.Constraint.Fill(1),
+				ui.Constraint.Length(1),
+			})
+			:split(self._area)
+		return
+	end
+
 	self._chunks = ui.Layout()
 		:direction(ui.Layout.HORIZONTAL)
 		:constraints({
@@ -47,6 +64,26 @@ function DualPane:layout()
 end
 
 function DualPane:build()
+	if self._is_narrow then
+		self._base = {}
+		self._children = {}
+
+		if cx.tabs.preview_pane then
+			table.insert(self._children, Preview:new(self._area, cx.active, true))
+		else
+			local ratio = { parent = 0, current = 1, preview = 0, all = 1 }
+			local active_tab = cx.active
+			local active_pane = cx.tabs:pane(cx.tabs.idx)
+			local side = cx.tabs.idx == 2 and "right" or "left"
+
+			table.insert(self._children, Header:new(self._narrow_chunks[1], active_tab))
+			table.insert(self._children, Tabs:new(self._narrow_chunks[2], active_pane, cx.tabs.idx))
+			table.insert(self._children, Tab:new(self._narrow_chunks[3], active_tab, true, ratio, side))
+			table.insert(self._children, Status:new(self._narrow_chunks[4], active_tab))
+		end
+		return
+	end
+
 	self._base = {
 		ui.Bar(ui.Edge.LEFT):area(self._chunks[2]):symbol("│"):style(ui.Style():patch(th.mgr.border_style)),
 	}

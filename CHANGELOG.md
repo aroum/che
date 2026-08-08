@@ -12,6 +12,7 @@ This document tracks all new features, configuration options, utilities, and key
 - **Cyrillic Keyboard Shortcuts**: Fixed `Shift` modifier preservation for Cyrillic layout keys in `yazi-config/src/keymap/key.rs` (`Ctrl+Shift+к` ➔ `<C-S-r>`).
 - **Overwrite Confirmation Dialog**: Refactored `copy_to` and `move_to` actors to asynchronously prompt confirmation dialog before overwriting existing files.
 - **Right Pane Markers Positioning**: Positioned right pane `Marker` components immediately after the central separator `│` (`x = self._area.x`) for visual balance in dual-pane layout.
+- **Adaptive Narrow Window Fallback (`dual_pane_min_width`)**: Added automatic fallback to single-pane layout when terminal width falls below the threshold (`dual_pane_min_width`, default: `80` columns).  Toggling preview with `Ctrl+Q` in narrow mode seamlessly replaces the file list pane with a full-screen preview pane.
 - **Unit Testing**: Added comprehensive unit tests for Cyrillic key mapping, rename cursor calculation, pane sync, glob filtering, and bulk rename graph prioritization.
 - **CalVer Manifest Sync**: Updated workspace manifests, lockfile, and release scripts to `26.8.7`.
 

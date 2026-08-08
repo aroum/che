@@ -28,6 +28,7 @@ pub struct Mgr {
 	pub scrolloff:            SyncCell<u8>,
 	pub mouse_events:         SyncCell<MouseEvents>,
 	pub archive_vfs:          SyncCell<bool>,
+	pub dual_pane_min_width:  SyncCell<u16>,
 }
 
 impl Mgr {

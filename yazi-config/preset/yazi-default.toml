@@ -18,7 +18,8 @@ hide_inactive_cursor = true
 smart_glob     = true
 scrolloff      = 5
 mouse_events   = [ "click", "scroll" ]
-archive_vfs    = true
+archive_vfs          = true
+dual_pane_min_width  = 80
 
 [preview]
 wrap            = "no"
