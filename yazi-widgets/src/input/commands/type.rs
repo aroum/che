@@ -41,6 +41,7 @@ impl Input {
 		}
 
 		act!(r#move, self, s.chars().count() as isize)?;
+		self.snaps.tag(self.limit).then(|| self.flush_value());
 		succ!(render!());
 	}
 }

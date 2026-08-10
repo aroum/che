@@ -64,7 +64,7 @@ impl Input {
 		true
 	}
 
-	pub(super) fn flush_value(&mut self) {
+	pub fn flush_value(&mut self) {
 		if let Some(cb) = &self.callback {
 			let (before, after) = self.partition();
 			cb(before, after);

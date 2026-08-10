@@ -54,6 +54,10 @@ impl Actor for Show {
 			}
 		}
 
+		if opt.cfg.completion || opt.cfg.realtime {
+			input.flush_value();
+		}
+
 		succ!(render!());
 	}
 }
