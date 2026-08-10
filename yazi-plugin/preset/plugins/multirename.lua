@@ -11,13 +11,16 @@ local state = ya.sync(function()
 	return selected
 end)
 
-local function find_gez()
-	-- che sets this at startup so plugins always know the sibling binary path
-	local path = os.getenv("CHE_CH_PATH") or os.getenv("GEZI_GEZ_PATH")
-	if path and path ~= "" then
-		return path
+local function spawn_ch(bin, args)
+	local ok, child = pcall(
+		function()
+			return Command(bin):arg(args):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):spawn()
+		end
+	)
+	if ok and child then
+		return child
 	end
-	return "ch"
+	return nil
 end
 
 function M:entry()
@@ -41,15 +44,32 @@ function M:entry()
 		table.insert(args, path)
 	end
 
-	local gez_bin = find_gez()
-	local child, err =
-		Command(gez_bin):arg(args):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):spawn()
+	local candidates = {}
+	local env_path = os.getenv("CHE_CH_PATH") or os.getenv("GEZI_GEZ_PATH")
+	if env_path and env_path ~= "" then
+		table.insert(candidates, env_path)
+	end
+	table.insert(candidates, "ch")
+	table.insert(candidates, "/opt/homebrew/bin/ch")
+	table.insert(candidates, "/usr/local/bin/ch")
+	local home = os.getenv("HOME")
+	if home then
+		table.insert(candidates, home .. "/.cargo/bin/ch")
+	end
+
+	local child = nil
+	for _, bin in ipairs(candidates) do
+		child = spawn_ch(bin, args)
+		if child then
+			break
+		end
+	end
 
 	if not child then
 		permit:drop()
 		return ya.notify {
 			title = "Multi-Rename",
-			content = "Failed to start rename tool: " .. tostring(err),
+			content = "Failed to start rename tool ('ch' binary not found in PATH or Homebrew)",
 			timeout = 5,
 			level = "error",
 		}

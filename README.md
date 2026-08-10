@@ -184,13 +184,13 @@ overwrite_dialog = true
 | :------------------------------- | :-------------------- | :------------------------------------------ |
 | **`Ctrl + J`**                   | `jump_mode`           | Toggle letter jump navigation mode (`JUMP`) |
 | **`g` `m`**                      | `disks`               | Open disk and volume selection picker       |
-| **`c` `m`**                      | `comment`             | Add / edit file comment (`descript.ion`)    |
-| **`Ctrl+Shift+R`** / **`c` `r`** | `plugin multirename`  | Launch batch multirename plugin             |
-| **`Ctrl+Shift+Y`** / **`c` `y`** | `plugin system_copy`  | Copy selected files to OS system clipboard  |
+| **`c` `m`**                                             | `comment`             | Add / edit file comment (`descript.ion`)               |
+| **`Ctrl+Shift+R`** / **`c` `r`** *(custom keymap)*       | `plugin multirename`  | Launch Double Commander style batch multirename plugin  |
+| **`Ctrl+Shift+Y`** / **`c` `y`**                         | `plugin system_copy`  | Copy selected files to OS system clipboard             |
 
 ---
 
-## ⚙️ Configuration (`yazi.toml`)
+## ⚙️ Configuration (`yazi.toml` & `keymap.toml`)
 
 You can customize **che** behavior by adding configuration options to `~/.config/che/yazi.toml`:
 
@@ -200,6 +200,29 @@ You can customize **che** behavior by adding configuration options to `~/.config
 # When width is below this value, che automatically falls back to single-pane mode.
 # In narrow mode, press Ctrl+Q to toggle full-screen preview.
 dual_pane_min_width = 80
+```
+
+### Batch Multi-Rename TUI (`multirename`)
+
+By default, pressing `r` on multiple selected files retains standard Yazi behavior (opening the text editor for batch rename).
+
+To bind the interactive Double Commander style Batch Multi-Rename TUI plugin to `c r` or `Ctrl+Shift+R`, add the following to `~/.config/che/keymap.toml`:
+
+```toml
+[[mgr.prepend_keymap]]
+on   = [ "c", "r" ]
+run  = "plugin multirename"
+desc = "Multi-Rename (Double Commander style TUI)"
+
+[[mgr.prepend_keymap]]
+on   = "<C-S-r>"
+run  = "plugin multirename"
+desc = "Multi-Rename (Double Commander style TUI)"
+
+[[mgr.prepend_keymap]]
+on   = "<C-r>"
+run  = "plugin multirename"
+desc = "Multi-Rename (Double Commander style TUI)"
 ```
 
 ---

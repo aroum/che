@@ -1350,3 +1350,99 @@ fn generate_previews(
 
 	previews
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_text_input_operations() {
+		let mut input = TextInput::new("hello");
+		assert_eq!(input.value, "hello");
+		assert_eq!(input.cursor, 5);
+
+		input.insert('!');
+		assert_eq!(input.value, "hello!");
+		assert_eq!(input.cursor, 6);
+
+		input.left();
+		assert_eq!(input.cursor, 5);
+
+		input.insert('w');
+		assert_eq!(input.value, "hellow!");
+		assert_eq!(input.cursor, 6);
+
+		input.backspace();
+		assert_eq!(input.value, "hello!");
+		assert_eq!(input.cursor, 5);
+	}
+
+	#[test]
+	fn test_parse_mask_basic() {
+		let name = "document";
+		let ext = "pdf";
+		let parent = "folder";
+		let gparent = "root";
+
+		assert_eq!(parse_mask("[N]", name, ext, parent, gparent, 0, 1, 1, 3), "document");
+		assert_eq!(parse_mask("[E]", name, ext, parent, gparent, 0, 1, 1, 3), "pdf");
+		assert_eq!(parse_mask("[P]", name, ext, parent, gparent, 0, 1, 1, 3), "folder");
+		assert_eq!(parse_mask("[G]", name, ext, parent, gparent, 0, 1, 1, 3), "root");
+		assert_eq!(parse_mask("[C]", name, ext, parent, gparent, 0, 1, 1, 3), "001");
+	}
+
+	#[test]
+	fn test_parse_mask_slice() {
+		let name = "document";
+		let ext = "pdf";
+
+		assert_eq!(parse_mask("[N1-3]", name, ext, "", "", 0, 1, 1, 3), "doc");
+		assert_eq!(parse_mask("[N4-]", name, ext, "", "", 0, 1, 1, 3), "ument");
+	}
+
+	#[test]
+	fn test_perform_replace_literal() {
+		let s = "photo_2026_01.jpg";
+
+		assert_eq!(perform_replace(s, "2026", "2027", false, true, false), "photo_2027_01.jpg");
+		assert_eq!(perform_replace(s, "PHOTO", "image", false, false, false), "image_2026_01.jpg");
+	}
+
+	#[test]
+	fn test_perform_replace_regex() {
+		let s = "file_123_test.txt";
+
+		assert_eq!(perform_replace(s, r"\d+", "999", true, true, false), "file_999_test.txt");
+	}
+
+	#[test]
+	fn test_apply_case_conv() {
+		assert_eq!(apply_case_conv("hello WORLD", CaseConv::Lowercase), "hello world");
+		assert_eq!(apply_case_conv("hello WORLD", CaseConv::Uppercase), "HELLO WORLD");
+		assert_eq!(apply_case_conv("hello world", CaseConv::FirstLetter), "Hello world");
+	}
+
+	#[test]
+	fn test_generate_previews() {
+		let files = vec!["/tmp/test_file.txt".to_string()];
+		let previews = generate_previews(
+			&files,
+			"[N]_renamed",
+			"[E]",
+			"",
+			"",
+			false,
+			true,
+			false,
+			CaseConv::NoChange,
+			CaseConv::NoChange,
+			"1",
+			"1",
+			"3",
+		);
+
+		assert_eq!(previews.len(), 1);
+		assert_eq!(previews[0].0, "test_file.txt");
+		assert_eq!(previews[0].1, "test_file_renamed.txt");
+	}
+}

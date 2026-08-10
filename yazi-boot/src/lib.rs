@@ -24,12 +24,19 @@ pub fn init() {
 
 	// Expose the path to the sibling `ch` binary so Lua plugins can invoke it.
 	if let Ok(exe) = std::env::current_exe() {
+		let exe = std::fs::canonicalize(&exe).unwrap_or(exe);
 		if let Some(dir) = exe.parent() {
+			#[cfg(target_os = "windows")]
+			let ch = dir.join("ch.exe");
+			#[cfg(not(target_os = "windows"))]
 			let ch = dir.join("ch");
-			// SAFETY: single-threaded init before any tokio threads are spawned.
-			unsafe {
-				std::env::set_var("CHE_CH_PATH", &ch);
-				std::env::set_var("GEZI_GEZ_PATH", &ch);
+
+			if ch.is_file() {
+				// SAFETY: single-threaded init before any tokio threads are spawned.
+				unsafe {
+					std::env::set_var("CHE_CH_PATH", &ch);
+					std::env::set_var("GEZI_GEZ_PATH", &ch);
+				}
 			}
 		}
 	}

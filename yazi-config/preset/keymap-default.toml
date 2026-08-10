@@ -86,8 +86,6 @@ keymap = [
 	{ on = "<C-S-x>",      run = "copy filename",               desc = "Copy filename to clipboard" },
 	{ on = "<C-S-y>",      run = "plugin system-copy",          desc = "Copy files to system clipboard" },
 	{ on = [ "c", "y" ],   run = "plugin system-copy",          desc = "Copy files to system clipboard" },
-	{ on = "<C-S-r>",      run = "plugin multirename",          desc = "Multi-Rename (Double Commander style)" },
-	{ on = [ "c", "r" ],   run = "plugin multirename",          desc = "Multi-Rename (Double Commander style)" },
 	{ on = [ "c", "m" ],   run = "comment",                     desc = "Edit file/folder comment (descript.ion)" },
 	{ on = "<C-Tab>",      run = "tab_switch 1 --relative",     desc = "Switch to next tab" },
 	{ on = "<C-S-Tab>",    run = "tab_switch -1 --relative",    desc = "Switch to previous tab" },
