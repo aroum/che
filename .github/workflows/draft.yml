@@ -61,8 +61,7 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: |
-            yazi-${{ matrix.target }}.zip
-            yazi-${{ matrix.target }}.deb
+            che-${{ matrix.target }}.zip
 
   build-windows:
     strategy:
@@ -95,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.target }}
-          path: yazi-${{ matrix.target }}.zip
+          path: che-${{ matrix.target }}.zip
 
   build-musl:
     runs-on: ubuntu-latest
@@ -124,8 +123,7 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: |
-            yazi-${{ matrix.target }}.zip
-            yazi-${{ matrix.target }}.deb
+            che-${{ matrix.target }}.zip
 
   build-snap:
     strategy:
@@ -201,8 +199,7 @@ jobs:
         with:
           draft: true
           files: |
-            yazi-*.zip
-            yazi-*.deb
+            che-*.zip
             yazi-*.snap
           generate_release_notes: true
 
@@ -238,8 +235,7 @@ jobs:
           tag_name: nightly
           prerelease: true
           files: |
-            yazi-*.zip
-            yazi-*.deb
+            che-*.zip
             yazi-*.snap
           name: Nightly Build
           body: ${{ env.NIGHTLY_BODY }}
