@@ -38,7 +38,12 @@ fi
 cp README.md LICENSE "$ARTIFACT_NAME"
 
 # Zip the artifact
-if ! command -v zip &> /dev/null; then
-	apt-get update && apt-get install -yq zip 2>/dev/null || true
+if command -v zip &> /dev/null; then
+	zip -r "$ARTIFACT_NAME.zip" "$ARTIFACT_NAME"
+elif command -v 7z &> /dev/null; then
+	7z a -tzip "$ARTIFACT_NAME.zip" "$ARTIFACT_NAME"
+elif command -v 7za &> /dev/null; then
+	7za a -tzip "$ARTIFACT_NAME.zip" "$ARTIFACT_NAME"
+else
+	tar -acvf "$ARTIFACT_NAME.zip" "$ARTIFACT_NAME"
 fi
-zip -r "$ARTIFACT_NAME.zip" "$ARTIFACT_NAME"
