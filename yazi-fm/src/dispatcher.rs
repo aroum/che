@@ -73,12 +73,11 @@ impl<'a> Dispatcher<'a> {
 	}
 
 	#[inline]
-	fn dispatch_key(&mut self, key: KeyEvent) -> Result<Data> {
+	fn dispatch_key(&mut self, key: KeyEvent) -> Result<()> {
 		let parsed = Key::from(key);
 		tracing::info!("Received key event: {:?}, mapped to Key: {:?}", key, parsed);
 		Router::new(self.app).route(parsed)?;
-		succ!();
->>>>>>> cc241472 (feat: new `ya.exec()` API and `ya exec` subcommand to execute an action and await its result (#3780))
+		Ok(())
 	}
 
 	#[inline]

@@ -35,7 +35,6 @@ impl Utils {
 				&lua,
 				rx.recv().await.ok_or_else(|| "channel closed before action response".into_lua_err())??,
 			)
->>>>>>> cc241472 (feat: new `ya.exec()` API and `ya exec` subcommand to execute an action and await its result (#3780))
 		})
 	}
 }
