@@ -24,7 +24,7 @@ apps:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
 
 parts:
-  che:
+  che-fm:
     plugin: rust
     source: https://github.com/aroum/che.git
     stage-snaps:
@@ -143,7 +143,7 @@ parts:
       - usr/lib/libMagickWand-7.Q16HDRI.so*
 
   cleanup:
-    after: [che, magick]
+    after: [che-fm, magick]
     plugin: nil
     build-packages:
       - patchelf
