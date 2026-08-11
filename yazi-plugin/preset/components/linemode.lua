@@ -6,7 +6,9 @@ Linemode = {
 	},
 }
 
-function Linemode:new(file, active) return setmetatable({ _file = file, _active = active ~= false }, { __index = self }) end
+function Linemode:new(file, active, area)
+	return setmetatable({ _file = file, _active = active ~= false, _area = area }, { __index = self })
+end
 
 function Linemode:solo()
 	if not self._file.in_current then

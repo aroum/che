@@ -28,7 +28,8 @@ function Parent:redraw()
 	local left, right = {}, {}
 	for _, f in ipairs(self._folder.window) do
 		local entity = Entity:new(f, self._active)
-		left[#left + 1], right[#right + 1] = self:dim(entity:redraw()), self:dim(Linemode:new(f, self._active):redraw())
+		left[#left + 1], right[#right + 1] =
+			self:dim(entity:redraw()), self:dim(Linemode:new(f, self._active, self._area):redraw())
 
 		local max = math.max(0, self._area.w - right[#right]:width())
 		left[#left]:truncate { max = max, ellipsis = entity:ellipsis(max) }
