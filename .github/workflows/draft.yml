@@ -245,9 +245,9 @@ jobs:
           body: ${{ env.NIGHTLY_BODY }}
           target_commitish: ${{ github.sha }}
 
-      - name: Publish APT nightly
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.BUILDS_TOKEN }}
-          repository: yazi-rs/builds
-          event-type: publish-apt
+#       - name: Publish APT nightly
+#         uses: peter-evans/repository-dispatch@v4
+#         with:
+#           token: ${{ secrets.BUILDS_TOKEN }}
+#           repository: yazi-rs/builds
+#           event-type: publish-apt
