@@ -1,6 +1,7 @@
 # CHANGELOG — `che` (`dual-yazi`)
 
-This document tracks all new features, configuration options, utilities, and keybindings implemented since the baseline refactoring (`c8921e3c`).
+> [!NOTE]
+> For a comprehensive summary of all unique custom features, architectural enhancements, and differences relative to upstream Yazi, see [DIFF_FROM_YAZI.md](file:///Users/aroum/Documents/GitHub/che/DIFF_FROM_YAZI.md).
 
 ---
 
