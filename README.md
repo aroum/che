@@ -225,6 +225,72 @@ run  = "plugin multirename"
 desc = "Multi-Rename (Double Commander style TUI)"
 ```
 
+### Custom Linemodes (`commander` & `adaptive`)
+
+You can create rich custom columns and linemodes via Lua in `~/.config/che/init.lua`:
+
+1. **Define linemodes in `~/.config/che/init.lua`**:
+
+```lua
+-- Classic Double Commander style linemode (Size + Modification Date)
+function Linemode:commander()
+  local size = self._file:size()
+  local size_str = size and ya.readable_size(size) or "  -"
+  local mtime = self._file.cha.mtime
+  local mtime_str = mtime and os.date("%d.%m.%y %H:%M", math.floor(mtime)) or "----"
+  local result = string.format("%8s  %s", size_str, mtime_str)
+
+  if mtime and os.time() - math.floor(mtime) <= 172800 then
+    return ui.Line({ ui.Span(result):fg("green") })
+  end
+  return result
+end
+
+-- Responsive Adaptive linemode (dynamically collapses on narrow panes)
+function Linemode:adaptive()
+  local width = self._area and self._area.w or 80
+  if width < 32 then
+    return "" -- Hide columns on narrow panes to avoid truncating filenames
+  end
+
+  local size = self._file:size()
+  local size_str = size and ya.readable_size(size) or "  -"
+  if width < 46 then
+    return size_str -- Show size only on medium-width panes
+  end
+
+  local mtime = self._file.cha.mtime
+  local mtime_str = mtime and os.date("%d.%m.%y %H:%M", math.floor(mtime)) or "----"
+  local result = string.format("%8s  %s", size_str, mtime_str)
+
+  if mtime and os.time() - math.floor(mtime) <= 172800 then
+    return ui.Line({ ui.Span(result):fg("green") })
+  end
+  return result
+end
+```
+
+2. **Add keybindings in `~/.config/che/keymap.toml`**:
+
+```toml
+[[mgr.prepend_keymap]]
+on   = [ "m", "c" ]
+run  = "linemode commander"
+desc = "Linemode: commander"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "a" ]
+run  = "linemode adaptive"
+desc = "Linemode: adaptive"
+```
+
+3. **Set default linemode in `~/.config/che/yazi.toml`**:
+
+```toml
+[mgr]
+linemode = "adaptive"
+```
+
 ---
 
 ## 🚚 Migration from Yazi
