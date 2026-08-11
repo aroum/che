@@ -41,11 +41,9 @@ impl Actor for MoveTo {
 		}
 
 		tokio::spawn(async move {
-			let mut has_conflict = false;
 			for u in yanked.iter() {
 				if let Some(Ok(to)) = u.name().map(|n| dest.try_join(n)) {
 					if maybe_exists(&to).await {
-						has_conflict = true;
 						if !ConfirmProxy::show(ConfirmCfg::overwrite(&to)).await {
 							return;
 						}
@@ -54,7 +52,7 @@ impl Actor for MoveTo {
 				}
 			}
 
-			emit!(Call(relay!(mgr:move_to).with("force", has_conflict)));
+			emit!(Call(relay!(mgr:move_to).with("force", true)));
 		});
 
 		succ!()
