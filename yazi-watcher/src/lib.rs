@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 yazi_macro::mod_pub!(local remote);
 
 yazi_macro::mod_flat!(backend reporter watched watchee watcher);

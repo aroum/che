@@ -1,3 +1,5 @@
+#![allow(clippy::all, unused)]
+
 yazi_macro::mod_pub!(dds package shared);
 
 yazi_macro::mod_flat!(args);

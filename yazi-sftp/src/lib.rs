@@ -1,3 +1,5 @@
+#![allow(clippy::wrong_self_convention)]
+
 pub mod fs;
 pub mod requests;
 pub mod responses;

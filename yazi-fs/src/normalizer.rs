@@ -6,6 +6,7 @@ use unicode_normalization::UnicodeNormalization;
 pub struct Normalizer;
 
 impl Normalizer {
+	#[allow(clippy::result_large_err)]
 	pub fn normalize(pat: &str) -> Result<Cow<'_, str>, ast::Error> {
 		if !Self::must_normalize(pat) {
 			return Ok(pat.into());

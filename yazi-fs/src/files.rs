@@ -246,16 +246,14 @@ impl Files {
 
 	pub fn set_upparent(&mut self, parent_url: Option<yazi_shared::url::UrlBuf>, show_upparent: bool) {
 		self.items.retain(|f| !f.is_upparent);
-		if let Some(parent) = parent_url {
-			if show_upparent {
-				let upparent = File::make_upparent(parent);
-				self.items.insert(0, upparent);
-			}
+		if let Some(parent) = parent_url.filter(|_| show_upparent) {
+			let upparent = File::make_upparent(parent);
+			self.items.insert(0, upparent);
 		}
 	}
 
 	fn sort_items(&mut self) {
-		let has_upparent = self.items.first().map_or(false, |f| f.is_upparent);
+		let has_upparent = self.items.first().is_some_and(|f| f.is_upparent);
 		if has_upparent {
 			let upparent = self.items.remove(0);
 			self.sorter.sort(&mut self.items, &self.sizes);
