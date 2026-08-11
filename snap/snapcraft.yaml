@@ -15,13 +15,13 @@ platforms:
 
 apps:
   che:
-    command: bin/che
+    command: usr/bin/che
     environment:
-      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+      PATH: $SNAP/usr/bin:$PATH
   ch:
-    command: bin/ch
+    command: usr/bin/ch
     environment:
-      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+      PATH: $SNAP/usr/bin:$PATH
 
 parts:
   che-fm:
@@ -44,9 +44,9 @@ parts:
       - zoxide
     override-build: |
       cargo build --release --locked
-      mkdir -p "$CRAFT_PART_INSTALL/bin"
-      cp target/release/che "$CRAFT_PART_INSTALL/bin/"
-      cp target/release/ch "$CRAFT_PART_INSTALL/bin/"
+      mkdir -p "$CRAFT_PART_INSTALL/usr/bin"
+      cp target/release/che "$CRAFT_PART_INSTALL/usr/bin/"
+      cp target/release/ch "$CRAFT_PART_INSTALL/usr/bin/"
       craftctl set version=$(git describe --tags --abbrev=0 2>/dev/null || echo "26.8.7")
     build-attributes:
       - enable-patchelf
