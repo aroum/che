@@ -43,8 +43,11 @@ parts:
       - xclip
       - zoxide
     override-build: |
-      cargo xtask install --bin-dir "$CRAFT_PART_INSTALL"
-      craftctl set version=$(git describe --tags --abbrev=0)
+      cargo build --release --locked
+      mkdir -p "$CRAFT_PART_INSTALL/bin"
+      cp target/release/che "$CRAFT_PART_INSTALL/bin/"
+      cp target/release/ch "$CRAFT_PART_INSTALL/bin/"
+      craftctl set version=$(git describe --tags --abbrev=0 2>/dev/null || echo "26.8.7")
     build-attributes:
       - enable-patchelf
     organize:
@@ -140,7 +143,7 @@ parts:
       - usr/lib/libMagickWand-7.Q16HDRI.so*
 
   cleanup:
-    after: [yazi, magick]
+    after: [che, magick]
     plugin: nil
     build-packages:
       - patchelf
