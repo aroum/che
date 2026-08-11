@@ -15,11 +15,11 @@ platforms:
 
 apps:
   che:
-    command: che
+    command: bin/che
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
   ch:
-    command: ch
+    command: bin/ch
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
 
