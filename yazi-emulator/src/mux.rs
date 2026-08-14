@@ -4,9 +4,6 @@ use anyhow::Result;
 use tracing::error;
 use yazi_macro::time;
 use yazi_shared::SyncCell;
-use yazi_tty::TTY;
-
-use crate::Emulator;
 
 pub static TMUX: SyncCell<bool> = SyncCell::new(false);
 pub static ESCAPE: SyncCell<&'static str> = SyncCell::new("\x1b");
@@ -53,12 +50,9 @@ impl Mux {
 			}
 		}
 	}
-
 	pub fn tmux_drain() -> Result<()> {
-		if TMUX.get() {
-			crossterm::execute!(TTY.writer(), crossterm::style::Print(Self::csi("\x1b[5n")))?;
-			_ = Emulator::read_until_dsr();
-		}
+		// tmux 3.6a under Kitty does not answer this DSR through passthrough.
+		// Waiting here adds 200 ms to every startup and can block the first frame.
 		Ok(())
 	}
 
