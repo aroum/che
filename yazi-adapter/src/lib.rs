@@ -27,7 +27,12 @@ pub fn init() -> anyhow::Result<()> {
 		START.set("\x1bPtmux;\x1b\x1b");
 		CLOSE.set("\x1b\\");
 		Mux::tmux_passthrough();
-		emulator = Emulator::detect().unwrap_or_default();
+
+		// The first probe already has the terminal capabilities. A second probe
+		// through tmux can lose DA1 while passthrough is being enabled.
+		if let Some(brand) = Brand::from_env() {
+			emulator.kind = emulator.kind.map_left(|_| brand);
+		}
 	}
 
 	EMULATOR.init(emulator);

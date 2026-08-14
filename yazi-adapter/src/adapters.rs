@@ -39,7 +39,7 @@ impl From<yazi_emulator::Brand> for Adapters {
 			B::Tabby => vec![A::Iip, A::Sixel],
 			B::Hyper => vec![A::Iip, A::Sixel],
 			B::Mintty => vec![A::Iip],
-			B::Tmux => vec![],
+			B::Tmux => vec![A::Kgp],
 			B::VTerm => vec![],
 			B::Apple => vec![],
 			B::Urxvt => vec![],
