@@ -29,12 +29,13 @@ This document tracks all custom features, architectural enhancements, UI/UX impr
 - **Layout-Aware Key Mapping**: Preserves modifier state (`Shift`, `Ctrl`, `Alt`) for non-ASCII / Cyrillic keyboard layouts (`Ctrl+Shift+к` ➔ `<C-S-r>`).
 - **Input Autocomplete Reactive Triggering**: Typing ordinary characters in input fields (`type_str`) immediately tags input snapshot and triggers `flush_value()` so completion popups appear instantly on initial keypress without requiring backspace.
 
-### 5. Bundled Dual-Pane Session Persistence (`session` / `autosession`)
+### 5. Bundled Dual-Pane Session Persistence (`che-session`)
+- **Upstream Origin & Dual-Pane Extension**: Based on [barbanevosa/autosession.yazi](https://github.com/barbanevosa/autosession.yazi) and extended for `che`'s dual-pane architecture.
 - **Dual-Pane Independent State**: Saves and restores open tabs and working directories for both Left (Pane 1) and Right (Pane 2) panes independently.
 - **Per-Tab View Preferences**: Automatically persists sorting options (`by`, `reverse`, `dir_first`, `sensitive`, `translit`), linemodes (`commander`, `adaptive`, etc.), and hidden file visibility per tab.
 - **Active Tab & Pane Focus**: Restores cursor/active tab index in each pane, active pane selection, and `single_pane` mode.
-- **Built-in Bundled Plugin & Toggle Flag**: Delivered out-of-the-box as `session` / `autosession` preset plugin without requiring external package downloads. Can be enabled or disabled via `require("session"):setup({ enabled = true })` (or `enabled = false`).
-- **Commands & Keymaps**: Supports `save-and-quit`, `save`, and `restore` actions via `plugin session -- save-and-quit` or `plugin autosession -- save-and-quit`.
+- **Built-in Bundled Plugin & Toggle Flag**: Delivered out-of-the-box as `che-session` preset plugin without requiring external package downloads. Can be enabled or disabled via `require("che-session"):setup({ enabled = true })` (or `enabled = false`).
+- **Commands & Keymaps**: Supports `save-and-quit`, `save`, and `restore` actions via `plugin che-session -- save-and-quit`.
 
 ### 6. Binaries & Versioning Scheme
 - **Binary Names**: Main TUI executable is named **`che`** (`yazi-fm`), and CLI helper tool is named **`ch`** (`yazi-cli`).

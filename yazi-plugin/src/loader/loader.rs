@@ -29,7 +29,7 @@ impl Default for Loader {
 			// Plugins
 			("archive".to_owned(), preset!("plugins/archive").into()),
 			("audio".to_owned(), preset!("plugins/audio").into()),
-			("autosession".to_owned(), preset!("plugins/session").into()),
+			("che-session".to_owned(), preset!("plugins/che-session").into()),
 			("code".to_owned(), preset!("plugins/code").into()),
 			("dds".to_owned(), preset!("plugins/dds").into()),
 			("empty".to_owned(), preset!("plugins/empty").into()),
@@ -51,7 +51,6 @@ impl Default for Loader {
 			("noop".to_owned(), preset!("plugins/noop").into()),
 			("null".to_owned(), preset!("plugins/null").into()),
 			("pdf".to_owned(), preset!("plugins/pdf").into()),
-			("session".to_owned(), preset!("plugins/session").into()),
 			("svg".to_owned(), preset!("plugins/svg").into()),
 			("system-copy".to_owned(), preset!("plugins/system-copy").into()),
 			("vfs".to_owned(), preset!("plugins/vfs").into()),

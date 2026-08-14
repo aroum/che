@@ -49,6 +49,9 @@ Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class c
 11. **Tab Close & Restore (Undo Closed Tab)**:
     * **`Ctrl+W`**: Close the active tab, or exit if it is the last remaining tab.
     * **`close-and-restore-tab` Integration**: Preserves closed tab state and history.  Re-open recently closed tabs with full session state restoration.
+12. **Built-in Dual-Pane Session Persistence (`che-session`)**:
+    * Automatically saves and restores all open tabs, working directories, per-tab view settings (sorting mode, linemode, hidden visibility), active tab selection, and active pane focus across restarts.
+    * Available out of the box with zero external installation required.
 
 ---
 
@@ -290,6 +293,36 @@ desc = "Linemode: adaptive"
 [mgr]
 linemode = "adaptive"
 ```
+
+---
+
+## 💾 Dual-Pane Session Persistence (`che-session`)
+
+`che` includes a built-in session persistence plugin (`che-session`, based on [barbanevosa/autosession.yazi](https://github.com/barbanevosa/autosession.yazi) and extended for dual panes). It saves the workspace state on exit and restores it on startup:
+* Open tabs with their working directories for both panes
+* Per-tab view settings: sorting mode, linemode, hidden file visibility
+* Active tab selection and active pane focus
+
+### 1. Enable in `~/.config/che/init.lua`
+```lua
+require("che-session"):setup({
+  enabled = true,        -- true / false (toggle flag to enable or disable)
+  sync_yanked = false,   -- optionally sync yanked state
+})
+```
+
+### 2. Map save-and-quit in `~/.config/che/keymap.toml`
+```toml
+[[mgr.prepend_keymap]]
+on   = [ "q" ]
+run  = "plugin che-session -- save-and-quit"
+desc = "Save session and quit"
+```
+
+Available commands:
+* `plugin che-session -- save-and-quit`: Save state for both panes and exit.
+* `plugin che-session -- save`: Save state without exiting.
+* `plugin che-session -- restore`: Restore saved state on demand.
 
 ---
 

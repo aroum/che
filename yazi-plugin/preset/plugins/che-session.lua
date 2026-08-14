@@ -1,3 +1,6 @@
+-- Based on autosession.yazi by barbanevosa (https://github.com/barbanevosa/autosession.yazi)
+-- Extended for che with dual-pane support, per-pane tabs, and view preferences.
+
 -- Get current session across both panes in dual-pane layout
 local _get_current_session = ya.sync(function(state)
 	local tabs = cx.tabs
@@ -151,7 +154,7 @@ local function setup(state, opts)
 	opts = opts or {}
 	state.enabled = opts.enabled ~= false
 	state.restored = false
-	state.event = opts.event or "@autosession-event"
+	state.event = opts.event or "@che-session"
 
 	if opts.sync_yanked then
 		ps.sub_remote("@yank", function(opt) ya.emit("update_yanked", { opt = opt }) end)
@@ -161,17 +164,12 @@ local function setup(state, opts)
 		return
 	end
 
-	local sub_callback = function(body)
+	ps.sub_remote(state.event, function(body)
 		if not state.restored and state.enabled then
 			state.session = body
 			_restore_session()
 		end
-	end
-
-	ps.sub_remote(state.event, sub_callback)
-	if state.event ~= "@session" then
-		ps.sub_remote("@session", sub_callback)
-	end
+	end)
 end
 
 return {
