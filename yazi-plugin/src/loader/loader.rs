@@ -29,6 +29,7 @@ impl Default for Loader {
 			// Plugins
 			("archive".to_owned(), preset!("plugins/archive").into()),
 			("audio".to_owned(), preset!("plugins/audio").into()),
+			("autosession".to_owned(), preset!("plugins/session").into()),
 			("code".to_owned(), preset!("plugins/code").into()),
 			("dds".to_owned(), preset!("plugins/dds").into()),
 			("empty".to_owned(), preset!("plugins/empty").into()),

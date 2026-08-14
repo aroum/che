@@ -7,7 +7,10 @@ pub struct PaneFocusOpt {
 }
 
 impl From<ActionCow> for PaneFocusOpt {
-	fn from(a: ActionCow) -> Self { Self { left: a.bool("left") } }
+	fn from(a: ActionCow) -> Self {
+		let left = a.bool("left") || a.str(0) == "left" || a.first::<usize>().is_ok_and(|i| i == 0);
+		Self { left }
+	}
 }
 
 impl FromLua for PaneFocusOpt {

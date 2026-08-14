@@ -8,6 +8,7 @@
 ## 📅 Versioning & CalVer Release (`26.8.7`)
 
 ### ⚡ Key Fixes & UI Enhancements
+- **Bundled Dual-Pane Session Persistence Plugin (`session` / `autosession`)**: Added out-of-the-box session persistence plugin that saves and restores tabs independently for each pane in dual-pane layout, persists per-tab view settings (sorting mode, linemode, hidden file visibility), active tab selection, active pane focus, and `single_pane` mode, with configurable enable/disable toggle `require("session"):setup({ enabled = true })`.
 - **Input Popup & Rename Dialog**: Fixed actor action dispatch (`InputShow`), registered `InputShow` and `ShowOpt` in `yazi-dds/src/spark/spark.rs`.
 - **Glob Filter Normalization Order**: Fixed normalization order in `Filter::new` so wildcard glob patterns (e.g. `*.sh`) operate cleanly across case modes.
 - **Cyrillic Keyboard Shortcuts**: Fixed `Shift` modifier preservation for Cyrillic layout keys in `yazi-config/src/keymap/key.rs` (`Ctrl+Shift+к` ➔ `<C-S-r>`).
