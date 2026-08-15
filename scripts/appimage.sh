@@ -41,11 +41,24 @@ cp assets/che.desktop "$APPDIR/usr/share/applications/che.desktop"
 cp assets/logo.png "$APPDIR/che.png"
 cp assets/logo.png "$APPDIR/usr/share/icons/hicolor/512x512/apps/che.png"
 
-# Create AppRun entrypoint
+# Create smart multi-call AppRun entrypoint
 cat << 'APPRUN' > "$APPDIR/AppRun"
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "${0}")")"
 export PATH="${HERE}/usr/bin:${PATH}"
+
+# Check invoked binary name (support symlink: ln -s che.AppImage ch)
+CALL_NAME="$(basename "${ARGV0:-$0}")"
+if [ "$CALL_NAME" = "ch" ]; then
+  exec "${HERE}/usr/bin/ch" "$@"
+fi
+
+# Support invoking ch as first subcommand: ./che.AppImage ch ...
+if [ "$#" -gt 0 ] && [ "$1" = "ch" ]; then
+  shift
+  exec "${HERE}/usr/bin/ch" "$@"
+fi
+
 exec "${HERE}/usr/bin/che" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
