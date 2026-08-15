@@ -39,7 +39,7 @@ This document tracks all custom features, architectural enhancements, UI/UX impr
 
 ### 6. Binaries & Versioning Scheme
 - **Binary Names**: Main TUI executable is named **`che`** (`yazi-fm`), and CLI helper tool is named **`ch`** (`yazi-cli`).
-- **Calendar Versioning (CalVer)**: Adheres strictly to CalVer scheme (`YY.M.D`, e.g., `26.8.7`).
+- **Calendar Versioning (CalVer)**: Adheres strictly to CalVer scheme (`YY.M.D`, e.g., `26.8.15`).
 
 ---
 

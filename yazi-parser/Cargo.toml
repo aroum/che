@@ -17,14 +17,14 @@ default      = [ "vendored-lua" ]
 vendored-lua = [ "mlua/vendored" ]
 
 [dependencies]
-yazi-binding = { path = "../yazi-binding", version = "26.8.7" }
-yazi-boot    = { path = "../yazi-boot", version = "26.8.7" }
-yazi-config  = { path = "../yazi-config", version = "26.8.7" }
-yazi-fs      = { path = "../yazi-fs", version = "26.8.7" }
-yazi-macro   = { path = "../yazi-macro", version = "26.8.7" }
-yazi-shared  = { path = "../yazi-shared", version = "26.8.7" }
-yazi-vfs     = { path = "../yazi-vfs", version = "26.8.7" }
-yazi-widgets = { path = "../yazi-widgets", version = "26.8.7" }
+yazi-binding = { path = "../yazi-binding", version = "26.8.15" }
+yazi-boot = { path = "../yazi-boot", version = "26.8.15" }
+yazi-config = { path = "../yazi-config", version = "26.8.15" }
+yazi-fs = { path = "../yazi-fs", version = "26.8.15" }
+yazi-macro = { path = "../yazi-macro", version = "26.8.15" }
+yazi-shared = { path = "../yazi-shared", version = "26.8.15" }
+yazi-vfs = { path = "../yazi-vfs", version = "26.8.15" }
+yazi-widgets = { path = "../yazi-widgets", version = "26.8.15" }
 
 # External dependencies
 anyhow        = { workspace = true }

@@ -47,7 +47,7 @@ parts:
       mkdir -p "$CRAFT_PART_INSTALL/usr/bin"
       cp target/release/che "$CRAFT_PART_INSTALL/usr/bin/"
       cp target/release/ch "$CRAFT_PART_INSTALL/usr/bin/"
-      craftctl set version=$(git describe --tags --abbrev=0 2>/dev/null || echo "26.8.7")
+      craftctl set version=$(git describe --tags --abbrev=0 2>/dev/null || echo "26.8.15")
     build-attributes:
       - enable-patchelf
     organize:

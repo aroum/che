@@ -5,7 +5,7 @@
 
 ---
 
-## 📅 Versioning & CalVer Release (`26.8.7`)
+## 📅 Versioning & CalVer Release (`26.8.15`)
 
 ### ⚡ Key Fixes & UI Enhancements
 - **Bundled Dual-Pane Session Persistence Plugin (`che-session`)**: Added out-of-the-box session persistence plugin (based on [barbanevosa/autosession.yazi](https://github.com/barbanevosa/autosession.yazi) and extended for dual panes) that saves and restores tabs independently for each pane in dual-pane layout, persists per-tab view settings (sorting mode, linemode, hidden file visibility), active tab selection, active pane focus, and `single_pane` mode, with configurable enable/disable toggle `require("che-session"):setup({ enabled = true })`.
@@ -17,7 +17,7 @@
 - **Adaptive Narrow Window Fallback (`dual_pane_min_width`)**: Added automatic fallback to single-pane layout when terminal width falls below the threshold (`dual_pane_min_width`, default: `80` columns).  Toggling preview with `Ctrl+Q` in narrow mode seamlessly replaces the file list pane with a full-screen preview pane.
 - **Unit Testing**: Added comprehensive unit tests for Cyrillic key mapping, rename cursor calculation, pane sync, glob filtering, and bulk rename graph prioritization.
 - **AppImage Packaging**: Added automated AppImage packaging in GitHub Actions workflows (`draft.yml` and `release.yml`) for `x86_64` and `aarch64` Linux distributions with desktop entry (`assets/che.desktop`) and application icon integration.
-- **CalVer Manifest Sync**: Updated workspace manifests, lockfile, and release scripts to `26.8.7`.
+- **CalVer Manifest Sync**: Updated workspace manifests, lockfile, and release scripts to `26.8.15`.
 
 ---
 

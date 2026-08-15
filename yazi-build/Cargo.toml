@@ -13,7 +13,7 @@ rust-version.workspace = true
 workspace = true
 
 [build-dependencies]
-yazi-tty = { path = "../yazi-tty", version = "26.8.7" }
+yazi-tty = { path = "../yazi-tty", version = "26.8.15" }
 
 [[bin]]
 name = "yazi-build"
