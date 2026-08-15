@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET="${1:-x86_64-unknown-linux-musl}"
+TARGET="${1:-x86_64-unknown-linux-gnu}"
 
 case "$TARGET" in
   x86_64*)
@@ -65,11 +65,13 @@ chmod +x "$APPDIR/AppRun"
 
 # Download and run appimagetool
 APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage"
-curl -fsSL "$APPIMAGETOOL_URL" -o appimagetool
+if ! curl -fsSL "$APPIMAGETOOL_URL" -o appimagetool 2>/dev/null; then
+  curl -fsSL "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage" -o appimagetool
+fi
 chmod +x appimagetool
 
 ./appimagetool --appimage-extract
-ARCH="$ARCH" ./squashfs-root/AppRun "$APPDIR" "che-${ARCH}.AppImage"
+ARCH="$ARCH" ./squashfs-root/AppRun --no-appstream "$APPDIR" "che-${ARCH}.AppImage"
 
 rm -rf "$APPDIR" squashfs-root appimagetool
 echo "Successfully created che-${ARCH}.AppImage"
