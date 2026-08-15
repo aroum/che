@@ -64,32 +64,33 @@ Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class c
 
 ---
 
-## 🛠 Installation
-
-### macOS & Linux (Homebrew)
-
-```bash
-brew tap aroum/che
-brew install che
-```
-
-To upgrade:
-
-```bash
-brew update && brew upgrade che
-```
-
-### Build from Source (Cargo)
-
-Requires Rust toolchain (1.78+):
-
-```bash
 ## 📦 Installation
 
 ### 🍺 Homebrew (macOS & Linux)
 ```bash
 brew tap aroum/che
 brew install che
+```
+
+To upgrade:
+```bash
+brew update && brew upgrade che
+```
+
+### 📦 AppImage (Linux x86_64 & aarch64)
+Download the standalone AppImage from [GitHub Releases](https://github.com/aroum/che/releases):
+
+```bash
+# Make executable
+chmod +x che-x86_64.AppImage
+
+# Run directly
+./che-x86_64.AppImage
+
+# (Optional) Install to ~/.local/bin and link CLI companion:
+mkdir -p ~/.local/bin
+mv che-x86_64.AppImage ~/.local/bin/che
+ln -s ~/.local/bin/che ~/.local/bin/ch
 ```
 
 ### 🪟 Windows Package Manager (Winget)
@@ -99,7 +100,7 @@ winget install aroum.che
 
 ### 🐧 Snapcraft (Linux)
 ```bash
-snap install che-fm
+snap install che-fm --classic
 ```
 
 ### ❄️ Nix (Flakes)
@@ -108,6 +109,8 @@ nix run github:aroum/che
 ```
 
 ### 🛠 Building from Source
+Requires Rust toolchain (1.78+):
+
 ```bash
 git clone https://github.com/aroum/che.git
 cd che
