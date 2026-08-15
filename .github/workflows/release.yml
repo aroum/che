@@ -60,6 +60,9 @@ jobs:
           cp target/${{ matrix.target }}/release/ch "${ARCHIVE_NAME}/"
           cp README.md LICENSE CHANGELOG.md "${ARCHIVE_NAME}/"
           zip -r "${ARCHIVE_NAME}.zip" "${ARCHIVE_NAME}"
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            ./scripts/appimage.sh "${{ matrix.target }}" || true
+          fi
 
       - name: Package binaries (Windows)
         if: runner.os == 'Windows'
@@ -77,7 +80,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-${{ matrix.target }}
-          path: "*.zip"
+          path: |
+            *.zip
+            *.AppImage
 
   publish-release:
     needs: build-release
@@ -91,7 +96,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "*.zip"
+          files: |
+            *.zip
+            *.AppImage
           generate_release_notes: true
 
       - name: Publish to Winget

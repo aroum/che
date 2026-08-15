@@ -16,6 +16,7 @@
 - **Right Pane Markers Positioning**: Positioned right pane `Marker` components immediately after the central separator `│` (`x = self._area.x`) for visual balance in dual-pane layout.
 - **Adaptive Narrow Window Fallback (`dual_pane_min_width`)**: Added automatic fallback to single-pane layout when terminal width falls below the threshold (`dual_pane_min_width`, default: `80` columns).  Toggling preview with `Ctrl+Q` in narrow mode seamlessly replaces the file list pane with a full-screen preview pane.
 - **Unit Testing**: Added comprehensive unit tests for Cyrillic key mapping, rename cursor calculation, pane sync, glob filtering, and bulk rename graph prioritization.
+- **AppImage Packaging**: Added automated AppImage packaging in GitHub Actions workflows (`draft.yml` and `release.yml`) for `x86_64` and `aarch64` Linux distributions with desktop entry (`assets/che.desktop`) and application icon integration.
 - **CalVer Manifest Sync**: Updated workspace manifests, lockfile, and release scripts to `26.8.7`.
 
 ---
