@@ -29,6 +29,8 @@ impl Default for Loader {
 			// Plugins
 			("archive".to_owned(), preset!("plugins/archive").into()),
 			("audio".to_owned(), preset!("plugins/audio").into()),
+			("che-archive".to_owned(), preset!("plugins/che-archive").into()),
+			("che-bookmarks".to_owned(), preset!("plugins/che-bookmarks").into()),
 			("che-session".to_owned(), preset!("plugins/che-session").into()),
 			("code".to_owned(), preset!("plugins/code").into()),
 			("dds".to_owned(), preset!("plugins/dds").into()),

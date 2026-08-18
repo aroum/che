@@ -5,6 +5,16 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.8.18`)
+
+### ⚡ New Features & UI Enhancements
+- **Archive Manager (`che-archive`)**: Added Double Commander style archive creation and extraction TUI with interactive format selection (`zip`, `tar`, `7z`, `tar.gz`, `tar.bz2`, `tar.xz`, `tar.zst`), compression levels (`0` Store to `9` Ultra), password encryption, header encryption (for 7z), solid compression toggle, and cross-pane packaging (`c a`, `c A`, `c x`, `c X`, `c e`).
+- **Interactive Password Prompt for Protected Archives**: Added native interactive password prompt when entering password-protected archives, with session-level password caching in `ARCHIVE_PASSWORDS` and `-p-` flag enforcement with standard input null redirection to prevent terminal hangs.
+- **Enhanced Multi-Rename TUI (`multirename`)**: Added inverted block visual cursor rendering in input fields, comprehensive cursor and word navigation keybindings (`Home`, `End`, `Delete`, `Backspace`, `Ctrl`/`Alt` + `Left`/`Right`/`Backspace`/`Delete`, `Ctrl+U/K/A/E`), and refactored event dispatch loop to eliminate mouse click latency on buttons and controls.
+- **Preset Bookmarks & Hops Plugin (`che-bookmarks`)**: Added bundled preset bookmarks plugin supporting interactive key/description creation (`<Enter>`), deletion (`<Delete>`), fuzzy search (`<Space>` / `'`), dynamic tab jumps for the active pane, and automatic state persistence in `~/.config/che/bookmarks.json`.
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.8.15`)
 
 ### ⚡ Key Fixes & UI Enhancements
