@@ -64,12 +64,49 @@ dual_pane_min_width = 80
 ```
 
 ```toml
-# ~/.config/che/keymap.toml
 [[mgr.prepend_keymap]]
 on   = [ "c", "r" ]
 run  = "plugin multirename"
 desc = "Multi-Rename (Double Commander style TUI)"
 
+# ── Archive Pack & Extract (che-archive) ──────────────────────────────────────
+[[mgr.prepend_keymap]]
+on   = [ "c", "a" ]
+run  = "plugin che-archive -- pack-opposite"
+desc = "Pack files to archive (opposite pane)"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "A" ]
+run  = "plugin che-archive -- pack"
+desc = "Pack files to archive (current pane)"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "x" ]
+run  = "plugin che-archive -- extract-opposite"
+desc = "Extract archive to opposite pane"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "X" ]
+run  = "plugin che-archive -- extract"
+desc = "Extract archive to current pane"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "e" ]
+run  = "plugin che-archive -- extract-to-folder"
+desc = "Extract archive to subdirectory"
+
+# ── Fast Bookmarks (che-bookmarks) ───────────────────────────────────────────
+[[mgr.prepend_keymap]]
+on   = ";"
+run  = "plugin che-bookmarks"
+desc = "Hop to bookmark (che-bookmarks)"
+
+[[mgr.prepend_keymap]]
+on   = "'"
+run  = "plugin che-bookmarks -- fuzzy"
+desc = "Fuzzy search bookmarks (che-bookmarks)"
+
+# ── Custom Linemodes ─────────────────────────────────────────────────────────
 [[mgr.prepend_keymap]]
 on   = [ "m", "c" ]
 run  = "linemode commander"
@@ -83,6 +120,32 @@ desc = "Linemode: adaptive"
 
 ```lua
 -- ~/.config/che/init.lua
+
+-- ── che-session: Dual-pane session persistence ──────────────────────────────
+require("che-session"):setup({
+  enabled = true, -- Set to false to disable auto-restore
+})
+
+-- ── che-bookmarks: Fast directory hops & bookmarks ──────────────────────────
+require("che-bookmarks"):setup({
+  enabled = true,        -- Set to false to deactivate plugin
+  persist = true,        -- Automatically persist custom bookmarks to bookmarks.json
+  desc_strategy = "path",-- "path" or "filename"
+  ephemeral = true,      -- Allow interactive <Enter> creation and <Delete> removal
+  tabs = true,           -- Include dynamic tab hops for the active pane (1..9)
+  fuzzy_cmd = "fzf",     -- Fuzzy finder command
+  hops = {
+    { key = "/", path = "/" },
+    { key = "t", path = "/tmp" },
+    { key = "~", path = "~", desc = "Home" },
+    { key = "d", path = "~/Desktop", desc = "Desktop" },
+    { key = "D", path = "~/Documents", desc = "Documents" },
+    { key = "c", path = "~/.config", desc = "Config files" },
+    { key = { "l", "s" }, path = "~/.local/share", desc = "Local share" },
+  },
+})
+
+-- ── Custom Linemodes ────────────────────────────────────────────────────────
 function Linemode:commander()
   local size = self._file:size()
   local size_str = size and ya.readable_size(size) or "  -"
