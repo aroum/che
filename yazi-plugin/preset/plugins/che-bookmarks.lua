@@ -15,17 +15,11 @@ local function warn(s, ...)
 	ya.notify { title = "che-bookmarks", content = string.format(s, ...), timeout = 3, level = "warn" }
 end
 
-local get_state = ya.sync(function(state, attr)
-	return state[attr]
-end)
+local get_state = ya.sync(function(state, attr) return state[attr] end)
 
-local set_state = ya.sync(function(state, attr, value)
-	state[attr] = value
-end)
+local set_state = ya.sync(function(state, attr, value) state[attr] = value end)
 
-local get_cwd = ya.sync(function(_)
-	return tostring(cx.active.current.cwd)
-end)
+local get_cwd = ya.sync(function(_) return tostring(cx.active.current.cwd) end)
 
 local get_current_tab_idx = ya.sync(function(_)
 	local pane_idx = cx.tabs.idx
@@ -36,7 +30,9 @@ end)
 local get_tabs_as_paths = ya.sync(function(_)
 	local pane_idx = cx.tabs.idx
 	local pane = cx.tabs:pane(pane_idx)
-	if not pane then return {} end
+	if not pane then
+		return {}
+	end
 
 	local active_tab_idx = pane.idx
 	local result = {}
@@ -50,7 +46,9 @@ end)
 
 local function path_to_desc(path, strategy)
 	if strategy == "filename" then
-		if path == "/" then return "/" end
+		if path == "/" then
+			return "/"
+		end
 		local url_name = Url(path):name()
 		return url_name and tostring(url_name) or path
 	end
@@ -108,9 +106,7 @@ local function sort_hops(hops)
 		return tostring(key)
 	end
 
-	table.sort(hops, function(x, y)
-		return convert_key(x.key) < convert_key(y.key)
-	end)
+	table.sort(hops, function(x, y) return convert_key(x.key) < convert_key(y.key) end)
 	return hops
 end
 
@@ -123,13 +119,19 @@ local function get_persist_file_path(config)
 end
 
 local function load_persisted_hops(config)
-	if not config.persist then return {} end
+	if not config.persist then
+		return {}
+	end
 	local file_path = get_persist_file_path(config)
 	local f = io.open(file_path, "r")
-	if not f then return {} end
+	if not f then
+		return {}
+	end
 	local content = f:read("*a")
 	f:close()
-	if not content or content == "" then return {} end
+	if not content or content == "" then
+		return {}
+	end
 
 	local ok, data = pcall(ya.json_decode, content)
 	if ok and type(data) == "table" then
@@ -150,7 +152,9 @@ local function load_persisted_hops(config)
 end
 
 local function save_persisted_hops(hops, config)
-	if not config.persist then return end
+	if not config.persist then
+		return
+	end
 	local to_save = {}
 	for _, h in ipairs(hops) do
 		if h.custom then
@@ -225,7 +229,9 @@ local select_fuzzy = function(hops, config)
 		if not existing or existing == "" then
 			local key_str = key_to_string(hop.key)
 			local desc = hop.desc or path_to_desc(hop.path, config.desc_strategy)
-			if desc == hop.path then desc = "" end
+			if desc == hop.path then
+				desc = ""
+			end
 			fuzzy_entries[hop.path] = string.format("[%s] %s", key_str, desc)
 		end
 	end
@@ -347,7 +353,9 @@ local delete_mark = function(hops, config)
 
 	info("Select bookmark to delete")
 	local hops_idx = ya.which { cands = cands }
-	if not hops_idx then return end
+	if not hops_idx then
+		return
+	end
 	local selected = cands[hops_idx]
 
 	for i, h in ipairs(hops) do
@@ -389,7 +397,9 @@ local attempt_hop = function(hops, config)
 	end
 
 	local hops_idx = ya.which { cands = cands }
-	if not hops_idx then return end
+	if not hops_idx then
+		return
+	end
 	local selected_hop = cands[hops_idx]
 
 	if selected_hop.path == "__MARK__" then
@@ -400,7 +410,9 @@ local attempt_hop = function(hops, config)
 		return
 	elseif selected_hop.path == "__FUZZY__" then
 		local fuzzy_hop = select_fuzzy(hops, config)
-		if not fuzzy_hop then return end
+		if not fuzzy_hop then
+			return
+		end
 		selected_hop = fuzzy_hop
 	end
 

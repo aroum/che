@@ -155,13 +155,19 @@ impl TextInput {
 		}
 	}
 
-	fn render_spans<'a>(&'a self, is_focused: bool, normal_style: Style, active_style: Style) -> Vec<Span<'a>> {
+	fn render_spans<'a>(
+		&'a self,
+		is_focused: bool,
+		normal_style: Style,
+		active_style: Style,
+	) -> Vec<Span<'a>> {
 		if !is_focused {
 			return vec![Span::styled(&self.value, normal_style)];
 		}
 
 		let chars: Vec<char> = self.value.chars().collect();
-		let cursor_style = Style::default().bg(Color::White).fg(Color::Black).add_modifier(Modifier::BOLD);
+		let cursor_style =
+			Style::default().bg(Color::White).fg(Color::Black).add_modifier(Modifier::BOLD);
 
 		if chars.is_empty() {
 			return vec![Span::styled(" ", cursor_style)];
@@ -797,401 +803,403 @@ fn run_app(
 					return Ok(());
 				}
 
-			if key.modifiers.contains(KeyModifiers::ALT) {
-				match key.code {
-					KeyCode::Char('o' | 'O') => return accept_rename(files, previews),
-					KeyCode::Char('c' | 'C') => return Ok(()),
-					_ => {}
+				if key.modifiers.contains(KeyModifiers::ALT) {
+					match key.code {
+						KeyCode::Char('o' | 'O') => return accept_rename(files, previews),
+						KeyCode::Char('c' | 'C') => return Ok(()),
+						_ => {}
+					}
 				}
-			}
 
-			if key.modifiers.contains(KeyModifiers::CONTROL) || key.modifiers.contains(KeyModifiers::ALT) {
-				match key.code {
-					KeyCode::Left | KeyCode::Char('b') => {
-						match focus {
-							Focus::NameMask => mask_input.word_left(),
-							Focus::ExtMask => ext_input.word_left(),
-							Focus::Find => find_input.word_left(),
-							Focus::Replace => replace_input.word_left(),
-							Focus::CounterStart if counter_used => counter_start.word_left(),
-							Focus::CounterStep if counter_used => counter_step.word_left(),
-							Focus::CounterWidth if counter_used => counter_width.word_left(),
-							_ => {}
+				if key.modifiers.contains(KeyModifiers::CONTROL)
+					|| key.modifiers.contains(KeyModifiers::ALT)
+				{
+					match key.code {
+						KeyCode::Left | KeyCode::Char('b') => {
+							match focus {
+								Focus::NameMask => mask_input.word_left(),
+								Focus::ExtMask => ext_input.word_left(),
+								Focus::Find => find_input.word_left(),
+								Focus::Replace => replace_input.word_left(),
+								Focus::CounterStart if counter_used => counter_start.word_left(),
+								Focus::CounterStep if counter_used => counter_step.word_left(),
+								Focus::CounterWidth if counter_used => counter_width.word_left(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Right | KeyCode::Char('f') => {
-						match focus {
-							Focus::NameMask => mask_input.word_right(),
-							Focus::ExtMask => ext_input.word_right(),
-							Focus::Find => find_input.word_right(),
-							Focus::Replace => replace_input.word_right(),
-							Focus::CounterStart if counter_used => counter_start.word_right(),
-							Focus::CounterStep if counter_used => counter_step.word_right(),
-							Focus::CounterWidth if counter_used => counter_width.word_right(),
-							_ => {}
+						KeyCode::Right | KeyCode::Char('f') => {
+							match focus {
+								Focus::NameMask => mask_input.word_right(),
+								Focus::ExtMask => ext_input.word_right(),
+								Focus::Find => find_input.word_right(),
+								Focus::Replace => replace_input.word_right(),
+								Focus::CounterStart if counter_used => counter_start.word_right(),
+								Focus::CounterStep if counter_used => counter_step.word_right(),
+								Focus::CounterWidth if counter_used => counter_width.word_right(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Backspace | KeyCode::Char('w') | KeyCode::Char('h') => {
-						match focus {
-							Focus::NameMask => mask_input.delete_word_left(),
-							Focus::ExtMask => ext_input.delete_word_left(),
-							Focus::Find => find_input.delete_word_left(),
-							Focus::Replace => replace_input.delete_word_left(),
-							Focus::CounterStart if counter_used => counter_start.delete_word_left(),
-							Focus::CounterStep if counter_used => counter_step.delete_word_left(),
-							Focus::CounterWidth if counter_used => counter_width.delete_word_left(),
-							_ => {}
+						KeyCode::Backspace | KeyCode::Char('w') | KeyCode::Char('h') => {
+							match focus {
+								Focus::NameMask => mask_input.delete_word_left(),
+								Focus::ExtMask => ext_input.delete_word_left(),
+								Focus::Find => find_input.delete_word_left(),
+								Focus::Replace => replace_input.delete_word_left(),
+								Focus::CounterStart if counter_used => counter_start.delete_word_left(),
+								Focus::CounterStep if counter_used => counter_step.delete_word_left(),
+								Focus::CounterWidth if counter_used => counter_width.delete_word_left(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Delete | KeyCode::Char('d') => {
-						match focus {
-							Focus::NameMask => mask_input.delete_word_right(),
-							Focus::ExtMask => ext_input.delete_word_right(),
-							Focus::Find => find_input.delete_word_right(),
-							Focus::Replace => replace_input.delete_word_right(),
-							Focus::CounterStart if counter_used => counter_start.delete_word_right(),
-							Focus::CounterStep if counter_used => counter_step.delete_word_right(),
-							Focus::CounterWidth if counter_used => counter_width.delete_word_right(),
-							_ => {}
+						KeyCode::Delete | KeyCode::Char('d') => {
+							match focus {
+								Focus::NameMask => mask_input.delete_word_right(),
+								Focus::ExtMask => ext_input.delete_word_right(),
+								Focus::Find => find_input.delete_word_right(),
+								Focus::Replace => replace_input.delete_word_right(),
+								Focus::CounterStart if counter_used => counter_start.delete_word_right(),
+								Focus::CounterStep if counter_used => counter_step.delete_word_right(),
+								Focus::CounterWidth if counter_used => counter_width.delete_word_right(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Char('u') => {
-						match focus {
-							Focus::NameMask => mask_input.delete_to_start(),
-							Focus::ExtMask => ext_input.delete_to_start(),
-							Focus::Find => find_input.delete_to_start(),
-							Focus::Replace => replace_input.delete_to_start(),
-							Focus::CounterStart if counter_used => counter_start.delete_to_start(),
-							Focus::CounterStep if counter_used => counter_step.delete_to_start(),
-							Focus::CounterWidth if counter_used => counter_width.delete_to_start(),
-							_ => {}
+						KeyCode::Char('u') => {
+							match focus {
+								Focus::NameMask => mask_input.delete_to_start(),
+								Focus::ExtMask => ext_input.delete_to_start(),
+								Focus::Find => find_input.delete_to_start(),
+								Focus::Replace => replace_input.delete_to_start(),
+								Focus::CounterStart if counter_used => counter_start.delete_to_start(),
+								Focus::CounterStep if counter_used => counter_step.delete_to_start(),
+								Focus::CounterWidth if counter_used => counter_width.delete_to_start(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Char('k') => {
-						match focus {
-							Focus::NameMask => mask_input.delete_to_end(),
-							Focus::ExtMask => ext_input.delete_to_end(),
-							Focus::Find => find_input.delete_to_end(),
-							Focus::Replace => replace_input.delete_to_end(),
-							Focus::CounterStart if counter_used => counter_start.delete_to_end(),
-							Focus::CounterStep if counter_used => counter_step.delete_to_end(),
-							Focus::CounterWidth if counter_used => counter_width.delete_to_end(),
-							_ => {}
+						KeyCode::Char('k') => {
+							match focus {
+								Focus::NameMask => mask_input.delete_to_end(),
+								Focus::ExtMask => ext_input.delete_to_end(),
+								Focus::Find => find_input.delete_to_end(),
+								Focus::Replace => replace_input.delete_to_end(),
+								Focus::CounterStart if counter_used => counter_start.delete_to_end(),
+								Focus::CounterStep if counter_used => counter_step.delete_to_end(),
+								Focus::CounterWidth if counter_used => counter_width.delete_to_end(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Char('a') => {
-						match focus {
-							Focus::NameMask => mask_input.home(),
-							Focus::ExtMask => ext_input.home(),
-							Focus::Find => find_input.home(),
-							Focus::Replace => replace_input.home(),
-							Focus::CounterStart if counter_used => counter_start.home(),
-							Focus::CounterStep if counter_used => counter_step.home(),
-							Focus::CounterWidth if counter_used => counter_width.home(),
-							_ => {}
+						KeyCode::Char('a') => {
+							match focus {
+								Focus::NameMask => mask_input.home(),
+								Focus::ExtMask => ext_input.home(),
+								Focus::Find => find_input.home(),
+								Focus::Replace => replace_input.home(),
+								Focus::CounterStart if counter_used => counter_start.home(),
+								Focus::CounterStep if counter_used => counter_step.home(),
+								Focus::CounterWidth if counter_used => counter_width.home(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
-					}
-					KeyCode::Char('e') => {
-						match focus {
-							Focus::NameMask => mask_input.end(),
-							Focus::ExtMask => ext_input.end(),
-							Focus::Find => find_input.end(),
-							Focus::Replace => replace_input.end(),
-							Focus::CounterStart if counter_used => counter_start.end(),
-							Focus::CounterStep if counter_used => counter_step.end(),
-							Focus::CounterWidth if counter_used => counter_width.end(),
-							_ => {}
+						KeyCode::Char('e') => {
+							match focus {
+								Focus::NameMask => mask_input.end(),
+								Focus::ExtMask => ext_input.end(),
+								Focus::Find => find_input.end(),
+								Focus::Replace => replace_input.end(),
+								Focus::CounterStart if counter_used => counter_start.end(),
+								Focus::CounterStep if counter_used => counter_step.end(),
+								Focus::CounterWidth if counter_used => counter_width.end(),
+								_ => {}
+							}
+							continue;
 						}
-						continue;
+						_ => {}
 					}
-					_ => {}
 				}
-			}
 
-			match key.code {
-				KeyCode::Esc => {
-					return Ok(());
-				}
-				KeyCode::Tab => {
-					focus = focus.next(counter_used);
-				}
-				KeyCode::BackTab => {
-					focus = focus.prev(counter_used);
-				}
-				KeyCode::Home => match focus {
-					Focus::NameMask => mask_input.home(),
-					Focus::ExtMask => ext_input.home(),
-					Focus::Find => find_input.home(),
-					Focus::Replace => replace_input.home(),
-					Focus::CounterStart if counter_used => counter_start.home(),
-					Focus::CounterStep if counter_used => counter_step.home(),
-					Focus::CounterWidth if counter_used => counter_width.home(),
-					_ => {}
-				},
-				KeyCode::End => match focus {
-					Focus::NameMask => mask_input.end(),
-					Focus::ExtMask => ext_input.end(),
-					Focus::Find => find_input.end(),
-					Focus::Replace => replace_input.end(),
-					Focus::CounterStart if counter_used => counter_start.end(),
-					Focus::CounterStep if counter_used => counter_step.end(),
-					Focus::CounterWidth if counter_used => counter_width.end(),
-					_ => {}
-				},
-				KeyCode::Delete => match focus {
-					Focus::NameMask => mask_input.delete(),
-					Focus::ExtMask => ext_input.delete(),
-					Focus::Find => find_input.delete(),
-					Focus::Replace => replace_input.delete(),
-					Focus::CounterStart if counter_used => counter_start.delete(),
-					Focus::CounterStep if counter_used => counter_step.delete(),
-					Focus::CounterWidth if counter_used => counter_width.delete(),
-					_ => {}
-				},
-				KeyCode::Up => {
-					if focus == Focus::Table {
-						let i = match table_state.selected() {
-							Some(i) => {
-								if i > 0 {
-									i - 1
-								} else {
-									0
-								}
-							}
-							None => 0,
-						};
-						table_state.select(Some(i));
-					} else {
-						focus = focus.prev(counter_used);
-					}
-				}
-				KeyCode::Down => {
-					if focus == Focus::Table {
-						let i = match table_state.selected() {
-							Some(i) => {
-								if i < files.len() - 1 {
-									i + 1
-								} else {
-									files.len() - 1
-								}
-							}
-							None => 0,
-						};
-						table_state.select(Some(i));
-					} else {
-						focus = focus.next(counter_used);
-					}
-				}
-				KeyCode::Left => match focus {
-					Focus::NameMask => mask_input.left(),
-					Focus::ExtMask => ext_input.left(),
-					Focus::NameCase => name_case = name_case.prev(),
-					Focus::ExtCase => ext_case = ext_case.prev(),
-					Focus::Regex => use_regex = !use_regex,
-					Focus::CaseSensitive => case_sensitive = !case_sensitive,
-					Focus::Replace1x => replace_1x = !replace_1x,
-					Focus::Find => find_input.left(),
-					Focus::Replace => replace_input.left(),
-					Focus::CounterStart if counter_used => counter_start.left(),
-					Focus::CounterStep if counter_used => counter_step.left(),
-					Focus::CounterWidth if counter_used => counter_width.left(),
-					Focus::OkBtn | Focus::CancelBtn => {
-						focus = Focus::OkBtn;
-					}
-					_ => {}
-				},
-				KeyCode::Right => match focus {
-					Focus::NameMask => mask_input.right(),
-					Focus::ExtMask => ext_input.right(),
-					Focus::NameCase => name_case = name_case.next(),
-					Focus::ExtCase => ext_case = ext_case.next(),
-					Focus::Regex => use_regex = !use_regex,
-					Focus::CaseSensitive => case_sensitive = !case_sensitive,
-					Focus::Replace1x => replace_1x = !replace_1x,
-					Focus::Find => find_input.right(),
-					Focus::Replace => replace_input.right(),
-					Focus::CounterStart if counter_used => counter_start.right(),
-					Focus::CounterStep if counter_used => counter_step.right(),
-					Focus::CounterWidth if counter_used => counter_width.right(),
-					Focus::OkBtn | Focus::CancelBtn => {
-						focus = Focus::CancelBtn;
-					}
-					_ => {}
-				},
-				KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::Regex => {
-					use_regex = !use_regex;
-				}
-				KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::CaseSensitive => {
-					case_sensitive = !case_sensitive;
-				}
-				KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::Replace1x => {
-					replace_1x = !replace_1x;
-				}
-				KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::NameCase => {
-					name_case = match name_case {
-						CaseConv::NoChange => CaseConv::Uppercase,
-						CaseConv::Uppercase => CaseConv::Lowercase,
-						CaseConv::Lowercase => CaseConv::FirstLetter,
-						CaseConv::FirstLetter => CaseConv::TitleCase,
-						CaseConv::TitleCase => CaseConv::NoChange,
-					};
-				}
-				KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::ExtCase => {
-					ext_case = match ext_case {
-						CaseConv::NoChange => CaseConv::Uppercase,
-						CaseConv::Uppercase => CaseConv::Lowercase,
-						CaseConv::Lowercase => CaseConv::FirstLetter,
-						CaseConv::FirstLetter => CaseConv::TitleCase,
-						CaseConv::TitleCase => CaseConv::NoChange,
-					};
-				}
-				KeyCode::Char(c) => match focus {
-					Focus::NameMask => mask_input.insert(c),
-					Focus::ExtMask => ext_input.insert(c),
-					Focus::Find => find_input.insert(c),
-					Focus::Replace => replace_input.insert(c),
-					Focus::CounterStart if counter_used => {
-						if c.is_ascii_digit() {
-							counter_start.insert(c);
-						}
-					}
-					Focus::CounterStep if counter_used => {
-						if c.is_ascii_digit() {
-							counter_step.insert(c);
-						}
-					}
-					Focus::CounterWidth if counter_used => {
-						if c.is_ascii_digit() {
-							counter_width.insert(c);
-						}
-					}
-					Focus::OkBtn => {
-						if c == '\n' || c == '\r' {
-							return accept_rename(files, previews);
-						}
-					}
-					Focus::CancelBtn => {
-						if c == '\n' || c == '\r' {
-							return Ok(());
-						}
-					}
-					_ => {}
-				},
-				KeyCode::Backspace => match focus {
-					Focus::NameMask => mask_input.backspace(),
-					Focus::ExtMask => ext_input.backspace(),
-					Focus::Find => find_input.backspace(),
-					Focus::Replace => replace_input.backspace(),
-					Focus::CounterStart if counter_used => counter_start.backspace(),
-					Focus::CounterStep if counter_used => counter_step.backspace(),
-					Focus::CounterWidth if counter_used => counter_width.backspace(),
-					_ => {}
-				},
-				KeyCode::Enter => match focus {
-					Focus::OkBtn => {
-						return accept_rename(files, previews);
-					}
-					Focus::CancelBtn => {
+				match key.code {
+					KeyCode::Esc => {
 						return Ok(());
 					}
-					_ => {
+					KeyCode::Tab => {
+						focus = focus.next(counter_used);
+					}
+					KeyCode::BackTab => {
+						focus = focus.prev(counter_used);
+					}
+					KeyCode::Home => match focus {
+						Focus::NameMask => mask_input.home(),
+						Focus::ExtMask => ext_input.home(),
+						Focus::Find => find_input.home(),
+						Focus::Replace => replace_input.home(),
+						Focus::CounterStart if counter_used => counter_start.home(),
+						Focus::CounterStep if counter_used => counter_step.home(),
+						Focus::CounterWidth if counter_used => counter_width.home(),
+						_ => {}
+					},
+					KeyCode::End => match focus {
+						Focus::NameMask => mask_input.end(),
+						Focus::ExtMask => ext_input.end(),
+						Focus::Find => find_input.end(),
+						Focus::Replace => replace_input.end(),
+						Focus::CounterStart if counter_used => counter_start.end(),
+						Focus::CounterStep if counter_used => counter_step.end(),
+						Focus::CounterWidth if counter_used => counter_width.end(),
+						_ => {}
+					},
+					KeyCode::Delete => match focus {
+						Focus::NameMask => mask_input.delete(),
+						Focus::ExtMask => ext_input.delete(),
+						Focus::Find => find_input.delete(),
+						Focus::Replace => replace_input.delete(),
+						Focus::CounterStart if counter_used => counter_start.delete(),
+						Focus::CounterStep if counter_used => counter_step.delete(),
+						Focus::CounterWidth if counter_used => counter_width.delete(),
+						_ => {}
+					},
+					KeyCode::Up => {
+						if focus == Focus::Table {
+							let i = match table_state.selected() {
+								Some(i) => {
+									if i > 0 {
+										i - 1
+									} else {
+										0
+									}
+								}
+								None => 0,
+							};
+							table_state.select(Some(i));
+						} else {
+							focus = focus.prev(counter_used);
+						}
+					}
+					KeyCode::Down => {
+						if focus == Focus::Table {
+							let i = match table_state.selected() {
+								Some(i) => {
+									if i < files.len() - 1 {
+										i + 1
+									} else {
+										files.len() - 1
+									}
+								}
+								None => 0,
+							};
+							table_state.select(Some(i));
+						} else {
+							focus = focus.next(counter_used);
+						}
+					}
+					KeyCode::Left => match focus {
+						Focus::NameMask => mask_input.left(),
+						Focus::ExtMask => ext_input.left(),
+						Focus::NameCase => name_case = name_case.prev(),
+						Focus::ExtCase => ext_case = ext_case.prev(),
+						Focus::Regex => use_regex = !use_regex,
+						Focus::CaseSensitive => case_sensitive = !case_sensitive,
+						Focus::Replace1x => replace_1x = !replace_1x,
+						Focus::Find => find_input.left(),
+						Focus::Replace => replace_input.left(),
+						Focus::CounterStart if counter_used => counter_start.left(),
+						Focus::CounterStep if counter_used => counter_step.left(),
+						Focus::CounterWidth if counter_used => counter_width.left(),
+						Focus::OkBtn | Focus::CancelBtn => {
+							focus = Focus::OkBtn;
+						}
+						_ => {}
+					},
+					KeyCode::Right => match focus {
+						Focus::NameMask => mask_input.right(),
+						Focus::ExtMask => ext_input.right(),
+						Focus::NameCase => name_case = name_case.next(),
+						Focus::ExtCase => ext_case = ext_case.next(),
+						Focus::Regex => use_regex = !use_regex,
+						Focus::CaseSensitive => case_sensitive = !case_sensitive,
+						Focus::Replace1x => replace_1x = !replace_1x,
+						Focus::Find => find_input.right(),
+						Focus::Replace => replace_input.right(),
+						Focus::CounterStart if counter_used => counter_start.right(),
+						Focus::CounterStep if counter_used => counter_step.right(),
+						Focus::CounterWidth if counter_used => counter_width.right(),
+						Focus::OkBtn | Focus::CancelBtn => {
+							focus = Focus::CancelBtn;
+						}
+						_ => {}
+					},
+					KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::Regex => {
+						use_regex = !use_regex;
+					}
+					KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::CaseSensitive => {
+						case_sensitive = !case_sensitive;
+					}
+					KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::Replace1x => {
+						replace_1x = !replace_1x;
+					}
+					KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::NameCase => {
+						name_case = match name_case {
+							CaseConv::NoChange => CaseConv::Uppercase,
+							CaseConv::Uppercase => CaseConv::Lowercase,
+							CaseConv::Lowercase => CaseConv::FirstLetter,
+							CaseConv::FirstLetter => CaseConv::TitleCase,
+							CaseConv::TitleCase => CaseConv::NoChange,
+						};
+					}
+					KeyCode::Char(' ') | KeyCode::Enter if focus == Focus::ExtCase => {
+						ext_case = match ext_case {
+							CaseConv::NoChange => CaseConv::Uppercase,
+							CaseConv::Uppercase => CaseConv::Lowercase,
+							CaseConv::Lowercase => CaseConv::FirstLetter,
+							CaseConv::FirstLetter => CaseConv::TitleCase,
+							CaseConv::TitleCase => CaseConv::NoChange,
+						};
+					}
+					KeyCode::Char(c) => match focus {
+						Focus::NameMask => mask_input.insert(c),
+						Focus::ExtMask => ext_input.insert(c),
+						Focus::Find => find_input.insert(c),
+						Focus::Replace => replace_input.insert(c),
+						Focus::CounterStart if counter_used => {
+							if c.is_ascii_digit() {
+								counter_start.insert(c);
+							}
+						}
+						Focus::CounterStep if counter_used => {
+							if c.is_ascii_digit() {
+								counter_step.insert(c);
+							}
+						}
+						Focus::CounterWidth if counter_used => {
+							if c.is_ascii_digit() {
+								counter_width.insert(c);
+							}
+						}
+						Focus::OkBtn => {
+							if c == '\n' || c == '\r' {
+								return accept_rename(files, previews);
+							}
+						}
+						Focus::CancelBtn => {
+							if c == '\n' || c == '\r' {
+								return Ok(());
+							}
+						}
+						_ => {}
+					},
+					KeyCode::Backspace => match focus {
+						Focus::NameMask => mask_input.backspace(),
+						Focus::ExtMask => ext_input.backspace(),
+						Focus::Find => find_input.backspace(),
+						Focus::Replace => replace_input.backspace(),
+						Focus::CounterStart if counter_used => counter_start.backspace(),
+						Focus::CounterStep if counter_used => counter_step.backspace(),
+						Focus::CounterWidth if counter_used => counter_width.backspace(),
+						_ => {}
+					},
+					KeyCode::Enter => match focus {
+						Focus::OkBtn => {
+							return accept_rename(files, previews);
+						}
+						Focus::CancelBtn => {
+							return Ok(());
+						}
+						_ => {
+							return accept_rename(files, previews);
+						}
+					},
+					_ => {}
+				}
+			}
+			Event::Mouse(mouse_event) => {
+				// Mouse Click Handling
+				if mouse_event.kind == event::MouseEventKind::Down(event::MouseButton::Left) {
+					let mx = mouse_event.column;
+					let my = mouse_event.row;
+
+					let in_rect = |r: ratatui::layout::Rect| {
+						mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height
+					};
+
+					let size = terminal.size()?;
+					let area = ratatui::layout::Rect::new(0, 0, size.width, size.height);
+					let layouts = calculate_layouts(area);
+
+					// Check Name Mask
+					if in_rect(layouts.name_mask_inner[0]) {
+						focus = Focus::NameMask;
+					} else if in_rect(layouts.name_mask_inner[1]) {
+						focus = Focus::NameCase;
+						name_case = match name_case {
+							CaseConv::NoChange => CaseConv::Uppercase,
+							CaseConv::Uppercase => CaseConv::Lowercase,
+							CaseConv::Lowercase => CaseConv::FirstLetter,
+							CaseConv::FirstLetter => CaseConv::TitleCase,
+							CaseConv::TitleCase => CaseConv::NoChange,
+						};
+					}
+					// Check Extension Mask
+					else if in_rect(layouts.ext_mask_inner[0]) {
+						focus = Focus::ExtMask;
+					} else if in_rect(layouts.ext_mask_inner[1]) {
+						focus = Focus::ExtCase;
+						ext_case = match ext_case {
+							CaseConv::NoChange => CaseConv::Uppercase,
+							CaseConv::Uppercase => CaseConv::Lowercase,
+							CaseConv::Lowercase => CaseConv::FirstLetter,
+							CaseConv::FirstLetter => CaseConv::TitleCase,
+							CaseConv::TitleCase => CaseConv::NoChange,
+						};
+					}
+					// Check Find & Replace
+					else if in_rect(layouts.fr_inner[0]) {
+						focus = Focus::Find;
+					} else if in_rect(layouts.fr_inner[1]) {
+						focus = Focus::Replace;
+					}
+					// Checkboxes
+					else if in_rect(layouts.cb_chunks[0]) {
+						focus = Focus::Regex;
+						use_regex = !use_regex;
+					} else if in_rect(layouts.cb_chunks[1]) {
+						focus = Focus::CaseSensitive;
+						case_sensitive = !case_sensitive;
+					} else if in_rect(layouts.cb_chunks[2]) {
+						focus = Focus::Replace1x;
+						replace_1x = !replace_1x;
+					}
+					// Counter (only if counter is used/active)
+					else if counter_used && in_rect(layouts.counter_chunks[0]) {
+						focus = Focus::CounterStart;
+					} else if counter_used && in_rect(layouts.counter_chunks[1]) {
+						focus = Focus::CounterStep;
+					} else if counter_used && in_rect(layouts.counter_chunks[2]) {
+						focus = Focus::CounterWidth;
+					}
+					// Buttons
+					else if in_rect(layouts.button_chunks[0]) {
 						return accept_rename(files, previews);
+					} else if in_rect(layouts.button_chunks[1]) {
+						return Ok(());
 					}
-				},
-				_ => {}
-			}
-		}
-		Event::Mouse(mouse_event) => {
-			// Mouse Click Handling
-			if mouse_event.kind == event::MouseEventKind::Down(event::MouseButton::Left) {
-				let mx = mouse_event.column;
-				let my = mouse_event.row;
-
-				let in_rect = |r: ratatui::layout::Rect| {
-					mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height
-				};
-
-				let size = terminal.size()?;
-				let area = ratatui::layout::Rect::new(0, 0, size.width, size.height);
-				let layouts = calculate_layouts(area);
-
-				// Check Name Mask
-				if in_rect(layouts.name_mask_inner[0]) {
-					focus = Focus::NameMask;
-				} else if in_rect(layouts.name_mask_inner[1]) {
-					focus = Focus::NameCase;
-					name_case = match name_case {
-						CaseConv::NoChange => CaseConv::Uppercase,
-						CaseConv::Uppercase => CaseConv::Lowercase,
-						CaseConv::Lowercase => CaseConv::FirstLetter,
-						CaseConv::FirstLetter => CaseConv::TitleCase,
-						CaseConv::TitleCase => CaseConv::NoChange,
-					};
-				}
-				// Check Extension Mask
-				else if in_rect(layouts.ext_mask_inner[0]) {
-					focus = Focus::ExtMask;
-				} else if in_rect(layouts.ext_mask_inner[1]) {
-					focus = Focus::ExtCase;
-					ext_case = match ext_case {
-						CaseConv::NoChange => CaseConv::Uppercase,
-						CaseConv::Uppercase => CaseConv::Lowercase,
-						CaseConv::Lowercase => CaseConv::FirstLetter,
-						CaseConv::FirstLetter => CaseConv::TitleCase,
-						CaseConv::TitleCase => CaseConv::NoChange,
-					};
-				}
-				// Check Find & Replace
-				else if in_rect(layouts.fr_inner[0]) {
-					focus = Focus::Find;
-				} else if in_rect(layouts.fr_inner[1]) {
-					focus = Focus::Replace;
-				}
-				// Checkboxes
-				else if in_rect(layouts.cb_chunks[0]) {
-					focus = Focus::Regex;
-					use_regex = !use_regex;
-				} else if in_rect(layouts.cb_chunks[1]) {
-					focus = Focus::CaseSensitive;
-					case_sensitive = !case_sensitive;
-				} else if in_rect(layouts.cb_chunks[2]) {
-					focus = Focus::Replace1x;
-					replace_1x = !replace_1x;
-				}
-				// Counter (only if counter is used/active)
-				else if counter_used && in_rect(layouts.counter_chunks[0]) {
-					focus = Focus::CounterStart;
-				} else if counter_used && in_rect(layouts.counter_chunks[1]) {
-					focus = Focus::CounterStep;
-				} else if counter_used && in_rect(layouts.counter_chunks[2]) {
-					focus = Focus::CounterWidth;
-				}
-				// Buttons
-				else if in_rect(layouts.button_chunks[0]) {
-					return accept_rename(files, previews);
-				} else if in_rect(layouts.button_chunks[1]) {
-					return Ok(());
-				}
-				// Table
-				else if in_rect(layouts.chunks[1]) {
-					focus = Focus::Table;
-					let table_y = layouts.chunks[1].y;
-					if my >= table_y + 2 && my < table_y + 2 + files.len() as u16 {
-						let clicked_row = (my - table_y - 2) as usize;
-						table_state.select(Some(clicked_row));
+					// Table
+					else if in_rect(layouts.chunks[1]) {
+						focus = Focus::Table;
+						let table_y = layouts.chunks[1].y;
+						if my >= table_y + 2 && my < table_y + 2 + files.len() as u16 {
+							let clicked_row = (my - table_y - 2) as usize;
+							table_state.select(Some(clicked_row));
+						}
 					}
 				}
 			}
+			_ => {}
 		}
-		_ => {}
-	}
 	}
 }
 

@@ -11,15 +11,15 @@ use crossterm::{
 		MouseButton, MouseEventKind,
 	},
 	execute,
-	terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+	terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use ratatui::{
+	Terminal,
 	backend::CrosstermBackend,
 	layout::{Alignment, Constraint, Direction, Layout, Rect},
 	style::{Color, Modifier, Style},
 	text::{Line, Span},
 	widgets::{Block, Borders, Clear, Paragraph},
-	Terminal,
 };
 use serde::{Deserialize, Serialize};
 
@@ -59,15 +59,8 @@ impl ArchiveFormat {
 		}
 	}
 
-	pub fn all() -> &'static [ArchiveFormat] {
-		&[
-			ArchiveFormat::SevenZip,
-			ArchiveFormat::Zip,
-			ArchiveFormat::TarGz,
-			ArchiveFormat::TarXz,
-			ArchiveFormat::TarBz2,
-			ArchiveFormat::TarZst,
-		]
+	pub fn all() -> &'static [Self] {
+		&[Self::SevenZip, Self::Zip, Self::TarGz, Self::TarXz, Self::TarBz2, Self::TarZst]
 	}
 
 	pub fn from_ext(ext: &str) -> Self {
@@ -116,15 +109,8 @@ impl CompressionLevel {
 		}
 	}
 
-	pub fn all() -> &'static [CompressionLevel] {
-		&[
-			CompressionLevel::Store,
-			CompressionLevel::Fastest,
-			CompressionLevel::Fast,
-			CompressionLevel::Normal,
-			CompressionLevel::Maximum,
-			CompressionLevel::Ultra,
-		]
+	pub fn all() -> &'static [Self] {
+		&[Self::Store, Self::Fastest, Self::Fast, Self::Normal, Self::Maximum, Self::Ultra]
 	}
 }
 
@@ -152,15 +138,8 @@ impl CompressionMethod {
 		}
 	}
 
-	pub fn all() -> &'static [CompressionMethod] {
-		&[
-			CompressionMethod::Auto,
-			CompressionMethod::LZMA2,
-			CompressionMethod::LZMA,
-			CompressionMethod::Deflate,
-			CompressionMethod::BZip2,
-			CompressionMethod::ZSTD,
-		]
+	pub fn all() -> &'static [Self] {
+		&[Self::Auto, Self::LZMA2, Self::LZMA, Self::Deflate, Self::BZip2, Self::ZSTD]
 	}
 }
 
@@ -536,11 +515,7 @@ fn run_pack_app(
 	let base_name = if files.len() == 1 {
 		first_path.file_stem().and_then(|s| s.to_str()).unwrap_or("archive")
 	} else {
-		first_path
-			.parent()
-			.and_then(|p| p.file_name())
-			.and_then(|s| s.to_str())
-			.unwrap_or("archive")
+		first_path.parent().and_then(|p| p.file_name()).and_then(|s| s.to_str()).unwrap_or("archive")
 	};
 
 	let chosen_dir = if mode_arg == "pack-opposite" && opposite_dir.is_some() {
@@ -636,15 +611,16 @@ fn run_pack_app(
 
 			// Row 0: Archive path with visual cursor
 			let mut path_spans = vec![Span::styled("Archive path: ", normal_style)];
-			path_spans.extend(path_input.render_spans(is_focused(&Focus::ArchivePath), normal_style, active_style));
+			path_spans.extend(path_input.render_spans(
+				is_focused(&Focus::ArchivePath),
+				normal_style,
+				active_style,
+			));
 			f.render_widget(
 				Paragraph::new(Line::from(path_spans)).block(
-					Block::default().borders(Borders::BOTTOM).border_style(if is_focused(&Focus::ArchivePath)
-					{
-						active_style
-					} else {
-						dim_style
-					}),
+					Block::default()
+						.borders(Borders::BOTTOM)
+						.border_style(if is_focused(&Focus::ArchivePath) { active_style } else { dim_style }),
 				),
 				rows[0],
 			);
@@ -652,25 +628,20 @@ fn run_pack_app(
 			// Row 1: Compact Archiver & Level & Method & Solid (Dropdown style)
 			let row1_spans = vec![
 				Span::styled("Archiver", hotkey_style),
-				Span::styled(format!(":[ {} ]  ", formats[format_idx].label()), if is_focused(&Focus::Format)
-				{
-					active_style
-				} else {
-					normal_style
-				}),
+				Span::styled(
+					format!(":[ {} ]  ", formats[format_idx].label()),
+					if is_focused(&Focus::Format) { active_style } else { normal_style },
+				),
 				Span::styled("Level", hotkey_style),
-				Span::styled(format!(":[ {} ]  ", levels[level_idx].label()), if is_focused(&Focus::Level) {
-					active_style
-				} else {
-					normal_style
-				}),
+				Span::styled(
+					format!(":[ {} ]  ", levels[level_idx].label()),
+					if is_focused(&Focus::Level) { active_style } else { normal_style },
+				),
 				Span::styled("Method", hotkey_style),
-				Span::styled(format!(":[ {} ]  ", methods[method_idx].label()), if is_focused(&Focus::Method)
-				{
-					active_style
-				} else {
-					normal_style
-				}),
+				Span::styled(
+					format!(":[ {} ]  ", methods[method_idx].label()),
+					if is_focused(&Focus::Method) { active_style } else { normal_style },
+				),
 				Span::styled("[", dim_style),
 				Span::styled(
 					if solid { "x" } else { " " },
@@ -715,28 +686,36 @@ fn run_pack_app(
 				),
 			]);
 
-			let mut pwd_spans = vec![Span::styled("Password: ", if encrypt { normal_style } else { dim_style })];
-			pwd_spans.extend(password_input.render_password_spans(is_focused(&Focus::Password), show_password, if encrypt { normal_style } else { dim_style }, active_style));
+			let mut pwd_spans =
+				vec![Span::styled("Password: ", if encrypt { normal_style } else { dim_style })];
+			pwd_spans.extend(password_input.render_password_spans(
+				is_focused(&Focus::Password),
+				show_password,
+				if encrypt { normal_style } else { dim_style },
+				active_style,
+			));
 			pwd_spans.push(Span::styled("    Repeat: ", if encrypt { normal_style } else { dim_style }));
-			pwd_spans.extend(repeat_input.render_password_spans(is_focused(&Focus::RepeatPassword), show_password, if encrypt { normal_style } else { dim_style }, active_style));
+			pwd_spans.extend(repeat_input.render_password_spans(
+				is_focused(&Focus::RepeatPassword),
+				show_password,
+				if encrypt { normal_style } else { dim_style },
+				active_style,
+			));
 
 			let enc_fields = Line::from(pwd_spans);
 
-			let enc_block = Block::default()
-				.borders(Borders::ALL)
-				.title(" Security ")
-				.border_style(
-					if is_focused(&Focus::Encrypt)
-						|| is_focused(&Focus::EncryptHeader)
-						|| is_focused(&Focus::ShowPassword)
-						|| is_focused(&Focus::Password)
-						|| is_focused(&Focus::RepeatPassword)
-					{
-						active_style
-					} else {
-						dim_style
-					},
-				);
+			let enc_block = Block::default().borders(Borders::ALL).title(" Security ").border_style(
+				if is_focused(&Focus::Encrypt)
+					|| is_focused(&Focus::EncryptHeader)
+					|| is_focused(&Focus::ShowPassword)
+					|| is_focused(&Focus::Password)
+					|| is_focused(&Focus::RepeatPassword)
+				{
+					active_style
+				} else {
+					dim_style
+				},
+			);
 			f.render_widget(Paragraph::new(vec![enc_header, enc_fields]).block(enc_block), rows[2]);
 
 			// Row 3: Options (Delete source)
@@ -794,9 +773,8 @@ fn run_pack_app(
 					let mx = mouse_event.column;
 					let my = mouse_event.row;
 
-					let in_rect = |r: Rect| {
-						mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height
-					};
+					let in_rect =
+						|r: Rect| mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height;
 
 					if !layout_rects.is_empty() {
 						if in_rect(layout_rects[0]) {
@@ -904,7 +882,9 @@ fn run_pack_app(
 
 				error_msg = None;
 
-				if key.modifiers.contains(KeyModifiers::CONTROL) || key.modifiers.contains(KeyModifiers::ALT) {
+				if key.modifiers.contains(KeyModifiers::CONTROL)
+					|| key.modifiers.contains(KeyModifiers::ALT)
+				{
 					match key.code {
 						KeyCode::Left | KeyCode::Char('b') => {
 							match focus {
@@ -1244,15 +1224,14 @@ fn run_extract_app(
 	let persistent = load_state();
 
 	let archive_path = Path::new(&files[0]);
-	let parent_dir =
-		output_dir.as_deref().map(Path::new).unwrap_or_else(|| archive_path.parent().unwrap_or(Path::new(".")));
+	let parent_dir = output_dir
+		.as_deref()
+		.map(Path::new)
+		.unwrap_or_else(|| archive_path.parent().unwrap_or(Path::new(".")));
 
 	let stem = archive_path.file_stem().and_then(|s| s.to_str()).unwrap_or("extracted");
-	let clean_stem = if stem.ends_with(".tar") {
-		stem.strip_suffix(".tar").unwrap_or(stem)
-	} else {
-		stem
-	};
+	let clean_stem =
+		if stem.ends_with(".tar") { stem.strip_suffix(".tar").unwrap_or(stem) } else { stem };
 
 	let current_dir_str = parent_dir.to_string_lossy().to_string();
 	let subdir_str = parent_dir.join(clean_stem).to_string_lossy().to_string();
@@ -1292,7 +1271,10 @@ fn run_extract_app(
 
 			f.render_widget(Clear, popup_area);
 
-			let title = format!(" Extract files: {} ", archive_path.file_name().and_then(|s| s.to_str()).unwrap_or(""));
+			let title = format!(
+				" Extract files: {} ",
+				archive_path.file_name().and_then(|s| s.to_str()).unwrap_or("")
+			);
 			let main_block = Block::default()
 				.borders(Borders::ALL)
 				.title(title)
@@ -1328,7 +1310,11 @@ fn run_extract_app(
 
 			// Row 0: Dest path with visual cursor
 			let mut path_spans = vec![Span::styled("Extract to: ", normal_style)];
-			path_spans.extend(dest_input.render_spans(is_focused(&Focus::DestPath), normal_style, active_style));
+			path_spans.extend(dest_input.render_spans(
+				is_focused(&Focus::DestPath),
+				normal_style,
+				active_style,
+			));
 			f.render_widget(
 				Paragraph::new(Line::from(path_spans)).block(
 					Block::default().borders(Borders::BOTTOM).border_style(if is_focused(&Focus::DestPath) {
@@ -1378,7 +1364,12 @@ fn run_extract_app(
 
 			// Row 2: Password with visual cursor
 			let mut pwd_spans = vec![Span::styled("Password (if encrypted): ", normal_style)];
-			pwd_spans.extend(password_input.render_password_spans(is_focused(&Focus::Password), show_password, normal_style, active_style));
+			pwd_spans.extend(password_input.render_password_spans(
+				is_focused(&Focus::Password),
+				show_password,
+				normal_style,
+				active_style,
+			));
 			pwd_spans.push(Span::styled("    [", dim_style));
 			pwd_spans.push(Span::styled(
 				if show_password { "x" } else { " " },
@@ -1464,9 +1455,8 @@ fn run_extract_app(
 					let mx = mouse_event.column;
 					let my = mouse_event.row;
 
-					let in_rect = |r: Rect| {
-						mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height
-					};
+					let in_rect =
+						|r: Rect| mx >= r.x && mx < r.x + r.width && my >= r.y && my < r.y + r.height;
 
 					if !layout_rects.is_empty() {
 						if in_rect(layout_rects[0]) {
@@ -1558,7 +1548,9 @@ fn run_extract_app(
 
 				error_msg = None;
 
-				if key.modifiers.contains(KeyModifiers::CONTROL) || key.modifiers.contains(KeyModifiers::ALT) {
+				if key.modifiers.contains(KeyModifiers::CONTROL)
+					|| key.modifiers.contains(KeyModifiers::ALT)
+				{
 					match key.code {
 						KeyCode::Left | KeyCode::Char('b') => {
 							match focus {
@@ -1892,7 +1884,8 @@ mod tests {
 		};
 
 		let json_str = serde_json::to_string(&res).expect("serialization failed");
-		let deserialized: ArchiveResult = serde_json::from_str(&json_str).expect("deserialization failed");
+		let deserialized: ArchiveResult =
+			serde_json::from_str(&json_str).expect("deserialization failed");
 		assert_eq!(res, deserialized);
 	}
 }

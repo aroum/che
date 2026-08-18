@@ -20,9 +20,11 @@ local state = ya.sync(function()
 end)
 
 local function spawn_ch(bin, args)
-	local ok, child = pcall(function()
-		return Command(bin):arg(args):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):spawn()
-	end)
+	local ok, child = pcall(
+		function()
+			return Command(bin):arg(args):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):spawn()
+		end
+	)
 	if ok and child then
 		return child
 	end
@@ -141,7 +143,9 @@ function M:execute_pack(plan)
 	local cmd = nil
 	local args = {}
 
-	if ext == "7z" or (ext == "zip" and (is_cmd_available("7z") or is_cmd_available("7zz") or is_cmd_available("7za"))) then
+	if
+		ext == "7z" or (ext == "zip" and (is_cmd_available("7z") or is_cmd_available("7zz") or is_cmd_available("7za")))
+	then
 		cmd = is_cmd_available("7z") and "7z" or (is_cmd_available("7zz") and "7zz" or "7za")
 		table.insert(args, "a")
 		if ext == "zip" then
@@ -197,7 +201,8 @@ function M:execute_pack(plan)
 	if not status or not status.success then
 		return ya.notify {
 			title = "Archive",
-			content = "Archiving failed with error: " .. tostring(wait_err or "exit code " .. tostring(status and status.code)),
+			content = "Archiving failed with error: "
+				.. tostring(wait_err or "exit code " .. tostring(status and status.code)),
 			timeout = 5,
 			level = "error",
 		}
@@ -300,7 +305,8 @@ function M:execute_extract(plan)
 
 		return ya.notify {
 			title = "Archive",
-			content = "Extraction failed with error: " .. tostring(wait_err or "exit code " .. tostring(status and status.code)),
+			content = "Extraction failed with error: "
+				.. tostring(wait_err or "exit code " .. tostring(status and status.code)),
 			timeout = 5,
 			level = "error",
 		}
