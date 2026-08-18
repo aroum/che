@@ -52,6 +52,12 @@ Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class c
 12. **Built-in Dual-Pane Session Persistence (`che-session`)**:
     * Automatically saves and restores all open tabs, working directories, per-tab view settings (sorting mode, linemode, hidden visibility), active tab selection, and active pane focus across restarts.
     * Available out of the box with zero external installation required.
+13. **Double Commander Style Archive Manager & Password Protection (`che-archive`)**:
+    * Interactive TUI for archive creation (`c a` / `c A`) with format selection (`zip`, `tar`, `7z`, `tar.gz`, `tar.bz2`, `tar.xz`, `tar.zst`), compression levels (`0` Store to `9` Ultra), password encryption, 7z header encryption, and solid mode.
+    * Archive extraction into active or opposite pane (`c x`, `c X`, `c e`).
+    * Native interactive masked password prompt when opening encrypted archives, with session-level password caching.
+14. **Bundled Fast Directory Bookmarks & Hops (`che-bookmarks`)**:
+    * Fast hopping menu on `;`, interactive bookmark creation with custom keys/descriptions (`<Enter>`), deletion (`<Delete>`), fuzzy search (`fzf`), active pane tab jumps (`1..9`), and automatic JSON persistence.
 
 ---
 

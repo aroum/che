@@ -37,9 +37,20 @@ This document tracks all custom features, architectural enhancements, UI/UX impr
 - **Built-in Bundled Plugin & Toggle Flag**: Delivered out-of-the-box as `che-session` preset plugin without requiring external package downloads. Can be enabled or disabled via `require("che-session"):setup({ enabled = true })` (or `enabled = false`).
 - **Commands & Keymaps**: Supports `save-and-quit`, `save`, and `restore` actions via `plugin che-session -- save-and-quit`.
 
-### 6. Binaries & Versioning Scheme
+### 6. Double Commander Style Archive Manager & Password Protection (`che-archive`)
+- **Interactive Archive Creation TUI**: Double Commander style archive creation interface supporting format selection (`zip`, `tar`, `7z`, `tar.gz`, `tar.bz2`, `tar.xz`, `tar.zst`), compression levels (`0` Store to `9` Ultra), compression methods (`LZMA2`, `Deflate`, `ZSTD`, etc.), solid block compression, and password encryption.
+- **Header Encryption for 7z**: Option to encrypt archive file lists and metadata (`-mhe=on`).
+- **Cross-Pane Packing & Extraction**: `che-archive` plugin bindings to pack files into the active or opposite pane (`c a`, `c A`) and extract archives into the active or opposite pane (`c x`, `c X`, `c e`).
+- **Interactive Password Prompt**: Native masked password input dialog (`InputCfg::password`) when opening password-protected archives, with session-level password caching in `ARCHIVE_PASSWORDS` and `-p-` stdin null redirection to prevent CLI tool hangs.
+
+### 7. Bundled Fast Directory Bookmarks & Hops (`che-bookmarks`)
+- **Interactive Preset Plugin**: Built-in bookmarks plugin supporting fast directory jumping, interactive bookmark creation with custom keys/prefixes and descriptions (`<Enter>`), and inline deletion (`<Delete>`).
+- **Fuzzy Search & Tab Jumps**: Built-in fuzzy finder integration (`fzf`) and dynamic tab jumping (`1..9`) for open tabs in the active pane.
+- **Persistence & Config Toggle**: Automatically persists custom bookmarks in `~/.config/che/bookmarks.json` and supports configuration via `require("che-bookmarks"):setup({ enabled = true, hops = { ... } })`.
+
+### 8. Binaries & Versioning Scheme
 - **Binary Names**: Main TUI executable is named **`che`** (`yazi-fm`), and CLI helper tool is named **`ch`** (`yazi-cli`).
-- **Calendar Versioning (CalVer)**: Adheres strictly to CalVer scheme (`YY.M.D`, e.g., `26.8.15`).
+- **Calendar Versioning (CalVer)**: Adheres strictly to CalVer scheme (`YY.M.D`, e.g., `26.8.18`).
 
 ---
 
