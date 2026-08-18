@@ -4,6 +4,7 @@ yazi_macro::mod_pub!(dds package shared);
 
 yazi_macro::mod_flat!(args);
 mod multirename;
+mod archive;
 
 use std::process::ExitCode;
 
@@ -116,6 +117,10 @@ async fn run() -> anyhow::Result<()> {
 
 		Command::Multirename(cmd) => {
 			multirename::run(cmd.files)?;
+		}
+
+		Command::Archive(cmd) => {
+			archive::run(cmd.files, cmd.mode, cmd.output_dir, cmd.opposite_dir)?;
 		}
 	}
 

@@ -34,6 +34,8 @@ pub(super) enum Command {
 	Sub(CommandSub),
 	/// Open the multi-rename TUI.
 	Multirename(CommandMultirename),
+	/// Open the archive/compression TUI dialog.
+	Archive(CommandArchive),
 }
 
 #[derive(clap::Args)]
@@ -224,6 +226,25 @@ impl_pub_body!(CommandPubTo);
 #[derive(clap::Args)]
 pub(super) struct CommandMultirename {
 	/// Files to rename.
+	#[arg(index = 1, num_args = 1..)]
+	pub(super) files: Vec<String>,
+}
+
+#[derive(clap::Args)]
+pub(super) struct CommandArchive {
+	/// Operation mode ("auto", "pack", "extract").
+	#[arg(short, long, default_value = "auto")]
+	pub(super) mode: String,
+
+	/// Output destination directory.
+	#[arg(short, long)]
+	pub(super) output_dir: Option<String>,
+
+	/// Opposite pane directory in dual-pane layout.
+	#[arg(long)]
+	pub(super) opposite_dir: Option<String>,
+
+	/// Files to archive or extract.
 	#[arg(index = 1, num_args = 1..)]
 	pub(super) files: Vec<String>,
 }
