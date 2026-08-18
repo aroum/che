@@ -105,6 +105,9 @@ winget install aroum.che
 ```
 
 ### 🐧 Snapcraft (Linux)
+> [!NOTE]
+> Classic confinement is currently [pending approval](https://forum.snapcraft.io/t/classic-confinement-request-for-che-fm/52668) in the Snapcraft forum. Once approved, install via:
+
 ```bash
 snap install che-fm --classic
 ```

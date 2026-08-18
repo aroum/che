@@ -1847,13 +1847,19 @@ mod tests {
 
 	#[test]
 	fn test_update_ext() {
-		let mut input = TextInput::new("/path/to/archive.zip");
+		let mut input = TextInput::new("archive.zip");
 		update_archive_ext(&mut input, "7z");
-		assert_eq!(input.value, "/path/to/archive.7z");
+		assert_eq!(input.value, "archive.7z");
 
-		let mut input_tar = TextInput::new("/path/to/archive.tar.gz");
+		let mut input_tar = TextInput::new("archive.tar.gz");
 		update_archive_ext(&mut input_tar, "tar.xz");
-		assert_eq!(input_tar.value, "/path/to/archive.tar.xz");
+		assert_eq!(input_tar.value, "archive.tar.xz");
+
+		let test_dir = std::path::Path::new("dir").join("archive.zip");
+		let mut input_path = TextInput::new(&test_dir.to_string_lossy());
+		update_archive_ext(&mut input_path, "7z");
+		let expected_dir = std::path::Path::new("dir").join("archive.7z");
+		assert_eq!(input_path.value, expected_dir.to_string_lossy().as_ref());
 	}
 
 	#[test]
