@@ -106,6 +106,20 @@ impl InputCfg {
 		}
 	}
 
+	pub fn password(title: impl Into<String>) -> Self {
+		Self {
+			title: title.into(),
+			position: Position::new(Origin::TopCenter, Offset {
+				x:      0,
+				y:      2,
+				width:  50,
+				height: 3,
+			}),
+			obscure: true,
+			..Default::default()
+		}
+	}
+
 	#[inline]
 	pub fn with_value(mut self, value: impl Into<String>) -> Self {
 		self.value = value.into();

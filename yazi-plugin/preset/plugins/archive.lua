@@ -59,7 +59,7 @@ function M.spawn_7z(args)
 	local last_err = nil
 	local try = function(name)
 		local stdout = args[1] == "l" and Command.PIPED or Command.NULL
-		local child, err = Command(name):arg(args):stdout(stdout):stderr(Command.PIPED):spawn()
+		local child, err = Command(name):arg(args):stdin(Command.NULL):stdout(stdout):stderr(Command.PIPED):spawn()
 		if not child then
 			last_err = err
 		end
@@ -78,7 +78,7 @@ end
 function M.spawn_7z_piped(src_args, dst_args)
 	local last_err = nil
 	local try = function(name)
-		local src, err = Command(name):arg(src_args):stdout(Command.PIPED):stderr(Command.PIPED):spawn()
+		local src, err = Command(name):arg(src_args):stdin(Command.NULL):stdout(Command.PIPED):stderr(Command.PIPED):spawn()
 		if not src then
 			last_err = err
 			return src
@@ -108,7 +108,7 @@ end
 ---@return table items
 ---@return Error? err
 function M.list_archive(args, skip, limit)
-	local child = M.spawn_7z { "l", "-ba", "-slt", "-sccUTF-8", "-xr!__MACOSX", table.unpack(args) }
+	local child = M.spawn_7z { "l", "-ba", "-slt", "-sccUTF-8", "-p-", "-xr!__MACOSX", table.unpack(args) }
 	if not child then
 		return {}, Err("Failed to start either `7zz` or `7z`. Do you have 7-zip installed?")
 	end
@@ -127,8 +127,8 @@ end
 ---@return Error? err
 function M.list_compressed_tar(args, skip, limit)
 	local src, dst = M.spawn_7z_piped(
-		{ "x", "-so", table.unpack(args) },
-		{ "l", "-ba", "-slt", "-ttar", "-sccUTF-8", "-xr!__MACOSX", "-si" }
+		{ "x", "-so", "-p-", table.unpack(args) },
+		{ "l", "-ba", "-slt", "-ttar", "-sccUTF-8", "-p-", "-xr!__MACOSX", "-si" }
 	)
 	if not dst then
 		return {}, Err("Failed to start either `7zz` or `7z`. Do you have 7-zip installed?")
@@ -146,7 +146,7 @@ end
 function M.list_if_only_one(path)
 	-- For certain compressed tarballs (e.g. .tar.xz),
 	-- 7-zip doesn't print a .tar item if -slt is specified, so we are not doing that here
-	local child = M.spawn_7z { "l", "-ba", "-sccUTF-8", "-p", tostring(path) }
+	local child = M.spawn_7z { "l", "-ba", "-sccUTF-8", "-p-", tostring(path) }
 	if not child then
 		return
 	end

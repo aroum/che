@@ -1,8 +1,78 @@
-use std::{collections::HashSet, io, process::Stdio, sync::Arc};
+use std::{
+	collections::{HashMap, HashSet},
+	io,
+	path::{Path, PathBuf},
+	process::Stdio,
+	sync::{Arc, LazyLock, RwLock},
+};
 
 use tokio::process::Command;
 use yazi_fs::{cha::{Cha, ChaKind, ChaMode}, provider::{DirReader, FileHolder}};
 use yazi_shared::{path::PathBufDyn, strand::StrandCow, url::{AsUrl, UrlBuf, UrlLike}};
+
+static ARCHIVE_PASSWORDS: LazyLock<RwLock<HashMap<PathBuf, String>>> =
+	LazyLock::new(|| RwLock::new(HashMap::new()));
+
+pub fn get_archive_password(path: &Path) -> Option<String> {
+	ARCHIVE_PASSWORDS.read().ok()?.get(path).cloned()
+}
+
+pub fn set_archive_password(path: PathBuf, password: String) {
+	if let Ok(mut map) = ARCHIVE_PASSWORDS.write() {
+		map.insert(path, password);
+	}
+}
+
+pub async fn test_archive_access(base_path: &Path) -> bool {
+	let pwd_opt = get_archive_password(base_path);
+	let pwd_arg = pwd_opt.as_deref().map(|p| format!("-p{p}")).unwrap_or_else(|| "-p-".to_string());
+
+	let mut cmd = Command::new("7zz");
+	cmd.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
+	cmd.arg(base_path);
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
+
+	let output = match cmd.output().await {
+		Ok(o) => o,
+		Err(_) => {
+			let mut cmd2 = Command::new("7z");
+			cmd2.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
+			cmd2.arg(base_path);
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
+			match cmd2.output().await {
+				Ok(o) => o,
+				Err(_) => return false,
+			}
+		}
+	};
+
+	output.status.success()
+}
+
+pub async fn test_archive_password(base_path: &Path, password: &str) -> bool {
+	let pwd_arg = format!("-p{password}");
+
+	let mut cmd = Command::new("7zz");
+	cmd.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
+	cmd.arg(base_path);
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
+
+	let output = match cmd.output().await {
+		Ok(o) => o,
+		Err(_) => {
+			let mut cmd2 = Command::new("7z");
+			cmd2.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
+			cmd2.arg(base_path);
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
+			match cmd2.output().await {
+				Ok(o) => o,
+				Err(_) => return false,
+			}
+		}
+	};
+
+	output.status.success()
+}
 
 pub struct ReadDir {
 	dir:     Arc<UrlBuf>,
@@ -30,21 +100,31 @@ impl ReadDir {
 
 		tracing::info!("Archive ReadDir::new: url={url:?}, base_path={base_path:?}, target_dir={target_dir:?}");
 
+		let pwd_opt = get_archive_password(&base_path);
+		let pwd_arg = pwd_opt.as_deref().map(|p| format!("-p{p}")).unwrap_or_else(|| "-p-".to_string());
+
 		let mut cmd = Command::new("7zz");
-		cmd.args(["l", "-ba", "-slt", "-sccUTF-8", "-xr!__MACOSX"]);
+		cmd.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
 		cmd.arg(&base_path);
-		cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+		cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 
 		let output = match cmd.output().await {
 			Ok(o) => o,
 			Err(_) => {
 				let mut cmd2 = Command::new("7z");
-				cmd2.args(["l", "-ba", "-slt", "-sccUTF-8", "-xr!__MACOSX"]);
+				cmd2.args(["l", "-ba", "-slt", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
 				cmd2.arg(&base_path);
-				cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+				cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 				cmd2.output().await?
 			}
 		};
+
+		if !output.status.success() {
+			return Err(io::Error::new(
+				io::ErrorKind::PermissionDenied,
+				"Archive is password protected or cannot be read without password",
+			));
+		}
 
 		let stdout = String::from_utf8_lossy(&output.stdout);
 		let mut raw_entries = Vec::new();
@@ -198,20 +278,23 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
 	};
 
+	let pwd_opt = get_archive_password(&base_path);
+	let pwd_arg = pwd_opt.as_deref().map(|p| format!("-p{p}")).unwrap_or_else(|| "-p-".to_string());
+
 	let mut cmd = Command::new("7zz");
-	cmd.args(["x", "-so", "-sccUTF-8", "-xr!__MACOSX"]);
+	cmd.args(["x", "-so", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
 	cmd.arg(&base_path);
 	cmd.arg(&target_file);
-	cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 
 	let output = match cmd.output().await {
 		Ok(o) => o,
 		Err(_) => {
 			let mut cmd2 = Command::new("7z");
-			cmd2.args(["x", "-so", "-sccUTF-8", "-xr!__MACOSX"]);
+			cmd2.args(["x", "-so", "-sccUTF-8", &pwd_arg, "-xr!__MACOSX"]);
 			cmd2.arg(&base_path);
 			cmd2.arg(&target_file);
-			cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 			cmd2.output().await?
 		}
 	};
@@ -243,6 +326,7 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 	cmd.arg("a");
 	cmd.arg(format!("-si{target_file}"));
 	cmd.arg("-sccUTF-8");
+	cmd.arg("-p-");
 	cmd.arg(&base_path);
 	cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null());
 
@@ -253,6 +337,7 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 			cmd2.arg("a");
 			cmd2.arg(format!("-si{target_file}"));
 			cmd2.arg("-sccUTF-8");
+			cmd2.arg("-p-");
 			cmd2.arg(&base_path);
 			cmd2.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null());
 			cmd2.spawn()?
@@ -283,19 +368,19 @@ pub async fn remove_file(url: &UrlBuf) -> io::Result<()> {
 	};
 
 	let mut cmd = Command::new("7zz");
-	cmd.args(["d", "-sccUTF-8"]);
+	cmd.args(["d", "-sccUTF-8", "-p-"]);
 	cmd.arg(&base_path);
 	cmd.arg(&target_file);
-	cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 
 	let output = match cmd.output().await {
 		Ok(o) => o,
 		Err(_) => {
 			let mut cmd2 = Command::new("7z");
-			cmd2.args(["d", "-sccUTF-8"]);
+			cmd2.args(["d", "-sccUTF-8", "-p-"]);
 			cmd2.arg(&base_path);
 			cmd2.arg(&target_file);
-			cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 			cmd2.output().await?
 		}
 	};
@@ -320,21 +405,21 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 
 	let pattern = format!("{target_dir}/*");
 	let mut cmd = Command::new("7zz");
-	cmd.args(["d", "-r", "-sccUTF-8"]);
+	cmd.args(["d", "-r", "-sccUTF-8", "-p-"]);
 	cmd.arg(&base_path);
 	cmd.arg(&pattern);
 	cmd.arg(&target_dir);
-	cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 
 	let output = match cmd.output().await {
 		Ok(o) => o,
 		Err(_) => {
 			let mut cmd2 = Command::new("7z");
-			cmd2.args(["d", "-r", "-sccUTF-8"]);
+			cmd2.args(["d", "-r", "-sccUTF-8", "-p-"]);
 			cmd2.arg(&base_path);
 			cmd2.arg(&pattern);
 			cmd2.arg(&target_dir);
-			cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 			cmd2.output().await?
 		}
 	};
@@ -372,21 +457,21 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	}
 
 	let mut cmd = Command::new("7zz");
-	cmd.args(["rn", "-sccUTF-8"]);
+	cmd.args(["rn", "-sccUTF-8", "-p-"]);
 	cmd.arg(&from_base);
 	cmd.arg(&old_target);
 	cmd.arg(&new_target);
-	cmd.stdout(Stdio::piped()).stderr(Stdio::null());
+	cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 
 	let output = match cmd.output().await {
 		Ok(o) => o,
 		Err(_) => {
 			let mut cmd2 = Command::new("7z");
-			cmd2.args(["rn", "-sccUTF-8"]);
+			cmd2.args(["rn", "-sccUTF-8", "-p-"]);
 			cmd2.arg(&from_base);
 			cmd2.arg(&old_target);
 			cmd2.arg(&new_target);
-			cmd2.stdout(Stdio::piped()).stderr(Stdio::null());
+			cmd2.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
 			cmd2.output().await?
 		}
 	};
