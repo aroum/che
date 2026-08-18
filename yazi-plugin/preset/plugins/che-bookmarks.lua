@@ -114,8 +114,13 @@ local function get_persist_file_path(config)
 	if config.persist_file and config.persist_file ~= "" then
 		return normalize_path(config.persist_file)
 	end
-	local home = os.getenv("HOME") or "/tmp"
-	return home .. "/.config/che/bookmarks.json"
+	local home = os.getenv("HOME") or os.getenv("USERPROFILE")
+	if home and home ~= "" then
+		local sep = package.config:sub(1, 1) or "/"
+		return home .. sep .. ".config" .. sep .. "che" .. sep .. "bookmarks.json"
+	end
+	local tmp = os.getenv("TMPDIR") or os.getenv("TEMP") or os.getenv("TMP") or "/tmp"
+	return tmp .. "/che_bookmarks.json"
 end
 
 local function load_persisted_hops(config)

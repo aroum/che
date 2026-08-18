@@ -33,7 +33,16 @@ function M:entry()
 	ya.emit("escape", { visual = true })
 
 	-- Clean old result file if exists
-	local result_path = "/tmp/che_multirename_result.json"
+	local function get_result_path()
+		local tmp = os.getenv("TMPDIR") or os.getenv("TEMP") or os.getenv("TMP") or "/tmp"
+		if tmp:sub(-1) == "/" or tmp:sub(-1) == "\\" then
+			tmp = tmp:sub(1, -2)
+		end
+		local sep = package.config:sub(1, 1) or "/"
+		return tmp .. sep .. "che_multirename_result.json"
+	end
+
+	local result_path = get_result_path()
 	os.remove(result_path)
 
 	-- Hide Yazi UI to let the child process use the terminal

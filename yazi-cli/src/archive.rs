@@ -154,13 +154,17 @@ pub struct PersistentArchiveState {
 }
 
 fn state_path() -> PathBuf {
-	if let Some(home) = std::env::var_os("HOME") {
-		let dir = PathBuf::from(home).join(".config/che");
+	if let Some(home) = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")) {
+		let dir = PathBuf::from(home).join(".config").join("che");
 		let _ = fs::create_dir_all(&dir);
 		dir.join("archive_state.json")
 	} else {
-		PathBuf::from("/tmp/che_archive_state.json")
+		std::env::temp_dir().join("che_archive_state.json")
 	}
+}
+
+pub fn result_file_path() -> PathBuf {
+	std::env::temp_dir().join("che_archive_result.json")
 }
 
 fn load_state() -> PersistentArchiveState {
@@ -865,7 +869,7 @@ fn run_pack_app(
 									overwrite: false,
 								};
 
-								let f = fs::File::create("/tmp/che_archive_result.json")?;
+								let f = fs::File::create(result_file_path())?;
 								serde_json::to_writer(f, &result)?;
 								return Ok(());
 							} else {
@@ -1030,7 +1034,7 @@ fn run_pack_app(
 								overwrite: false,
 							};
 
-							let f = fs::File::create("/tmp/che_archive_result.json")?;
+							let f = fs::File::create(result_file_path())?;
 							serde_json::to_writer(f, &result)?;
 							return Ok(());
 						}
@@ -1531,7 +1535,7 @@ fn run_extract_app(
 									overwrite,
 								};
 
-								let f = fs::File::create("/tmp/che_archive_result.json")?;
+								let f = fs::File::create(result_file_path())?;
 								serde_json::to_writer(f, &result)?;
 								return Ok(());
 							} else {
@@ -1692,7 +1696,7 @@ fn run_extract_app(
 								overwrite,
 							};
 
-							let f = fs::File::create("/tmp/che_archive_result.json")?;
+							let f = fs::File::create(result_file_path())?;
 							serde_json::to_writer(f, &result)?;
 							return Ok(());
 						}

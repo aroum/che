@@ -1216,7 +1216,7 @@ fn accept_rename(files: Vec<String>, previews: Vec<(String, String)>) -> anyhow:
 		rename_map.push(RenameMap { old: old_path, new: new_path });
 	}
 
-	let result_path = "/tmp/che_multirename_result.json";
+	let result_path = std::env::temp_dir().join("che_multirename_result.json");
 	let f = std::fs::File::create(result_path)?;
 	serde_json::to_writer(f, &rename_map)?;
 
