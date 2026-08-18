@@ -8,6 +8,7 @@ use ratatui::{
 	backend::CrosstermBackend,
 	layout::{Constraint, Direction, Layout},
 	style::{Color, Modifier, Style},
+	text::{Line, Span},
 	widgets::{Block, Borders, Paragraph, Row, Table, TableState, Wrap},
 };
 use regex::Regex;
@@ -20,6 +21,7 @@ struct RenameMap {
 	new: String,
 }
 
+#[derive(Clone, Debug)]
 struct TextInput {
 	value: String,
 	cursor: usize,
@@ -27,24 +29,36 @@ struct TextInput {
 
 impl TextInput {
 	fn new(value: &str) -> Self {
-		Self { value: value.to_string(), cursor: value.chars().count() }
+		let len = value.chars().count();
+		Self { value: value.to_string(), cursor: len }
 	}
 
 	fn insert(&mut self, c: char) {
-		let char_idx = self.cursor;
-		let byte_idx =
-			self.value.char_indices().map(|(i, _)| i).nth(char_idx).unwrap_or(self.value.len());
-		self.value.insert(byte_idx, c);
+		let mut chars: Vec<char> = self.value.chars().collect();
+		if self.cursor > chars.len() {
+			self.cursor = chars.len();
+		}
+		chars.insert(self.cursor, c);
+		self.value = chars.into_iter().collect();
 		self.cursor += 1;
 	}
 
 	fn backspace(&mut self) {
 		if self.cursor > 0 {
-			self.cursor -= 1;
-			let char_idx = self.cursor;
-			let byte_idx =
-				self.value.char_indices().map(|(i, _)| i).nth(char_idx).unwrap_or(self.value.len());
-			self.value.remove(byte_idx);
+			let mut chars: Vec<char> = self.value.chars().collect();
+			if self.cursor <= chars.len() {
+				chars.remove(self.cursor - 1);
+				self.value = chars.into_iter().collect();
+				self.cursor -= 1;
+			}
+		}
+	}
+
+	fn delete(&mut self) {
+		let mut chars: Vec<char> = self.value.chars().collect();
+		if self.cursor < chars.len() {
+			chars.remove(self.cursor);
+			self.value = chars.into_iter().collect();
 		}
 	}
 
@@ -58,6 +72,121 @@ impl TextInput {
 		if self.cursor < self.value.chars().count() {
 			self.cursor += 1;
 		}
+	}
+
+	fn home(&mut self) {
+		self.cursor = 0;
+	}
+
+	fn end(&mut self) {
+		self.cursor = self.value.chars().count();
+	}
+
+	fn word_left(&mut self) {
+		let chars: Vec<char> = self.value.chars().collect();
+		if self.cursor == 0 {
+			return;
+		}
+		let mut idx = self.cursor;
+		while idx > 0 && chars[idx - 1].is_whitespace() {
+			idx -= 1;
+		}
+		while idx > 0 && !chars[idx - 1].is_whitespace() {
+			idx -= 1;
+		}
+		self.cursor = idx;
+	}
+
+	fn word_right(&mut self) {
+		let chars: Vec<char> = self.value.chars().collect();
+		let len = chars.len();
+		if self.cursor >= len {
+			return;
+		}
+		let mut idx = self.cursor;
+		while idx < len && !chars[idx].is_whitespace() {
+			idx += 1;
+		}
+		while idx < len && chars[idx].is_whitespace() {
+			idx += 1;
+		}
+		self.cursor = idx;
+	}
+
+	fn delete_word_left(&mut self) {
+		let old_cursor = self.cursor;
+		self.word_left();
+		let new_cursor = self.cursor;
+		let mut chars: Vec<char> = self.value.chars().collect();
+		for _ in new_cursor..old_cursor {
+			if new_cursor < chars.len() {
+				chars.remove(new_cursor);
+			}
+		}
+		self.value = chars.into_iter().collect();
+	}
+
+	fn delete_word_right(&mut self) {
+		let old_cursor = self.cursor;
+		self.word_right();
+		let target_cursor = self.cursor;
+		self.cursor = old_cursor;
+		let mut chars: Vec<char> = self.value.chars().collect();
+		for _ in old_cursor..target_cursor {
+			if old_cursor < chars.len() {
+				chars.remove(old_cursor);
+			}
+		}
+		self.value = chars.into_iter().collect();
+	}
+
+	fn delete_to_start(&mut self) {
+		let chars: Vec<char> = self.value.chars().collect();
+		if self.cursor <= chars.len() {
+			self.value = chars[self.cursor..].iter().collect();
+			self.cursor = 0;
+		}
+	}
+
+	fn delete_to_end(&mut self) {
+		let chars: Vec<char> = self.value.chars().collect();
+		if self.cursor <= chars.len() {
+			self.value = chars[..self.cursor].iter().collect();
+		}
+	}
+
+	fn render_spans<'a>(&'a self, is_focused: bool, normal_style: Style, active_style: Style) -> Vec<Span<'a>> {
+		if !is_focused {
+			return vec![Span::styled(&self.value, normal_style)];
+		}
+
+		let chars: Vec<char> = self.value.chars().collect();
+		let cursor_style = Style::default().bg(Color::White).fg(Color::Black).add_modifier(Modifier::BOLD);
+
+		if chars.is_empty() {
+			return vec![Span::styled(" ", cursor_style)];
+		}
+
+		let mut spans = Vec::new();
+		let cursor_pos = self.cursor.min(chars.len());
+
+		if cursor_pos > 0 {
+			let before: String = chars[..cursor_pos].iter().collect();
+			spans.push(Span::styled(before, active_style));
+		}
+
+		if cursor_pos < chars.len() {
+			let at_cursor: String = chars[cursor_pos..cursor_pos + 1].iter().collect();
+			spans.push(Span::styled(at_cursor, cursor_style));
+			if cursor_pos + 1 < chars.len() {
+				let after: String = chars[cursor_pos + 1..].iter().collect();
+				spans.push(Span::styled(after, active_style));
+			}
+		} else {
+			spans.push(Span::styled(" ", cursor_style));
+		}
+
+		spans
 	}
 }
 
@@ -139,6 +268,28 @@ enum CaseConv {
 	Lowercase,
 	FirstLetter,
 	TitleCase,
+}
+
+impl CaseConv {
+	pub fn next(self) -> Self {
+		match self {
+			Self::NoChange => Self::Uppercase,
+			Self::Uppercase => Self::Lowercase,
+			Self::Lowercase => Self::FirstLetter,
+			Self::FirstLetter => Self::TitleCase,
+			Self::TitleCase => Self::NoChange,
+		}
+	}
+
+	pub fn prev(self) -> Self {
+		match self {
+			Self::NoChange => Self::TitleCase,
+			Self::TitleCase => Self::FirstLetter,
+			Self::FirstLetter => Self::Lowercase,
+			Self::Lowercase => Self::Uppercase,
+			Self::Uppercase => Self::NoChange,
+		}
+	}
 }
 
 struct Layouts {
@@ -329,6 +480,9 @@ fn run_app(
 				}
 			};
 
+			let mask_active_style = Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD);
+			let normal_text_style = Style::default();
+
 			// 1. Render Name Mask Box
 			let name_mask_block = Block::default()
 				.borders(Borders::ALL)
@@ -343,7 +497,12 @@ fn run_app(
 				.title(" Mask ")
 				.border_style(item_border_style(Focus::NameMask));
 			f.render_widget(
-				Paragraph::new(mask_input.value.as_str()).block(mask_frame),
+				Paragraph::new(ratatui::text::Line::from(mask_input.render_spans(
+					focus == Focus::NameMask,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(mask_frame),
 				layouts.name_mask_inner[0],
 			);
 
@@ -378,7 +537,12 @@ fn run_app(
 				.title(" Mask ")
 				.border_style(item_border_style(Focus::ExtMask));
 			f.render_widget(
-				Paragraph::new(ext_input.value.as_str()).block(ext_mask_frame),
+				Paragraph::new(ratatui::text::Line::from(ext_input.render_spans(
+					focus == Focus::ExtMask,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(ext_mask_frame),
 				layouts.ext_mask_inner[0],
 			);
 
@@ -419,7 +583,12 @@ fn run_app(
 				.title(" Find ")
 				.border_style(item_border_style(Focus::Find));
 			f.render_widget(
-				Paragraph::new(find_input.value.as_str()).block(find_frame),
+				Paragraph::new(ratatui::text::Line::from(find_input.render_spans(
+					focus == Focus::Find,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(find_frame),
 				layouts.fr_inner[0],
 			);
 
@@ -429,7 +598,12 @@ fn run_app(
 				.title(" Replace ")
 				.border_style(item_border_style(Focus::Replace));
 			f.render_widget(
-				Paragraph::new(replace_input.value.as_str()).block(replace_frame),
+				Paragraph::new(ratatui::text::Line::from(replace_input.render_spans(
+					focus == Focus::Replace,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(replace_frame),
 				layouts.fr_inner[1],
 			);
 
@@ -487,9 +661,13 @@ fn run_app(
 				.title(" Start ")
 				.border_style(c_item_border_style(Focus::CounterStart));
 			f.render_widget(
-				Paragraph::new(counter_start.value.as_str())
-					.block(c_start_frame)
-					.style(c_item_style(Focus::CounterStart)),
+				Paragraph::new(ratatui::text::Line::from(counter_start.render_spans(
+					focus == Focus::CounterStart,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(c_start_frame)
+				.style(c_item_style(Focus::CounterStart)),
 				layouts.counter_chunks[0],
 			);
 
@@ -498,9 +676,13 @@ fn run_app(
 				.title(" Step ")
 				.border_style(c_item_border_style(Focus::CounterStep));
 			f.render_widget(
-				Paragraph::new(counter_step.value.as_str())
-					.block(c_step_frame)
-					.style(c_item_style(Focus::CounterStep)),
+				Paragraph::new(ratatui::text::Line::from(counter_step.render_spans(
+					focus == Focus::CounterStep,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(c_step_frame)
+				.style(c_item_style(Focus::CounterStep)),
 				layouts.counter_chunks[1],
 			);
 
@@ -509,9 +691,13 @@ fn run_app(
 				.title(" Width ")
 				.border_style(c_item_border_style(Focus::CounterWidth));
 			f.render_widget(
-				Paragraph::new(counter_width.value.as_str())
-					.block(c_width_frame)
-					.style(c_item_style(Focus::CounterWidth)),
+				Paragraph::new(ratatui::text::Line::from(counter_width.render_spans(
+					focus == Focus::CounterWidth,
+					normal_text_style,
+					mask_active_style,
+				)))
+				.block(c_width_frame)
+				.style(c_item_style(Focus::CounterWidth)),
 				layouts.counter_chunks[2],
 			);
 
@@ -605,15 +791,126 @@ fn run_app(
 			}
 		})?;
 
-		if let Event::Key(key) = event::read()? {
-			if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('q') {
-				return Ok(());
-			}
+		match event::read()? {
+			Event::Key(key) => {
+				if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('q') {
+					return Ok(());
+				}
 
 			if key.modifiers.contains(KeyModifiers::ALT) {
 				match key.code {
 					KeyCode::Char('o' | 'O') => return accept_rename(files, previews),
 					KeyCode::Char('c' | 'C') => return Ok(()),
+					_ => {}
+				}
+			}
+
+			if key.modifiers.contains(KeyModifiers::CONTROL) || key.modifiers.contains(KeyModifiers::ALT) {
+				match key.code {
+					KeyCode::Left | KeyCode::Char('b') => {
+						match focus {
+							Focus::NameMask => mask_input.word_left(),
+							Focus::ExtMask => ext_input.word_left(),
+							Focus::Find => find_input.word_left(),
+							Focus::Replace => replace_input.word_left(),
+							Focus::CounterStart if counter_used => counter_start.word_left(),
+							Focus::CounterStep if counter_used => counter_step.word_left(),
+							Focus::CounterWidth if counter_used => counter_width.word_left(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Right | KeyCode::Char('f') => {
+						match focus {
+							Focus::NameMask => mask_input.word_right(),
+							Focus::ExtMask => ext_input.word_right(),
+							Focus::Find => find_input.word_right(),
+							Focus::Replace => replace_input.word_right(),
+							Focus::CounterStart if counter_used => counter_start.word_right(),
+							Focus::CounterStep if counter_used => counter_step.word_right(),
+							Focus::CounterWidth if counter_used => counter_width.word_right(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Backspace | KeyCode::Char('w') | KeyCode::Char('h') => {
+						match focus {
+							Focus::NameMask => mask_input.delete_word_left(),
+							Focus::ExtMask => ext_input.delete_word_left(),
+							Focus::Find => find_input.delete_word_left(),
+							Focus::Replace => replace_input.delete_word_left(),
+							Focus::CounterStart if counter_used => counter_start.delete_word_left(),
+							Focus::CounterStep if counter_used => counter_step.delete_word_left(),
+							Focus::CounterWidth if counter_used => counter_width.delete_word_left(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Delete | KeyCode::Char('d') => {
+						match focus {
+							Focus::NameMask => mask_input.delete_word_right(),
+							Focus::ExtMask => ext_input.delete_word_right(),
+							Focus::Find => find_input.delete_word_right(),
+							Focus::Replace => replace_input.delete_word_right(),
+							Focus::CounterStart if counter_used => counter_start.delete_word_right(),
+							Focus::CounterStep if counter_used => counter_step.delete_word_right(),
+							Focus::CounterWidth if counter_used => counter_width.delete_word_right(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Char('u') => {
+						match focus {
+							Focus::NameMask => mask_input.delete_to_start(),
+							Focus::ExtMask => ext_input.delete_to_start(),
+							Focus::Find => find_input.delete_to_start(),
+							Focus::Replace => replace_input.delete_to_start(),
+							Focus::CounterStart if counter_used => counter_start.delete_to_start(),
+							Focus::CounterStep if counter_used => counter_step.delete_to_start(),
+							Focus::CounterWidth if counter_used => counter_width.delete_to_start(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Char('k') => {
+						match focus {
+							Focus::NameMask => mask_input.delete_to_end(),
+							Focus::ExtMask => ext_input.delete_to_end(),
+							Focus::Find => find_input.delete_to_end(),
+							Focus::Replace => replace_input.delete_to_end(),
+							Focus::CounterStart if counter_used => counter_start.delete_to_end(),
+							Focus::CounterStep if counter_used => counter_step.delete_to_end(),
+							Focus::CounterWidth if counter_used => counter_width.delete_to_end(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Char('a') => {
+						match focus {
+							Focus::NameMask => mask_input.home(),
+							Focus::ExtMask => ext_input.home(),
+							Focus::Find => find_input.home(),
+							Focus::Replace => replace_input.home(),
+							Focus::CounterStart if counter_used => counter_start.home(),
+							Focus::CounterStep if counter_used => counter_step.home(),
+							Focus::CounterWidth if counter_used => counter_width.home(),
+							_ => {}
+						}
+						continue;
+					}
+					KeyCode::Char('e') => {
+						match focus {
+							Focus::NameMask => mask_input.end(),
+							Focus::ExtMask => ext_input.end(),
+							Focus::Find => find_input.end(),
+							Focus::Replace => replace_input.end(),
+							Focus::CounterStart if counter_used => counter_start.end(),
+							Focus::CounterStep if counter_used => counter_step.end(),
+							Focus::CounterWidth if counter_used => counter_width.end(),
+							_ => {}
+						}
+						continue;
+					}
 					_ => {}
 				}
 			}
@@ -628,6 +925,36 @@ fn run_app(
 				KeyCode::BackTab => {
 					focus = focus.prev(counter_used);
 				}
+				KeyCode::Home => match focus {
+					Focus::NameMask => mask_input.home(),
+					Focus::ExtMask => ext_input.home(),
+					Focus::Find => find_input.home(),
+					Focus::Replace => replace_input.home(),
+					Focus::CounterStart if counter_used => counter_start.home(),
+					Focus::CounterStep if counter_used => counter_step.home(),
+					Focus::CounterWidth if counter_used => counter_width.home(),
+					_ => {}
+				},
+				KeyCode::End => match focus {
+					Focus::NameMask => mask_input.end(),
+					Focus::ExtMask => ext_input.end(),
+					Focus::Find => find_input.end(),
+					Focus::Replace => replace_input.end(),
+					Focus::CounterStart if counter_used => counter_start.end(),
+					Focus::CounterStep if counter_used => counter_step.end(),
+					Focus::CounterWidth if counter_used => counter_width.end(),
+					_ => {}
+				},
+				KeyCode::Delete => match focus {
+					Focus::NameMask => mask_input.delete(),
+					Focus::ExtMask => ext_input.delete(),
+					Focus::Find => find_input.delete(),
+					Focus::Replace => replace_input.delete(),
+					Focus::CounterStart if counter_used => counter_start.delete(),
+					Focus::CounterStep if counter_used => counter_step.delete(),
+					Focus::CounterWidth if counter_used => counter_width.delete(),
+					_ => {}
+				},
 				KeyCode::Up => {
 					if focus == Focus::Table {
 						let i = match table_state.selected() {
@@ -665,6 +992,11 @@ fn run_app(
 				KeyCode::Left => match focus {
 					Focus::NameMask => mask_input.left(),
 					Focus::ExtMask => ext_input.left(),
+					Focus::NameCase => name_case = name_case.prev(),
+					Focus::ExtCase => ext_case = ext_case.prev(),
+					Focus::Regex => use_regex = !use_regex,
+					Focus::CaseSensitive => case_sensitive = !case_sensitive,
+					Focus::Replace1x => replace_1x = !replace_1x,
 					Focus::Find => find_input.left(),
 					Focus::Replace => replace_input.left(),
 					Focus::CounterStart if counter_used => counter_start.left(),
@@ -678,6 +1010,11 @@ fn run_app(
 				KeyCode::Right => match focus {
 					Focus::NameMask => mask_input.right(),
 					Focus::ExtMask => ext_input.right(),
+					Focus::NameCase => name_case = name_case.next(),
+					Focus::ExtCase => ext_case = ext_case.next(),
+					Focus::Regex => use_regex = !use_regex,
+					Focus::CaseSensitive => case_sensitive = !case_sensitive,
+					Focus::Replace1x => replace_1x = !replace_1x,
 					Focus::Find => find_input.right(),
 					Focus::Replace => replace_input.right(),
 					Focus::CounterStart if counter_used => counter_start.right(),
@@ -770,7 +1107,8 @@ fn run_app(
 				},
 				_ => {}
 			}
-		} else if let Event::Mouse(mouse_event) = event::read()? {
+		}
+		Event::Mouse(mouse_event) => {
 			// Mouse Click Handling
 			if mouse_event.kind == event::MouseEventKind::Down(event::MouseButton::Left) {
 				let mx = mouse_event.column;
@@ -852,6 +1190,8 @@ fn run_app(
 				}
 			}
 		}
+		_ => {}
+	}
 	}
 }
 
