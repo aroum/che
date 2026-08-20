@@ -3,6 +3,8 @@ use std::{fmt::{Display, Write}, str::FromStr};
 use anyhow::bail;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
+use super::map_cyrillic;
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Key {
 	pub code:   KeyCode,
@@ -25,45 +27,6 @@ impl Key {
 impl Default for Key {
 	fn default() -> Self {
 		Self { code: KeyCode::Null, shift: false, ctrl: false, alt: false, super_: false }
-	}
-}
-
-fn map_cyrillic(c: char) -> char {
-	match c {
-		'й' | 'Й' => 'q',
-		'ц' | 'Ц' => 'w',
-		'у' | 'У' => 'e',
-		'к' | 'К' => 'r',
-		'е' | 'Е' => 't',
-		'н' | 'Н' => 'y',
-		'г' | 'Г' => 'u',
-		'ш' | 'Ш' => 'i',
-		'щ' | 'Щ' => 'o',
-		'з' | 'З' => 'p',
-		'х' | 'Х' => '[',
-		'ъ' | 'Ъ' => ']',
-		'ф' | 'Ф' => 'a',
-		'ы' | 'Ы' => 's',
-		'в' | 'В' => 'd',
-		'а' | 'А' => 'f',
-		'п' | 'П' => 'g',
-		'р' | 'Р' => 'h',
-		'о' | 'О' => 'j',
-		'л' | 'Л' => 'k',
-		'д' | 'Д' => 'l',
-		'ж' | 'Ж' => ';',
-		'э' | 'Э' => '\'',
-		'я' | 'Я' => 'z',
-		'ч' | 'Ч' => 'x',
-		'с' | 'С' => 'c',
-		'м' | 'М' => 'v',
-		'и' | 'И' => 'b',
-		'т' | 'Т' => 'n',
-		'ь' | 'Ь' => 'm',
-		'б' | 'Б' => ',',
-		'ю' | 'Ю' => '.',
-		'ё' | 'Ё' => '`',
-		_ => c,
 	}
 }
 
