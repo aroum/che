@@ -15,185 +15,12 @@ use regex::Regex;
 use serde::Serialize;
 use std::path::Path;
 
+use crate::input::TextInput;
+
 #[derive(Serialize)]
 struct RenameMap {
 	old: String,
 	new: String,
-}
-
-#[derive(Clone, Debug)]
-struct TextInput {
-	value: String,
-	cursor: usize,
-}
-
-impl TextInput {
-	fn new(value: &str) -> Self {
-		let len = value.chars().count();
-		Self { value: value.to_string(), cursor: len }
-	}
-
-	fn insert(&mut self, c: char) {
-		let mut chars: Vec<char> = self.value.chars().collect();
-		if self.cursor > chars.len() {
-			self.cursor = chars.len();
-		}
-		chars.insert(self.cursor, c);
-		self.value = chars.into_iter().collect();
-		self.cursor += 1;
-	}
-
-	fn backspace(&mut self) {
-		if self.cursor > 0 {
-			let mut chars: Vec<char> = self.value.chars().collect();
-			if self.cursor <= chars.len() {
-				chars.remove(self.cursor - 1);
-				self.value = chars.into_iter().collect();
-				self.cursor -= 1;
-			}
-		}
-	}
-
-	fn delete(&mut self) {
-		let mut chars: Vec<char> = self.value.chars().collect();
-		if self.cursor < chars.len() {
-			chars.remove(self.cursor);
-			self.value = chars.into_iter().collect();
-		}
-	}
-
-	fn left(&mut self) {
-		if self.cursor > 0 {
-			self.cursor -= 1;
-		}
-	}
-
-	fn right(&mut self) {
-		if self.cursor < self.value.chars().count() {
-			self.cursor += 1;
-		}
-	}
-
-	fn home(&mut self) {
-		self.cursor = 0;
-	}
-
-	fn end(&mut self) {
-		self.cursor = self.value.chars().count();
-	}
-
-	fn word_left(&mut self) {
-		let chars: Vec<char> = self.value.chars().collect();
-		if self.cursor == 0 {
-			return;
-		}
-		let mut idx = self.cursor;
-		while idx > 0 && chars[idx - 1].is_whitespace() {
-			idx -= 1;
-		}
-		while idx > 0 && !chars[idx - 1].is_whitespace() {
-			idx -= 1;
-		}
-		self.cursor = idx;
-	}
-
-	fn word_right(&mut self) {
-		let chars: Vec<char> = self.value.chars().collect();
-		let len = chars.len();
-		if self.cursor >= len {
-			return;
-		}
-		let mut idx = self.cursor;
-		while idx < len && !chars[idx].is_whitespace() {
-			idx += 1;
-		}
-		while idx < len && chars[idx].is_whitespace() {
-			idx += 1;
-		}
-		self.cursor = idx;
-	}
-
-	fn delete_word_left(&mut self) {
-		let old_cursor = self.cursor;
-		self.word_left();
-		let new_cursor = self.cursor;
-		let mut chars: Vec<char> = self.value.chars().collect();
-		for _ in new_cursor..old_cursor {
-			if new_cursor < chars.len() {
-				chars.remove(new_cursor);
-			}
-		}
-		self.value = chars.into_iter().collect();
-	}
-
-	fn delete_word_right(&mut self) {
-		let old_cursor = self.cursor;
-		self.word_right();
-		let target_cursor = self.cursor;
-		self.cursor = old_cursor;
-		let mut chars: Vec<char> = self.value.chars().collect();
-		for _ in old_cursor..target_cursor {
-			if old_cursor < chars.len() {
-				chars.remove(old_cursor);
-			}
-		}
-		self.value = chars.into_iter().collect();
-	}
-
-	fn delete_to_start(&mut self) {
-		let chars: Vec<char> = self.value.chars().collect();
-		if self.cursor <= chars.len() {
-			self.value = chars[self.cursor..].iter().collect();
-			self.cursor = 0;
-		}
-	}
-
-	fn delete_to_end(&mut self) {
-		let chars: Vec<char> = self.value.chars().collect();
-		if self.cursor <= chars.len() {
-			self.value = chars[..self.cursor].iter().collect();
-		}
-	}
-
-	fn render_spans<'a>(
-		&'a self,
-		is_focused: bool,
-		normal_style: Style,
-		active_style: Style,
-	) -> Vec<Span<'a>> {
-		if !is_focused {
-			return vec![Span::styled(&self.value, normal_style)];
-		}
-
-		let chars: Vec<char> = self.value.chars().collect();
-		let cursor_style =
-			Style::default().bg(Color::White).fg(Color::Black).add_modifier(Modifier::BOLD);
-
-		if chars.is_empty() {
-			return vec![Span::styled(" ", cursor_style)];
-		}
-
-		let mut spans = Vec::new();
-		let cursor_pos = self.cursor.min(chars.len());
-
-		if cursor_pos > 0 {
-			let before: String = chars[..cursor_pos].iter().collect();
-			spans.push(Span::styled(before, active_style));
-		}
-
-		if cursor_pos < chars.len() {
-			let at_cursor: String = chars[cursor_pos..cursor_pos + 1].iter().collect();
-			spans.push(Span::styled(at_cursor, cursor_style));
-			if cursor_pos + 1 < chars.len() {
-				let after: String = chars[cursor_pos + 1..].iter().collect();
-				spans.push(Span::styled(after, active_style));
-			}
-		} else {
-			spans.push(Span::styled(" ", cursor_style));
-		}
-
-		spans
-	}
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -210,30 +37,33 @@ enum Focus {
 	CounterStart,
 	CounterStep,
 	CounterWidth,
-	Table,
 	OkBtn,
 	CancelBtn,
+	Table,
 }
 
 impl Focus {
+	const ALL: [Focus; 15] = [
+		Self::NameMask,
+		Self::NameCase,
+		Self::ExtMask,
+		Self::ExtCase,
+		Self::Find,
+		Self::Replace,
+		Self::Regex,
+		Self::CaseSensitive,
+		Self::Replace1x,
+		Self::CounterStart,
+		Self::CounterStep,
+		Self::CounterWidth,
+		Self::OkBtn,
+		Self::CancelBtn,
+		Self::Table,
+	];
+
 	fn next(self, counter_used: bool) -> Self {
-		let n = match self {
-			Self::NameMask => Self::NameCase,
-			Self::NameCase => Self::ExtMask,
-			Self::ExtMask => Self::ExtCase,
-			Self::ExtCase => Self::Find,
-			Self::Find => Self::Replace,
-			Self::Replace => Self::Regex,
-			Self::Regex => Self::CaseSensitive,
-			Self::CaseSensitive => Self::Replace1x,
-			Self::Replace1x => Self::CounterStart,
-			Self::CounterStart => Self::CounterStep,
-			Self::CounterStep => Self::CounterWidth,
-			Self::CounterWidth => Self::OkBtn,
-			Self::OkBtn => Self::CancelBtn,
-			Self::CancelBtn => Self::Table,
-			Self::Table => Self::NameMask,
-		};
+		let idx = Self::ALL.iter().position(|&f| f == self).unwrap_or(0);
+		let n = Self::ALL[(idx + 1) % Self::ALL.len()];
 		if !counter_used && matches!(n, Self::CounterStart | Self::CounterStep | Self::CounterWidth) {
 			n.next(counter_used)
 		} else {
@@ -242,23 +72,8 @@ impl Focus {
 	}
 
 	fn prev(self, counter_used: bool) -> Self {
-		let p = match self {
-			Self::NameMask => Self::Table,
-			Self::NameCase => Self::NameMask,
-			Self::ExtMask => Self::NameCase,
-			Self::ExtCase => Self::ExtMask,
-			Self::Find => Self::ExtCase,
-			Self::Replace => Self::Find,
-			Self::Regex => Self::Replace,
-			Self::CaseSensitive => Self::Regex,
-			Self::Replace1x => Self::CaseSensitive,
-			Self::CounterStart => Self::Replace1x,
-			Self::CounterStep => Self::CounterStart,
-			Self::CounterWidth => Self::CounterStep,
-			Self::OkBtn => Self::CounterWidth,
-			Self::CancelBtn => Self::OkBtn,
-			Self::Table => Self::CancelBtn,
-		};
+		let idx = Self::ALL.iter().position(|&f| f == self).unwrap_or(0);
+		let p = Self::ALL[(idx + Self::ALL.len() - 1) % Self::ALL.len()];
 		if !counter_used && matches!(p, Self::CounterStart | Self::CounterStep | Self::CounterWidth) {
 			p.prev(counter_used)
 		} else {

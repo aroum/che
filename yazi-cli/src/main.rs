@@ -4,6 +4,7 @@ yazi_macro::mod_pub!(dds package shared);
 
 yazi_macro::mod_flat!(args);
 mod archive;
+mod input;
 mod multirename;
 
 use std::process::ExitCode;

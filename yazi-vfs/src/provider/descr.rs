@@ -3,26 +3,19 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
 fn parse_line(line: &str) -> Option<(String, String)> {
-    let line = line.trim();
-    if line.is_empty() {
-        return None;
-    }
+	let line = line.trim();
+	if line.is_empty() {
+		return None;
+	}
 
-    if line.starts_with('"') {
-        if let Some(close_idx) = line[1..].find('"') {
-            let filename = &line[1..close_idx + 1];
-            let comment = line[close_idx + 2..].trim();
-            return Some((filename.to_string(), comment.to_string()));
-        }
-    }
-
-    if let Some(space_idx) = line.find(' ') {
-        let filename = &line[..space_idx];
-        let comment = line[space_idx + 1..].trim();
-        return Some((filename.to_string(), comment.to_string()));
-    }
-
-    Some((line.to_string(), String::new()))
+	if let Some(rest) = line.strip_prefix('"') {
+		let (filename, comment) = rest.split_once('"')?;
+		Some((filename.to_string(), comment.trim().to_string()))
+	} else if let Some((filename, comment)) = line.split_once(' ') {
+		Some((filename.to_string(), comment.trim().to_string()))
+	} else {
+		Some((line.to_string(), String::new()))
+	}
 }
 
 pub fn read_description(file_path: &Path) -> Option<String> {
