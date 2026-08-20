@@ -44,6 +44,10 @@ impl AsPath for PathCow<'_> {
 	}
 }
 
+impl AsPath for &PathCow<'_> {
+	fn as_path(&self) -> PathDyn<'_> { (*self).as_path() }
+}
+
 impl AsPath for super::Components<'_> {
 	fn as_path(&self) -> PathDyn<'_> { self.path() }
 }

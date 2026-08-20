@@ -17,6 +17,8 @@ pub trait PathLike: AsPath {
 
 	fn ext(&self) -> Option<Strand<'_>> { self.as_path().ext() }
 
+	fn has_prefix(&self) -> bool { matches!(self.components().next(), Some(crate::path::Component::Prefix(_))) }
+
 	fn has_root(&self) -> bool { self.as_path().has_root() }
 
 	fn is_absolute(&self) -> bool { self.as_path().is_absolute() }

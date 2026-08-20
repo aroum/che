@@ -5,6 +5,20 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.8.20`)
+
+### ⚡ Upstream Sync & Core Enhancements
+- **Upstream Sync with `sxyazi/yazi`**: Integrated latest upstream bugfixes and performance improvements:
+  - `tmux 3.7b` compatibility: set `allow-passthrough all` in `Mux::tmux_passthrough` to prevent passthrough breaking on recent tmux versions.
+  - `vergen` build resilience: added `.default_on_error()` to vergen Emitters across `yazi-boot`, `yazi-cli`, and `yazi-dds` to prevent build failures in shallow or detached git environments.
+  - URL variable expansion: fixed assertion failure when expanding URLs containing absolute paths in environment variables (`yazi-fs/src/path/expand.rs`).
+  - Input styling: fixed input value styling not applied when input field is empty (`yazi-widgets/src/input/widget.rs`).
+  - Debian/Ubuntu packaging: recommended APT dependencies for distro packaging.
+- **Hidden Chords Support in Which Popup**: Added `hidden` property to `Chord` and `ya.which` candidates in `yazi-config` / `yazi-fm`, allowing plugins to bind background shortcut keys (such as active pane tab jumps `1..9` in `che-bookmarks`) without cluttering the on-screen popup interface.
+- **Cross-Platform Path Audit for Windows**: Normalized all temporary file generation and configuration paths across `archive.rs`, `multirename.rs`, `che-archive.lua`, and `che-bookmarks.lua` to dynamically resolve `std::env::temp_dir()` and `USERPROFILE` / `TMPDIR` with platform-specific directory separators.
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.8.18`)
 
 ### ⚡ New Features & UI Enhancements

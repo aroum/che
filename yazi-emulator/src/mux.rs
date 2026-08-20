@@ -26,9 +26,9 @@ impl Mux {
 
 	pub fn tmux_passthrough() {
 		let output = time!(
-			"Running `tmux set -p allow-passthrough on`",
+			"Running `tmux set -p allow-passthrough all`",
 			std::process::Command::new("tmux")
-				.args(["set", "-p", "allow-passthrough", "on"])
+				.args(["set", "-p", "allow-passthrough", "all"])
 				.stdin(std::process::Stdio::null())
 				.stdout(std::process::Stdio::null())
 				.stderr(std::process::Stdio::piped())

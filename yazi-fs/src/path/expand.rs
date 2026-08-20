@@ -6,31 +6,40 @@ use yazi_shared::{loc::LocBuf, path::{PathBufDyn, PathCow, PathKind, PathLike}, 
 pub fn expand_url<'a>(url: impl Into<UrlCow<'a>>) -> UrlCow<'a> { expand_url_impl(url.into()) }
 
 fn expand_url_impl(url: UrlCow) -> UrlCow {
-	let (o_base, o_rest, o_urn) = url.triple();
+	let (base, rest, urn) = url.triple();
 
-	let n_base = expand_variables(o_base.into());
-	let n_rest = expand_variables(o_rest.into());
-	let n_urn = expand_variables(o_urn.into());
-	if n_base.is_borrowed() && n_rest.is_borrowed() && n_urn.is_borrowed() {
+	let base = expand_variables(base.into());
+	let rest = expand_variables(rest.into());
+	let urn = expand_variables(urn.into());
+	if base.is_borrowed() && rest.is_borrowed() && urn.is_borrowed() {
 		return url;
 	}
 
-	let rest_diff = n_rest.components().count() as isize - o_rest.components().count() as isize;
-	let urn_diff = n_urn.components().count() as isize - o_urn.components().count() as isize;
+	let mut path = PathBufDyn::with_capacity(url.kind(), base.len() + rest.len() + urn.len());
+	path.try_push(&base).expect("push original base should not fail");
+	let c_base = path.components().count();
 
-	let uri_count = url.uri().components().count() as isize;
-	let urn_count = url.urn().components().count() as isize;
+	path.try_push(&rest).expect("push original URI should not fail");
+	let c_trail = path.components().count();
 
-	let mut path = PathBufDyn::with_capacity(url.kind(), n_base.len() + n_rest.len() + n_urn.len());
-	path.try_extend([n_base, n_rest, n_urn]).expect("extend original parts should not fail");
+	path.try_push(&urn).expect("push original URN should not fail");
+	let c_full = path.components().count();
 
-	let uri = (uri_count + rest_diff + urn_diff) as usize;
-	let urn = (urn_count + urn_diff) as usize;
+	let uri = if urn.has_prefix() || rest.has_prefix() {
+		c_full
+	} else if urn.has_root() || rest.has_root() {
+		c_full - c_base.min(path.has_prefix() as usize)
+	} else {
+		c_full - c_base
+	};
+	let urn = if urn.has_prefix() || urn.has_root() {
+		path.components().rev().take_while(|&c| c != yazi_shared::path::Component::RootDir).count()
+	} else {
+		c_full - c_trail
+	};
 
 	match url.as_url() {
-		Url::Regular(_) => UrlBuf::Regular(
-			LocBuf::<std::path::PathBuf>::with(path.into_os().unwrap(), uri, urn).unwrap(),
-		),
+		Url::Regular(_) => UrlBuf::from(path.into_os().unwrap()),
 		Url::Search { domain, .. } => UrlBuf::Search {
 			loc:    LocBuf::<std::path::PathBuf>::with(path.into_os().unwrap(), uri, urn).unwrap(),
 			domain: domain.intern(),

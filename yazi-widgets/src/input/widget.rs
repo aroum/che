@@ -12,6 +12,7 @@ impl Widget for &Input {
 	{
 		crate::Clear.render(area, buf);
 
+		buf.set_style(area, THEME.input.value);
 		Line::styled(self.display(), THEME.input.value).render(area, buf);
 
 		if let Some(Range { start, end }) = self.selected() {
