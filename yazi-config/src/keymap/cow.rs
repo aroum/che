@@ -31,7 +31,7 @@ impl Deref for ChordCow {
 
 impl Default for ChordCow {
 	fn default() -> Self {
-		const C: &Chord = &Chord { on: vec![], run: vec![], desc: None, r#for: None };
+		const C: &Chord = &Chord { on: vec![], run: vec![], desc: None, r#for: None, hidden: false };
 		Self::Borrowed(C)
 	}
 }

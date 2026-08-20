@@ -24,11 +24,13 @@ impl Utils {
 				.enumerate()
 				.map(|(i, cand)| {
 					let cand = cand?;
+					let hidden = cand.raw_get::<bool>("hidden").unwrap_or(false);
 					Ok(ChordCow::Owned(Chord {
 						on:    Self::parse_keys(cand.raw_get("on")?)?,
 						run:   vec![relay!(which:callback, [i + 1])],
 						desc:  cand.raw_get("desc").ok(),
 						r#for: None,
+						hidden,
 					}))
 				})
 				.collect::<mlua::Result<_>>()?;

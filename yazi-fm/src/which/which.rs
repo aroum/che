@@ -24,8 +24,13 @@ impl Widget for Which<'_> {
 			return;
 		}
 
+		let visible: Vec<_> = which.cands.iter().filter(|c| !c.hidden).collect();
+		if visible.is_empty() {
+			return;
+		}
+
 		let cols = THEME.which.cols as usize;
-		let height = area.height.min(which.cands.len().div_ceil(cols) as u16 + PADDING_Y * 2);
+		let height = area.height.min(visible.len().div_ceil(cols) as u16 + PADDING_Y * 2);
 		let area = Rect {
 			x: PADDING_X.min(area.width),
 			y: area.height.saturating_sub(height + PADDING_Y * 2),
@@ -57,7 +62,7 @@ impl Widget for Which<'_> {
 
 		for y in 0..inner.height {
 			for (x, chunk) in chunks.iter().enumerate() {
-				let Some(cand) = which.cands.get(y as usize * cols + x) else {
+				let Some(cand) = visible.get(y as usize * cols + x) else {
 					break;
 				};
 

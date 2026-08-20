@@ -15,8 +15,10 @@ pub struct Chord {
 	pub on:    Vec<Key>,
 	#[serde(deserialize_with = "super::deserialize_run")]
 	pub run:   Vec<Action>,
-	pub desc:  Option<String>,
-	pub r#for: Option<String>,
+	pub desc:   Option<String>,
+	pub r#for:  Option<String>,
+	#[serde(default)]
+	pub hidden: bool,
 }
 
 impl PartialEq for Chord {

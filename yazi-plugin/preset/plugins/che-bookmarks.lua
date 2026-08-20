@@ -213,6 +213,7 @@ local create_special_hops = function(config)
 				key = tostring(idx),
 				path = tab_path,
 				desc = string.format("Tab %d: %s", idx, path_to_desc(tab_path, desc_strategy)),
+				hidden = true,
 			})
 		end
 	end
@@ -391,13 +392,14 @@ end
 local attempt_hop = function(hops, config)
 	local cands = {}
 	for _, hop in pairs(create_special_hops(config)) do
-		table.insert(cands, { desc = hop.desc, on = hop.key, path = hop.path })
+		table.insert(cands, { desc = hop.desc, on = hop.key, path = hop.path, hidden = hop.hidden })
 	end
 	for _, hop in pairs(hops) do
 		table.insert(cands, {
 			desc = hop.desc or path_to_desc(hop.path, config.desc_strategy),
 			on = key_to_cands(hop.key),
 			path = hop.path,
+			hidden = hop.hidden,
 		})
 	end
 
