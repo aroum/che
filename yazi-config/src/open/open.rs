@@ -30,7 +30,12 @@ impl Open {
 		U: AsUrl + 'b,
 		M: AsRef<str> + 'b,
 	{
-		let is_dir = mime.as_ref().starts_with("folder/");
+		let is_dir = match mime.as_ref().rsplit_once('/') {
+			Some((_, last)) if last.is_empty() => false,
+			Some(("folder", _)) => true,
+			Some((rest, _)) => rest.ends_with("/folder"),
+			None => false,
+		};
 		self
 			.rules
 			.iter()
