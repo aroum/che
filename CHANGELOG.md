@@ -5,6 +5,22 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.8.28`)
+
+### ⚡ Upstream Sync & Core Enhancements
+- **Upstream Sync with `sxyazi/yazi`**: Integrated latest upstream bugfixes and performance improvements:
+  - `rustc` LLD Linker Discovery: Delegated `lld` linker discovery to `rustc` in `yazi-build/src/build.rs` to fix build errors on environments with non-standard linker installations.
+  - Trashed Directories Open Rules: Corrected open rule matching for trashed directories (`trash/folder/local`) in `yazi-config/src/open/open.rs` and `yazi-plugin/preset/plugins/mime-dir.lua`.
+  - Git Package Symlink Materialization: Materialized symlinks to regular files when cloning/installing packages via `ch pkg` to ensure consistent package hashes across OSs (`yazi-cli/src/package/git.rs`).
+  - Kitty Graphics Protocol Partial Erasure: Implemented partial image erasure for legacy Kitty graphics protocol in `yazi-adapter/src/drivers/kgp_old.rs`.
+  - Which Key Dismissal Fix: Prevented modifier and lock keys (CapsLock, NumLock, ScrollLock) from prematurely dismissing the `which` popup menu in `yazi-core/src/which/which.rs`.
+- **Codebase Deduplication & Modularization**:
+  - Extracted shared `TextInput` component to `yazi-cli/src/input.rs`, removing ~240 lines of duplicate code between `archive.rs` and `multirename.rs`.
+  - Simplified focus navigation across 15 interactive fields in `multirename.rs`.
+  - Streamlined `descript.ion` parsing in `yazi-vfs/src/provider/descr.rs` using standard Rust string methods.
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.8.20`)
 
 ### ⚡ Upstream Sync & Core Enhancements
