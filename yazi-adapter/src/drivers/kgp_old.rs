@@ -3,11 +3,11 @@ use std::{io::Write, path::PathBuf};
 
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose};
+use crossterm::cursor::MoveTo;
 use image::DynamicImage;
 use ratatui::layout::Rect;
 use yazi_emulator::{CLOSE, ESCAPE, Emulator, START};
-use yazi_macro::writef;
-use yazi_tty::{TTY, sequence::MoveTo};
+use yazi_tty::TTY;
 
 use crate::{Image, SHOWN, adapter::Adapter, drivers::Kgp};
 
@@ -34,7 +34,7 @@ impl KgpOld {
 	pub(crate) fn image_erase(area: Rect) -> Result<()> {
 		let mut w = TTY.lockout();
 		let Some(shown) = SHOWN.get() else {
-			writef!(w, "{START}_Gq=2,a=d,d=I,i={}{ESCAPE}\\{CLOSE}", Kgp::image_id())?;
+			write!(w, "{START}_Gq=2,a=d,d=I,i={}{ESCAPE}\\{CLOSE}", Kgp::image_id())?;
 			return Ok(());
 		};
 

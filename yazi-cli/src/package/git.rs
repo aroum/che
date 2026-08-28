@@ -2,8 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use tokio::{fs, process::Command};
-use yazi_shared::strip_trailing_newline;
-use yazi_shim::wtf8::{FromWtf8, FromWtf8Vec};
+use yazi_shared::{strip_trailing_newline, wtf8::{FromWtf8, FromWtf8Vec}};
 
 pub(super) struct Git;
 

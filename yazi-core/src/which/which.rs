@@ -15,6 +15,16 @@ pub struct Which {
 
 impl Which {
 	pub fn r#type(&mut self, key: Key) -> bool {
+		if matches!(
+			key.code,
+			crossterm::event::KeyCode::Modifier(_)
+				| crossterm::event::KeyCode::CapsLock
+				| crossterm::event::KeyCode::ScrollLock
+				| crossterm::event::KeyCode::NumLock
+		) {
+			return false;
+		}
+
 		self.cands.retain(|c| c.on.len() > self.times && c.on[self.times] == key);
 		self.times += 1;
 
