@@ -3,8 +3,6 @@ use std::{fmt::{Display, Write}, str::FromStr};
 use anyhow::bail;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-use super::map_cyrillic;
-
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Key {
 	pub code:   KeyCode,
@@ -22,6 +20,17 @@ impl Key {
 			_ => None,
 		}
 	}
+
+	#[inline]
+	pub fn to_qwerty(mut self) -> Self {
+		if let KeyCode::Char(c) = self.code
+			&& let Some(qwerty_c) = yazi_shared::translit::cyrillic_to_qwerty(c)
+		{
+			self.code = KeyCode::Char(qwerty_c);
+			self.shift = qwerty_c.is_uppercase();
+		}
+		self
+	}
 }
 
 impl Default for Key {
@@ -32,9 +41,6 @@ impl Default for Key {
 
 impl From<KeyEvent> for Key {
 	fn from(mut value: KeyEvent) -> Self {
-		if let KeyCode::Char(c) = value.code {
-			value.code = KeyCode::Char(map_cyrillic(c));
-		}
 		// For alphabet:
 		//   Unix    :  <S-a> => Char("A") + SHIFT
 		//   Windows :  <S-a> => Char("A") + SHIFT
@@ -47,13 +53,13 @@ impl From<KeyEvent> for Key {
 		// for consistent behavior between OSs.
 
 		let shift = match (value.code, value.modifiers) {
-			(KeyCode::Char(c), m) => c.is_ascii_uppercase() || m.contains(KeyModifiers::SHIFT),
+			(KeyCode::Char(c), m) => c.is_uppercase() || m.contains(KeyModifiers::SHIFT),
 			(KeyCode::BackTab, _) => false,
 			(_, m) => m.contains(KeyModifiers::SHIFT),
 		};
 
-		if shift && let KeyCode::Char(c) = value.code && c.is_ascii_lowercase() {
-			value.code = KeyCode::Char(c.to_ascii_uppercase());
+		if shift && let KeyCode::Char(c) = value.code && c.is_lowercase() {
+			value.code = KeyCode::Char(c.to_uppercase().next().unwrap_or(c));
 		}
 
 		Self {
@@ -223,28 +229,32 @@ mod tests {
 
 	#[test]
 	fn test_cyrillic_mapping_and_modifiers() {
-		// Russian 'к' maps to 'r'
+		// Russian 'к' preserves 'к' and converts to 'r' via to_qwerty()
 		let k_event = KeyEvent::new(KeyCode::Char('к'), KeyModifiers::NONE);
 		let key_k = Key::from(k_event);
-		assert_eq!(key_k.code, KeyCode::Char('r'));
+		assert_eq!(key_k.code, KeyCode::Char('к'));
+		assert_eq!(key_k.to_qwerty().code, KeyCode::Char('r'));
 		assert!(!key_k.shift);
 
-		// Russian 'К' (Shift + 'к') maps to 'R' with shift flag
+		// Russian 'К' (Shift + 'к') preserves 'К' with shift flag
 		let shift_k_event = KeyEvent::new(KeyCode::Char('К'), KeyModifiers::SHIFT);
 		let key_shift_k = Key::from(shift_k_event);
-		assert_eq!(key_shift_k.code, KeyCode::Char('R'));
+		assert_eq!(key_shift_k.code, KeyCode::Char('К'));
+		assert_eq!(key_shift_k.to_qwerty().code, KeyCode::Char('R'));
 		assert!(key_shift_k.shift);
 
-		// Ctrl + Shift + Russian 'к' maps to Ctrl + Shift + 'R' (<C-S-r>)
+		// Ctrl + Shift + Russian 'к' maps to Ctrl + Shift + 'R' (<C-S-r>) via to_qwerty()
 		let mods = KeyModifiers::CONTROL | KeyModifiers::SHIFT;
 		let ctrl_shift_k = KeyEvent::new(KeyCode::Char('к'), mods);
 		let key_ctrl_shift_k = Key::from(ctrl_shift_k);
-		assert_eq!(key_ctrl_shift_k.code, KeyCode::Char('R'));
+		assert_eq!(key_ctrl_shift_k.code, KeyCode::Char('К'));
+		assert_eq!(key_ctrl_shift_k.to_qwerty().code, KeyCode::Char('R'));
 		assert!(key_ctrl_shift_k.ctrl);
 		assert!(key_ctrl_shift_k.shift);
 
-		// Russian 'о' maps to 'j'
+		// Russian 'о' maps to 'j' via to_qwerty()
 		let o_event = KeyEvent::new(KeyCode::Char('о'), KeyModifiers::NONE);
-		assert_eq!(Key::from(o_event).code, KeyCode::Char('j'));
+		assert_eq!(Key::from(o_event).code, KeyCode::Char('о'));
+		assert_eq!(Key::from(o_event).to_qwerty().code, KeyCode::Char('j'));
 	}
 }

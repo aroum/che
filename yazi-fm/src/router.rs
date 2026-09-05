@@ -13,16 +13,9 @@ pub(super) struct Router<'a> {
 impl<'a> Router<'a> {
 	pub(super) fn new(app: &'a mut App) -> Self { Self { app } }
 
-	pub(super) fn route(&mut self, mut key: Key) -> Result<bool> {
+	pub(super) fn route(&mut self, key: Key) -> Result<bool> {
 		let core = &mut self.app.core;
 		let layer = core.layer();
-
-		if !core.input.visible
-			&& let crossterm::event::KeyCode::Char(c) = key.code
-				&& let Some(qwerty_c) = Self::cyrillic_to_qwerty(c) {
-					key.code = crossterm::event::KeyCode::Char(qwerty_c);
-					key.shift = qwerty_c.is_ascii_uppercase();
-				}
 
 		if core.help.visible && core.help.r#type(&key)? {
 			return Ok(true);
@@ -51,7 +44,10 @@ impl<'a> Router<'a> {
 		if layer == Layer::Mgr && !core.input.visible && !core.confirm.visible && !core.help.visible {
 			let is_jump_mode = core.active().jump_mode;
 
-			if key.ctrl && !key.alt && matches!(key.code, crossterm::event::KeyCode::Char('j' | 'J')) {
+			if key.ctrl
+				&& !key.alt
+				&& matches!(key.code, crossterm::event::KeyCode::Char('j' | 'J' | 'о' | 'О'))
+			{
 				let cx = &mut Ctx::active(&mut self.app.core, &mut self.app.term);
 				act!(mgr:jump_mode, cx, ()).ok();
 				return Ok(true);
@@ -73,19 +69,22 @@ impl<'a> Router<'a> {
 			}
 		}
 
+		let key_qwerty = key.to_qwerty();
+
 		use Layer as L;
 		Ok(match layer {
 			L::App | L::Notify => unreachable!(),
 			L::Mgr | L::Tasks | L::Spot | L::Pick | L::Input | L::Confirm | L::Help => {
-				self.matches(layer, key)
+				self.matches(layer, key) || (key != key_qwerty && self.matches(layer, key_qwerty))
 			}
-			L::Cmp => self.matches(L::Cmp, key) || self.matches(L::Input, key),
-			L::Which => core.which.r#type(key),
+			L::Cmp => {
+				self.matches(L::Cmp, key)
+					|| (key != key_qwerty && self.matches(L::Cmp, key_qwerty))
+					|| self.matches(L::Input, key)
+					|| (key != key_qwerty && self.matches(L::Input, key_qwerty))
+			}
+			L::Which => core.which.r#type(key) || (key != key_qwerty && core.which.r#type(key_qwerty)),
 		})
-	}
-
-	fn cyrillic_to_qwerty(c: char) -> Option<char> {
-		yazi_shared::translit::cyrillic_to_qwerty(c)
 	}
 
 	fn matches(&mut self, layer: Layer, key: Key) -> bool {
