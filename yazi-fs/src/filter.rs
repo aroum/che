@@ -128,4 +128,25 @@ mod tests {
 		assert!(insensitive.matches("script.sh"));
 		assert!(insensitive.matches("SCRIPT.SH"));
 	}
+
+	#[test]
+	fn test_cyrillic_filter() {
+		// Smart case with Russian lowercase matches uppercase and lowercase
+		let filter = Filter::new("отчет", FilterCase::Smart).unwrap();
+		assert!(filter.matches("отчет_2026.docx"));
+		assert!(filter.matches("ОТЧЕТ_ГОДОВОЙ.PDF"));
+		assert!(filter.matches("Отчет.txt"));
+		assert!(!filter.matches("документ.txt"));
+
+		// Smart case with Russian uppercase is case-sensitive
+		let filter_upper = Filter::new("Отчет", FilterCase::Smart).unwrap();
+		assert!(filter_upper.matches("Отчет.txt"));
+		assert!(!filter_upper.matches("отчет_2026.docx"));
+
+		// Russian glob filter
+		let filter_glob = Filter::new("*док*.txt", FilterCase::Smart).unwrap();
+		assert!(filter_glob.matches("новый_документ.txt"));
+		assert!(filter_glob.matches("ДОКУМЕНТ_1.TXT"));
+		assert!(!filter_glob.matches("новый_документ.docx"));
+	}
 }
