@@ -34,24 +34,24 @@ impl Pick {
 			return PickJumpResult::None;
 		}
 
-		let ch_lower = ch.to_lowercase().to_string();
 		let matching: Vec<usize> = self
 			.items
 			.iter()
 			.enumerate()
 			.filter_map(|(idx, item)| {
-				let name_lower = item.to_lowercase();
-				let clean_name = if let Some(s) = name_lower.strip_prefix("volume: ") {
+				let clean_name = if let Some(s) = item.strip_prefix("volume: ") {
 					s
-				} else if let Some(s) = name_lower.strip_prefix("drive ") {
+				} else if let Some(s) = item.strip_prefix("drive ") {
 					s
-				} else if let Some(s) = name_lower.strip_prefix("mount: ") {
+				} else if let Some(s) = item.strip_prefix("mount: ") {
 					s
 				} else {
-					&name_lower
+					item.as_str()
 				};
 
-				if clean_name.starts_with(&ch_lower) || name_lower.starts_with(&ch_lower) {
+				if yazi_shared::translit::matches_jump_char(clean_name, ch)
+					|| yazi_shared::translit::matches_jump_char(item, ch)
+				{
 					Some(idx)
 				} else {
 					None

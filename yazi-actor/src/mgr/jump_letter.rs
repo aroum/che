@@ -20,15 +20,14 @@ impl Actor for JumpLetter {
 		let tab = cx.tab_mut();
 		tab.last_jump_char = Some(opt.ch);
 
-		let ch_lower = opt.ch.to_lowercase().to_string();
 		let matching: Vec<usize> = tab
 			.current
 			.files
 			.iter()
 			.enumerate()
 			.filter_map(|(idx, file)| {
-				let name = file.name().map(|n| n.to_string_lossy().to_lowercase()).unwrap_or_default();
-				if name.starts_with(&ch_lower) {
+				let name = file.name().map(|n| n.to_string_lossy()).unwrap_or_default();
+				if yazi_shared::translit::matches_jump_char(&name, opt.ch) {
 					Some(idx)
 				} else {
 					None
