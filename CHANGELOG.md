@@ -5,6 +5,16 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.9.11`)
+
+### ⚡ Bug Fixes & Language Support
+- **Mlua Scheme UserData Resilience**: Added safe `is_trash` field getter in `yazi-binding/src/scheme.rs` returning `false` to guarantee backwards compatibility and prevent `attempt to get an unknown field 'is_trash'` runtime errors in Lua mime fetchers and plugins.
+- **Cyrillic Jump & Filter Support**:
+  - Implemented phonetic, QWERTY layout, and transliteration character matching for quick jump navigation (`Ctrl+J` / `jump_letter`) in `yazi-shared/src/translit/jump.rs`.
+  - Added Cyrillic character set (`а-я`, `А-Я`, `ё`, `Ё`) to `jump-to-char` plugin candidates for seamless single-key character jumping under Russian keyboard layouts.
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.8.28`)
 
 ### ⚡ Upstream Sync & Core Enhancements

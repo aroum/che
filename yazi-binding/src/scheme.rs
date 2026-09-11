@@ -31,5 +31,6 @@ impl UserData for Scheme {
 		cached_field!(fields, cache, |_, me| Ok(me.cache().map(Path::new)));
 
 		fields.add_field_method_get("is_virtual", |_, me| Ok(me.is_virtual()));
+		fields.add_field_method_get("is_trash", |_, _| Ok(false));
 	}
 }
