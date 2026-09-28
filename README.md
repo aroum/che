@@ -57,7 +57,7 @@ Unlike standard Yazi, **che** elevates the dual-pane workflow to a first-class c
     * Archive extraction into active or opposite pane (`c x`, `c X`, `c e`).
     * Native interactive masked password prompt when opening encrypted archives, with session-level password caching.
 14. **Bundled Fast Directory Bookmarks & Hops (`che-bookmarks`)**:
-    * Fast hopping menu on `;`, interactive bookmark creation with custom keys/descriptions (`<Enter>`), deletion (`<Delete>`), fuzzy search (`fzf`), active pane tab jumps (`1..9`), and automatic JSON persistence.
+    * Fast hopping menu, interactive bookmark creation with custom keys/descriptions (`<Enter>`), deletion (`<Delete>`), fuzzy search (`fzf`), active pane tab jumps (`1..9`), and automatic JSON persistence (see [Directory Bookmarks Keymap](#directory-bookmarks-keymap-che-bookmarks) below to bind `;` or custom keys without conflicting with Yazi's shell prompt).
 
 ---
 
@@ -202,6 +202,8 @@ overwrite_dialog = true
 | **`c` `m`**                                             | `comment`             | Add / edit file comment (`descript.ion`)               |
 | **`Ctrl+Shift+R`** / **`c` `r`** *(custom keymap)*       | `plugin multirename`  | Launch Double Commander style batch multirename plugin  |
 | **`Ctrl+Shift+Y`** / **`c` `y`**                         | `plugin system_copy`  | Copy selected files to OS system clipboard             |
+| **`;`** *(custom keymap)*                                | `plugin che-bookmarks` | Quick directory hops and bookmarks menu                |
+| **`'`** *(custom keymap)*                                | `plugin che-bookmarks -- fuzzy` | Fuzzy search bookmarks via `fzf`                       |
 
 ---
 
@@ -239,6 +241,27 @@ on   = "<C-r>"
 run  = "plugin multirename"
 desc = "Multi-Rename (Double Commander style TUI)"
 ```
+
+### Directory Bookmarks Keymap (`che-bookmarks`)
+
+By default, Yazi binds `;` to `shell --interactive` (opening an interactive shell command prompt).  To preserve 100% upstream Yazi compatibility out of the box, `che` does not silently override this binding by default.
+
+To bind `che-bookmarks` to `;` (and optional fuzzy search to `'`), add the following to `~/.config/che/keymap.toml`:
+
+```toml
+[[mgr.prepend_keymap]]
+on   = ";"
+run  = "plugin che-bookmarks"
+desc = "Hop to bookmark (che-bookmarks)"
+
+[[mgr.prepend_keymap]]
+on   = "'"
+run  = "plugin che-bookmarks -- fuzzy"
+desc = "Fuzzy search bookmarks (che-bookmarks)"
+```
+
+> [!NOTE]
+> If you bind `;` to `che-bookmarks`, you can still access the blocking shell command prompt with `:` (`shell --block --interactive`).  Alternatively, you can choose any other shortcut for bookmarks, such as `b` or `m`.
 
 ### Custom Linemodes (`commander` & `adaptive`)
 
