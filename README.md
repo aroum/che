@@ -263,6 +263,105 @@ desc = "Fuzzy search bookmarks (che-bookmarks)"
 > [!NOTE]
 > If you bind `;` to `che-bookmarks`, you can still access the blocking shell command prompt with `:` (`shell --block --interactive`).  Alternatively, you can choose any other shortcut for bookmarks, such as `b` or `m`.
 
+### Commander Keybar Hints (Midnight Commander / FAR Style)
+
+If you prefer classic visual function key hints (similar to Midnight Commander, FAR Manager, or Norton Commander), you can easily add an informative keybar directly to your status line in `~/.config/che/init.lua` without altering or breaking Yazi's layout.
+
+#### Option A: Automatic Keybindings Detection (Recommended)
+
+This snippet automatically parses your `~/.config/che/keymap.toml` on startup and dynamically maps configured function keys (such as `<F5>` for `copy_to`, `<F6>` for `move_to`, etc.) to the bar labels:
+
+```lua
+-- ==================== MC-style Keybar (Dynamic Keybindings) ====================
+local function load_keybar_buttons()
+  local defs = {
+    { action = "help", default_key = "1", label = "Help" },
+    { action = "spot", default_key = "3", label = "View" },
+    { action = "open", default_key = "4", label = "Edit" },
+    { action = "copy_to", default_key = "5", label = "Copy" },
+    { action = "move_to", default_key = "6", label = "Move" },
+    { action = "create", default_key = "7", label = "Mkdir" },
+    { action = "remove", default_key = "8", label = "Del" },
+    { action = "disks", default_key = "9", label = "Disks" },
+    { action = "quit", default_key = "10", label = "Quit" },
+  }
+
+  local custom_keys = {}
+  local config_path = os.getenv("HOME") .. "/.config/che/keymap.toml"
+  local f = io.open(config_path, "r")
+  if f then
+    local content = f:read("*a")
+    f:close()
+
+    for block in content:gmatch("%[%[[^%]]+%]%](.-)(?=%[%[|$)") do
+      local on = block:match('on%s*=%s*"([^"]+)"')
+      local run = block:match('run%s*=%s*"([^"]+)"')
+      if not run then
+        run = block:match('run%s*=%s*%[%s*"([^"]+)"')
+      end
+
+      if on and run then
+        local action_name = run:match("^(%S+)")
+        local f_num = on:match("^<[fF](%d+)>$")
+        if f_num then
+          custom_keys[action_name] = f_num
+        end
+      end
+    end
+  end
+
+  local buttons = {}
+  for _, def in ipairs(defs) do
+    local key = custom_keys[def.action] or def.default_key
+    table.insert(buttons, { key = key, label = def.label })
+  end
+  return buttons
+end
+
+local KEYBAR_BUTTONS = load_keybar_buttons()
+
+Status.mc_keybar = function(status_self)
+  local spans = {}
+  for _, btn in ipairs(KEYBAR_BUTTONS) do
+    table.insert(spans, ui.Span(" " .. btn.key):fg("#282828"):bg("#83a598"):bold())
+    table.insert(spans, ui.Span(btn.label .. " "):fg("#ebdbb2"):bg("#3c3836"))
+  end
+  return ui.Line(spans)
+end
+
+Status:children_add(Status.mc_keybar, 10000, Status.RIGHT)
+```
+
+#### Option B: Static / Manual Customization
+
+If you prefer to define fixed button numbers, custom actions, or localized names manually, use this simpler static table:
+
+```lua
+-- ==================== MC-style Keybar (Static Definition) ====================
+local KEYBAR_BUTTONS = {
+  { key = "1", label = "Help" },
+  { key = "3", label = "View" },
+  { key = "4", label = "Edit" },
+  { key = "5", label = "Copy" },
+  { key = "6", label = "Move" },
+  { key = "7", label = "Mkdir" },
+  { key = "8", label = "Del" },
+  { key = "9", label = "Disks" },
+  { key = "10", label = "Quit" },
+}
+
+Status.mc_keybar = function(status_self)
+  local spans = {}
+  for _, btn in ipairs(KEYBAR_BUTTONS) do
+    table.insert(spans, ui.Span(" " .. btn.key):fg("#282828"):bg("#83a598"):bold())
+    table.insert(spans, ui.Span(btn.label .. " "):fg("#ebdbb2"):bg("#3c3836"))
+  end
+  return ui.Line(spans)
+end
+
+Status:children_add(Status.mc_keybar, 10000, Status.RIGHT)
+```
+
 ### Custom Linemodes (`commander` & `adaptive`)
 
 You can create rich custom columns and linemodes via Lua in `~/.config/che/init.lua`:
