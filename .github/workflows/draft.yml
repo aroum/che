@@ -62,6 +62,7 @@ jobs:
           name: ${{ matrix.target }}
           path: |
             che-${{ matrix.target }}.zip
+          retention-days: 3
 
   build-windows:
     strategy:
@@ -96,6 +97,7 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: che-${{ matrix.target }}.zip
+          retention-days: 3
 
   build-musl:
     runs-on: ubuntu-latest
@@ -125,6 +127,7 @@ jobs:
           name: ${{ matrix.target }}
           path: |
             che-${{ matrix.target }}.zip
+          retention-days: 3
 
   build-appimage:
     strategy:
@@ -158,6 +161,7 @@ jobs:
         with:
           name: appimage-${{ matrix.arch }}
           path: che-${{ matrix.arch }}.AppImage
+          retention-days: 3
 
   build-snap:
     strategy:
@@ -190,6 +194,7 @@ jobs:
         with:
           name: snap-${{ matrix.arch }}
           path: che-${{ matrix.arch }}.snap
+          retention-days: 3
 
 #  snap:
 #    runs-on: ubuntu-latest
