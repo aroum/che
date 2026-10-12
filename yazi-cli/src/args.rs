@@ -36,6 +36,8 @@ pub(super) enum Command {
 	Multirename(CommandMultirename),
 	/// Open the archive/compression TUI dialog.
 	Archive(CommandArchive),
+	/// Print environment and diagnostic information.
+	Env,
 }
 
 #[derive(clap::Args)]

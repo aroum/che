@@ -24,8 +24,8 @@ dual_pane_min_width  = 80
 [preview]
 wrap            = "no"
 tab_size        = 2
-max_width       = 600
-max_height      = 900
+max_width       = 1920
+max_height      = 1440
 cache_dir       = ""
 image_delay     = 30
 image_filter    = "triangle"

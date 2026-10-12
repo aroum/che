@@ -37,7 +37,7 @@ async fn main() -> ExitCode {
 async fn run() -> anyhow::Result<()> {
 	if std::env::args_os().nth(1).is_some_and(|s| s == "-V" || s == "--version") {
 		outln!(
-			"Ya {} ({} {})",
+			"Ch {} ({} {})",
 			env!("CARGO_PKG_VERSION"),
 			env!("VERGEN_GIT_SHA"),
 			env!("VERGEN_BUILD_DATE")
@@ -122,6 +122,30 @@ async fn run() -> anyhow::Result<()> {
 
 		Command::Archive(cmd) => {
 			archive::run(cmd.files, cmd.mode, cmd.output_dir, cmd.opposite_dir)?;
+		}
+
+		Command::Env => {
+			let che_bin = std::env::current_exe()
+				.ok()
+				.and_then(|p| {
+					let sibling = p.with_file_name(if cfg!(windows) { "che.exe" } else { "che" });
+					if sibling.is_file() { Some(sibling) } else { None }
+				})
+				.unwrap_or_else(|| std::path::PathBuf::from(if cfg!(windows) { "che.exe" } else { "che" }));
+
+			let status = std::process::Command::new(che_bin).arg("--debug").status();
+
+			match status {
+				Ok(s) => {
+					if !s.success() {
+						std::process::exit(s.code().unwrap_or(1));
+					}
+				}
+				Err(e) => {
+					errln!("Cannot run 'che --debug': {e}")?;
+					std::process::exit(1);
+				}
+			}
 		}
 	}
 

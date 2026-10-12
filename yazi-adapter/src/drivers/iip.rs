@@ -20,7 +20,7 @@ impl Iip {
 
 		Adapter::Iip.image_hide()?;
 		Adapter::shown_store(area);
-		Emulator::move_lock((max.x, max.y), |w| {
+		Emulator::move_lock((area.x, area.y), |w| {
 			w.write_all(&b)?;
 			Ok(area)
 		})

@@ -50,19 +50,18 @@ impl Chafa {
 			bail!("failed to parse chafa output");
 		};
 
-		let area = Rect {
-			x:      max.x,
-			y:      max.y,
-			width:  first.width() as u16,
-			height: lines.len() as u16,
-		};
+		let width = (first.width() as u16).min(max.width);
+		let height = (lines.len() as u16).min(max.height);
+		let x = max.x + (max.width.saturating_sub(width)) / 2;
+		let y = max.y + (max.height.saturating_sub(height)) / 2;
+		let area = Rect { x, y, width, height };
 
 		Adapter::Chafa.image_hide()?;
 		Adapter::shown_store(area);
-		Emulator::move_lock((max.x, max.y), |w| {
+		Emulator::move_lock((area.x, area.y), |w| {
 			for (i, line) in lines.into_iter().enumerate() {
 				w.write_all(line)?;
-				queue!(w, MoveTo(max.x, max.y + i as u16 + 1))?;
+				queue!(w, MoveTo(area.x, area.y + i as u16 + 1))?;
 			}
 			Ok(area)
 		})

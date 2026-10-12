@@ -7,6 +7,15 @@
 
 ## 📅 Versioning & CalVer Release (`26.10.12`)
 
+### 🖼️ Image Preview & CLI Enhancements
+- **Preview Pane Centering & Scaling**:
+  - Centered image previews horizontally and vertically within the preview pane across all terminal graphics protocols (`kgp`, `kgp_old`, `iip`, `sixel`, `ueberzug`, `chafa`).  
+  - Allowed image previews to scale up to the full available preview pane width when image resolution permits, removing artificial 600px width clamping on high-resolution displays.  
+  - Increased default precache dimensions to 1920x1440 in `yazi-adapter` and `preset/yazi-default.toml` for sharp rendering in wide preview panes.  
+- **Diagnostic `ch env` Command**:
+  - Implemented the `ch env` subcommand in companion CLI binary `ch` (`yazi-cli`), printing full environment, config, terminal emulator, and dependency diagnostics matching `che --debug`.  
+  - Updated `ch --version` banner to display `Ch <version>` instead of `Ya`.  
+
 ### ⚡ Bug Fixes & Platform Stability
 - **Windows Startup Panic Fix ([#4](https://github.com/aroum/che/issues/4))**: Added safe `is_trash` field getter in `yazi-binding/src/scheme.rs` returning `false` to guarantee backwards compatibility and prevent `attempt to get an unknown field 'is_trash'` unhandled unwinding panic in Tokio runtime worker on Windows.
 - **Multi-Architecture Homebrew Formula**: Fixed Homebrew formula deployment in CI to correctly publish `aarch64-apple-darwin` binaries for Apple Silicon and `x86_64-apple-darwin` for Intel Macs, resolving `Bad CPU type in executable (os error 86)`.
