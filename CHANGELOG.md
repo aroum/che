@@ -5,13 +5,18 @@
 
 ---
 
-## 📅 Versioning & CalVer Release (`26.9.11`)
+## 📅 Versioning & CalVer Release (`26.10.12`)
 
-### ⚡ Bug Fixes & Language Support
-- **Mlua Scheme UserData Resilience**: Added safe `is_trash` field getter in `yazi-binding/src/scheme.rs` returning `false` to guarantee backwards compatibility and prevent `attempt to get an unknown field 'is_trash'` runtime errors in Lua mime fetchers and plugins.
+### ⚡ Bug Fixes & Platform Stability
+- **Windows Startup Panic Fix ([#4](https://github.com/aroum/che/issues/4))**: Added safe `is_trash` field getter in `yazi-binding/src/scheme.rs` returning `false` to guarantee backwards compatibility and prevent `attempt to get an unknown field 'is_trash'` unhandled unwinding panic in Tokio runtime worker on Windows.
+- **Multi-Architecture Homebrew Formula**: Fixed Homebrew formula deployment in CI to correctly publish `aarch64-apple-darwin` binaries for Apple Silicon and `x86_64-apple-darwin` for Intel Macs, resolving `Bad CPU type in executable (os error 86)`.
 - **Cyrillic Jump & Filter Support**:
   - Implemented phonetic, QWERTY layout, and transliteration character matching for quick jump navigation (`Ctrl+J` / `jump_letter`) in `yazi-shared/src/translit/jump.rs`.
   - Added Cyrillic character set (`а-я`, `А-Я`, `ё`, `Ё`) to `jump-to-char` plugin candidates for seamless single-key character jumping under Russian keyboard layouts.
+- **Documentation & UI Guides**:
+  - Added guide for Midnight Commander / FAR Manager style bottom function keybar hints in `README.md` ([#2](https://github.com/aroum/che/issues/2)).
+  - Clarified `che-bookmarks` keymap configuration in `README.md` ([#3](https://github.com/aroum/che/issues/3)).
+- **CI Maintenance**: Configured 3-day artifact retention across all workflow runs to prevent storage quota exhaustion.
 
 ---
 

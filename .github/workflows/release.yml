@@ -116,13 +116,51 @@ jobs:
       - name: Update Homebrew Formula
         if: env.HOMEBREW_TAP_TOKEN != ''
         continue-on-error: true
-        uses: mislav/bump-homebrew-formula-action@v3
-        with:
-          formula-name: che
-          homebrew-tap: aroum/homebrew-che
-          download-url: https://github.com/aroum/che/releases/download/${{ github.ref_name }}/che-${{ github.ref_name }}-x86_64-apple-darwin.zip
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          SHA_MAC_ARM=$(sha256sum "che-${TAG}-aarch64-apple-darwin.zip" | awk '{print $1}')
+          SHA_MAC_INTEL=$(sha256sum "che-${TAG}-x86_64-apple-darwin.zip" | awk '{print $1}')
+          SHA_LINUX_ARM=$(sha256sum "che-${TAG}-aarch64-unknown-linux-gnu.zip" | awk '{print $1}')
+          SHA_LINUX_INTEL=$(sha256sum "che-${TAG}-x86_64-unknown-linux-gnu.zip" | awk '{print $1}')
+
+          git clone "https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/aroum/homebrew-che.git" tap
+          cat <<EOF > tap/Formula/che.rb
+          class Che < Formula
+            desc "Dual-pane terminal file manager written in Rust"
+            homepage "https://github.com/aroum/che"
+            version "${VERSION}"
+            license "MIT"
+
+            if OS.mac? && Hardware::CPU.arm?
+              url "https://github.com/aroum/che/releases/download/${TAG}/che-${TAG}-aarch64-apple-darwin.zip"
+              sha256 "${SHA_MAC_ARM}"
+            elsif OS.mac? && Hardware::CPU.intel?
+              url "https://github.com/aroum/che/releases/download/${TAG}/che-${TAG}-x86_64-apple-darwin.zip"
+              sha256 "${SHA_MAC_INTEL}"
+            elsif OS.linux? && Hardware::CPU.arm?
+              url "https://github.com/aroum/che/releases/download/${TAG}/che-${TAG}-aarch64-unknown-linux-gnu.zip"
+              sha256 "${SHA_LINUX_ARM}"
+            elsif OS.linux? && Hardware::CPU.intel?
+              url "https://github.com/aroum/che/releases/download/${TAG}/che-${TAG}-x86_64-unknown-linux-gnu.zip"
+              sha256 "${SHA_LINUX_INTEL}"
+            end
+
+            def install
+              bin.install "che"
+              bin.install "ch"
+            end
+
+            test do
+              system "#{bin}/che", "--version"
+            end
+          end
+          EOF
+          git -C tap config user.name "github-actions[bot]"
+          git -C tap config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C tap commit -am "che ${VERSION}"
+          git -C tap push origin main
         env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
 #      - name: Publish to Snapcraft Store
