@@ -30,6 +30,9 @@
     - Implemented `RoCell`, `BytesExt`, and thread-safe sendable Lua argument serializers (`yazi-shim`, `yazi-shared`).
     - Added Arc-wrapped action delegates in `yazi-config` (`fetcher_arc.rs`, `preloader_arc.rs`, `previewer_arc.rs`, `spotter_arc.rs`).
     - Preserved 100% of custom fork features: upper parent navigation (`is_upparent`), dual-pane support, archive manager, and custom preset plugins (`audio`, `che-archive`, `che-bookmarks`, `che-session`, `multirename`, `system-copy`).
+  - **Unified Action Deserialization & Dual-Pane Spark Registration (Stage 3 Modern Infrastructure)**:
+    - Ported modern Serde deserializers for owned and borrowed data: `de_owned.rs`, `de_key.rs`, `de_bytes.rs`, and numeric conversion macros (`impl_into_integer!`, `impl_into_number!`) in `yazi-shared/src/data/`.
+    - Preserved dual-pane actions (`pane:focus`, `pane:only`, `pane:preview`, `pane:switch`, `pane:sync_dir`, `pane:swap`, `pane:open_other`) and custom fork actions (`flat_toggle`, `jump_letter`, `jump_mode`, `comment`) in `yazi-dds::Spark` and action conversion macros.
   - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
   - **Relay Update Files Filtering**: Supported `opt.tabs` in `UpdateFilesOpt` and `update_files.rs` for multi-tab event filtering, allowing DDS and relay events to target specific tabs and dual-pane columns (`yazi-actor/src/mgr/update_files.rs`, `yazi-dds/src/spark/kind.rs`).
 - **UI & Navigation Improvements**:

@@ -2090,6 +2090,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "inventory"
+version = "0.3.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6928282826c822ad91bf1c9a1cb90a30ba1c26770749929b4656cd6be829cd7c"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6177,16 +6186,19 @@ name = "yazi-shared"
 version = "26.8.15"
 dependencies = [
  "anyhow",
+ "compact_str",
  "crossterm 0.29.0",
  "dyn-clone",
  "foldhash 0.2.0",
  "futures",
  "hashbrown 0.16.1",
+ "inventory",
  "libc",
  "memchr",
  "mlua",
  "ordered-float 5.1.0",
  "parking_lot",
+ "paste",
  "percent-encoding",
  "serde",
  "thiserror 2.0.18",
@@ -6195,6 +6207,7 @@ dependencies = [
  "uzers",
  "windows-sys 0.61.2",
  "yazi-macro",
+ "yazi-shim",
 ]
 
 [[package]]

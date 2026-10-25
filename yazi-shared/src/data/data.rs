@@ -1,10 +1,11 @@
 use std::borrow::Cow;
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
+use yazi_shim::SStr;
 
-use crate::{Id, SStr, data::{DataAny, DataKey}, path::PathBufDyn, strand::{IntoStrand, StrandBuf}, url::{UrlBuf, UrlCow}};
+use crate::{data::{DataAny, DataKey}, id::Id, path::PathBufDyn, strand::{IntoStrand, StrandBuf}, url::{Url, UrlBuf, UrlCow}};
 
 // --- Data
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -65,6 +66,10 @@ impl From<Id> for Data {
 	fn from(value: Id) -> Self { Self::Id(value) }
 }
 
+impl From<Url<'_>> for Data {
+	fn from(value: Url) -> Self { Self::Url(value.into()) }
+}
+
 impl From<UrlBuf> for Data {
 	fn from(value: UrlBuf) -> Self { Self::Url(value) }
 }
@@ -75,6 +80,15 @@ impl From<&UrlBuf> for Data {
 
 impl From<&str> for Data {
 	fn from(value: &str) -> Self { Self::String(Cow::Owned(value.to_owned())) }
+}
+
+impl<T> FromIterator<T> for Data
+where
+	T: Into<Self>,
+{
+	fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+		Self::List(iter.into_iter().map(Into::into).collect())
+	}
 }
 
 impl TryFrom<&Data> for bool {
@@ -101,13 +115,14 @@ impl<'a> TryFrom<&'a Data> for &'a str {
 	}
 }
 
-impl TryFrom<Data> for SStr {
+impl<'a> TryFrom<Data> for Cow<'a, str> {
 	type Error = anyhow::Error;
 
 	fn try_from(value: Data) -> Result<Self, Self::Error> {
 		match value {
-			Data::String(s) => Ok(s),
-			_ => bail!("not a string"),
+			Data::String(Cow::Borrowed(s)) => Ok(Cow::Borrowed(s)),
+			Data::String(Cow::Owned(s)) => Ok(Cow::Owned(s)),
+			_ => Err(anyhow!("not a string")),
 		}
 	}
 }
@@ -123,6 +138,33 @@ impl<'a> TryFrom<&'a Data> for Cow<'a, str> {
 	}
 }
 
+impl TryFrom<&Data> for String {
+	type Error = anyhow::Error;
+
+	fn try_from(value: &Data) -> Result<Self, Self::Error> {
+		value.try_into().map(|s: &str| s.to_owned())
+	}
+}
+
+impl TryFrom<Data> for String {
+	type Error = anyhow::Error;
+
+	fn try_from(value: Data) -> Result<Self, Self::Error> {
+		SStr::try_from(value).map(|s| s.into_owned())
+	}
+}
+
+impl TryFrom<&Data> for HashMap<DataKey, Data> {
+	type Error = anyhow::Error;
+
+	fn try_from(value: &Data) -> Result<Self, Self::Error> {
+		match value {
+			Data::Dict(d) => Ok(d.clone()),
+			_ => bail!("not a dict"),
+		}
+	}
+}
+
 impl TryFrom<Data> for HashMap<DataKey, Data> {
 	type Error = anyhow::Error;
 
@@ -131,14 +173,6 @@ impl TryFrom<Data> for HashMap<DataKey, Data> {
 			Data::Dict(d) => Ok(d),
 			_ => bail!("not a dict"),
 		}
-	}
-}
-
-impl TryFrom<&Data> for HashMap<DataKey, Data> {
-	type Error = anyhow::Error;
-
-	fn try_from(_: &Data) -> Result<Self, Self::Error> {
-		bail!("cannot take ownership of dict from &Data");
 	}
 }
 
@@ -155,6 +189,12 @@ impl TryFrom<Data> for UrlCow<'static> {
 	}
 }
 
+impl TryFrom<Data> for UrlBuf {
+	type Error = anyhow::Error;
+
+	fn try_from(value: Data) -> Result<Self, Self::Error> { UrlCow::try_from(value).map(Into::into) }
+}
+
 impl<'a> TryFrom<&'a Data> for UrlCow<'a> {
 	type Error = anyhow::Error;
 
@@ -166,6 +206,12 @@ impl<'a> TryFrom<&'a Data> for UrlCow<'a> {
 			_ => bail!("not a URL"),
 		}
 	}
+}
+
+impl TryFrom<&Data> for UrlBuf {
+	type Error = anyhow::Error;
+
+	fn try_from(value: &Data) -> Result<Self, Self::Error> { UrlCow::try_from(value).map(Into::into) }
 }
 
 impl<'a> TryFrom<&'a Data> for &'a [u8] {
@@ -206,11 +252,18 @@ impl TryFrom<&Data> for StrandBuf {
 }
 
 impl PartialEq<bool> for Data {
-	fn eq(&self, other: &bool) -> bool { self.try_into().is_ok_and(|b| *other == b) }
+	fn eq(&self, other: &bool) -> bool { self.try_into().is_ok_and(|b: bool| b == *other) }
 }
 
 impl Data {
-	pub fn as_str(&self) -> Option<&str> {
+	pub(crate) fn as_str(&self) -> Option<&str> {
+		match self {
+			Self::String(s) => Some(s),
+			_ => None,
+		}
+	}
+
+	pub fn into_string(self) -> Option<SStr> {
 		match self {
 			Self::String(s) => Some(s),
 			_ => None,
@@ -220,13 +273,6 @@ impl Data {
 	pub fn as_any<T: 'static>(&self) -> Option<&T> {
 		match self {
 			Self::Any(b) => (**b).as_any().downcast_ref::<T>(),
-			_ => None,
-		}
-	}
-
-	pub fn into_string(self) -> Option<SStr> {
-		match self {
-			Self::String(s) => Some(s),
 			_ => None,
 		}
 	}
@@ -250,53 +296,5 @@ impl Data {
 	}
 }
 
-// --- Macros
-macro_rules! impl_into_integer {
-	($t:ty) => {
-		impl TryFrom<&Data> for $t {
-			type Error = anyhow::Error;
-
-			fn try_from(value: &Data) -> Result<Self, Self::Error> {
-				Ok(match value {
-					Data::Integer(i) => <$t>::try_from(*i)?,
-					Data::String(s) => s.parse()?,
-					Data::Id(i) => <$t>::try_from(i.get())?,
-					_ => bail!("not an integer"),
-				})
-			}
-		}
-	};
-}
-
-macro_rules! impl_into_number {
-	($t:ty) => {
-		impl TryFrom<&Data> for $t {
-			type Error = anyhow::Error;
-
-			fn try_from(value: &Data) -> Result<Self, Self::Error> {
-				Ok(match value {
-					Data::Integer(i) if *i == (*i as $t as _) => *i as $t,
-					Data::Number(n) if *n == (*n as $t as _) => *n as $t,
-					Data::String(s) => s.parse()?,
-					Data::Id(i) if i.0 == (i.0 as $t as _) => i.0 as $t,
-					_ => bail!("not a number"),
-				})
-			}
-		}
-	};
-}
-
-impl_into_integer!(i8);
-impl_into_integer!(i16);
-impl_into_integer!(i32);
-impl_into_integer!(i64);
-impl_into_integer!(isize);
-impl_into_integer!(u8);
-impl_into_integer!(u16);
-impl_into_integer!(u32);
-impl_into_integer!(u64);
-impl_into_integer!(usize);
-impl_into_integer!(crate::Id);
-
-impl_into_number!(f32);
-impl_into_number!(f64);
+impl_into_integer!(Data, i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, crate::id::Id);
+impl_into_number!(Data, f32, f64);

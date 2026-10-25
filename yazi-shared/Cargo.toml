@@ -18,18 +18,22 @@ vendored-lua = [ "mlua/vendored" ]
 
 [dependencies]
 yazi-macro = { path = "../yazi-macro", version = "26.8.15" }
+yazi-shim  = { path = "../yazi-shim", version = "26.8.15" }
 
 # External dependencies
 anyhow           = { workspace = true }
+compact_str      = { workspace = true }
 crossterm        = { workspace = true }
 dyn-clone        = { workspace = true }
 foldhash         = { workspace = true }
 futures          = { workspace = true }
 hashbrown        = { workspace = true }
+inventory        = { workspace = true }
 memchr           = "2.8.0"
 mlua             = { workspace = true }
 ordered-float    = { workspace = true }
 parking_lot      = { workspace = true }
+paste            = { workspace = true }
 percent-encoding = { workspace = true }
 serde            = { workspace = true }
 thiserror        = { workspace = true }
