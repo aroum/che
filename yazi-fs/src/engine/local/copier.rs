@@ -2,7 +2,7 @@ use std::{io, path::PathBuf};
 
 use tokio::{select, sync::{mpsc, oneshot}};
 
-use crate::provider::Attrs;
+use crate::engine::Attrs;
 
 pub(super) async fn copy_impl(from: PathBuf, to: PathBuf, attrs: Attrs) -> io::Result<u64> {
 	#[cfg(any(target_os = "linux", target_os = "android"))]
@@ -61,7 +61,7 @@ pub(super) async fn copy_impl(from: PathBuf, to: PathBuf, attrs: Attrs) -> io::R
 	}
 }
 
-pub(super) fn copy_with_progress_impl(
+pub(super) fn copy_progressive_impl(
 	from: PathBuf,
 	to: PathBuf,
 	attrs: Attrs,

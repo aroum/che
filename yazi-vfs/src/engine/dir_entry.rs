@@ -1,10 +1,10 @@
 use std::io;
 
-use yazi_fs::{cha::{Cha, ChaType}, provider::FileHolder};
+use yazi_fs::{cha::{Cha, ChaType}, engine::FileHolder};
 use yazi_shared::{path::PathBufDyn, strand::StrandCow, url::UrlBuf};
 
 pub enum DirEntry {
-	Local(yazi_fs::provider::local::DirEntry),
+	Local(yazi_fs::engine::local::DirEntry),
 	Archive(super::archive::DirEntry),
 	Sftp(super::sftp::DirEntry),
 }

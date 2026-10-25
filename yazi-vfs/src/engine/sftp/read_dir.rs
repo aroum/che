@@ -1,6 +1,6 @@
 use std::{io, sync::Arc};
 
-use yazi_fs::provider::{DirReader, FileHolder};
+use yazi_fs::engine::{DirReader, FileHolder};
 use yazi_shared::{path::PathBufDyn, strand::StrandCow, url::{UrlBuf, UrlLike}};
 
 use super::{Cha, ChaMode};

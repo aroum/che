@@ -2,17 +2,17 @@ use std::{io::{self, SeekFrom}, sync::{Arc, atomic::{AtomicU64, Ordering}}};
 
 use futures::{StreamExt, TryStreamExt};
 use tokio::{io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt, BufReader, BufWriter}, select, sync::{mpsc, oneshot}};
-use yazi_fs::provider::{Attrs, FileBuilder};
+use yazi_fs::engine::{Attrs, FileBuilder};
 use yazi_shared::url::{Url, UrlBuf};
 
-use crate::provider::{self, Gate};
+use crate::engine::{self, Demand};
 
 const BUF_SIZE: usize = 512 * 1024;
 const PER_CHUNK: u64 = 8 * 1024 * 1024;
 
 pub(super) async fn copy_impl(from: Url<'_>, to: Url<'_>, attrs: Attrs) -> io::Result<u64> {
-	let src = provider::open(from).await?;
-	let dist = provider::create(to).await?;
+	let src = engine::open(from).await?;
+	let dist = engine::create(to).await?;
 
 	let mut reader = BufReader::with_capacity(BUF_SIZE, src);
 	let mut writer = BufWriter::with_capacity(BUF_SIZE, dist);
@@ -24,7 +24,7 @@ pub(super) async fn copy_impl(from: Url<'_>, to: Url<'_>, attrs: Attrs) -> io::R
 	Ok(written)
 }
 
-pub(super) fn copy_with_progress_impl(
+pub(super) fn copy_progressive_impl(
 	from: UrlBuf,
 	to: UrlBuf,
 	attrs: Attrs,
@@ -37,10 +37,10 @@ pub(super) fn copy_with_progress_impl(
 	let (acc_, prog_tx_) = (acc.clone(), prog_tx.clone());
 	tokio::spawn(async move {
 		let init = async {
-			let src = provider::open(&*from).await?;
+			let src = engine::open(&*from).await?;
 			let cha = src.metadata().await?;
 
-			let dist = provider::create(&*to).await?;
+			let dist = engine::create(&*to).await?;
 			dist.set_len(cha.len).await?;
 			Ok((cha, Some(src), Some(dist)))
 		};
@@ -66,11 +66,11 @@ pub(super) fn copy_with_progress_impl(
 
 					let mut src = BufReader::with_capacity(BUF_SIZE, match src {
 						Some(f) => f,
-						None => provider::open(&*from).await?,
+						None => engine::open(&*from).await?,
 					});
 					let mut dist = BufWriter::with_capacity(BUF_SIZE, match dist {
 						Some(f) => f,
-						None => Gate::default().write(true).open(&*to).await?,
+						None => Demand::default().write(true).open(&*to).await?,
 					});
 
 					src.seek(SeekFrom::Start(offset)).await?;

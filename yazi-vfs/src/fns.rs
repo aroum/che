@@ -3,11 +3,11 @@ use std::io::{self};
 use yazi_macro::ok_or_not_found;
 use yazi_shared::{strand::{StrandBuf, StrandLike}, url::{AsUrl, UrlBuf, UrlLike}};
 
-use crate::provider;
+use crate::engine;
 
 #[inline]
 pub async fn maybe_exists(url: impl AsUrl) -> bool {
-	match provider::symlink_metadata(url).await {
+	match engine::symlink_metadata(url).await {
 		Ok(_) => true,
 		Err(e) => e.kind() != io::ErrorKind::NotFound,
 	}
@@ -18,7 +18,7 @@ pub async fn unique_name<F>(u: UrlBuf, append: F) -> io::Result<UrlBuf>
 where
 	F: Future<Output = bool>,
 {
-	match provider::symlink_metadata(&u).await {
+	match engine::symlink_metadata(&u).await {
 		Ok(_) => _unique_name(u, append.await).await,
 		Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(u),
 		Err(e) => Err(e),
@@ -54,7 +54,7 @@ async fn _unique_name(mut url: UrlBuf, append: bool) -> io::Result<UrlBuf> {
 		}
 
 		url.try_set_name(&name)?;
-		ok_or_not_found!(provider::symlink_metadata(&url).await, break);
+		ok_or_not_found!(engine::symlink_metadata(&url).await, break);
 	}
 
 	Ok(url)
@@ -65,9 +65,9 @@ pub async fn unique_file(u: UrlBuf, is_dir: bool) -> io::Result<UrlBuf> {
 		return Ok(u);
 	}
 	let result = if is_dir {
-		provider::create_dir(&u).await
+		engine::create_dir(&u).await
 	} else {
-		provider::create_new(&u).await.map(|_| ())
+		engine::create_new(&u).await.map(|_| ())
 	};
 
 	match result {
@@ -107,9 +107,9 @@ async fn _unique_file(mut url: UrlBuf, is_dir: bool) -> io::Result<UrlBuf> {
 
 		url.try_set_name(&name)?;
 		let result = if is_dir {
-			provider::create_dir(&url).await
+			engine::create_dir(&url).await
 		} else {
-			provider::create_new(&url).await.map(|_| ())
+			engine::create_new(&url).await.map(|_| ())
 		};
 
 		match result {

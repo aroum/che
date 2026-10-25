@@ -1,19 +1,19 @@
 use std::io;
 
 use tokio::sync::mpsc;
-use yazi_fs::{cha::{Cha, ChaMode}, provider::{Attrs, Capabilities, Provider}};
+use yazi_fs::{cha::Cha, engine::{Attrs, Capabilities, Engine}};
 use yazi_shared::{path::{AsPath, PathBufDyn}, strand::AsStrand, url::{Url, UrlBuf, UrlCow}};
 
 #[derive(Clone)]
-pub(super) enum Providers<'a> {
-	Local(yazi_fs::provider::local::Local<'a>),
+pub enum Engines<'a> {
+	Local(yazi_fs::engine::local::Local<'a>),
 	Sftp(super::sftp::Sftp<'a>),
 }
 
-impl<'a> Provider for Providers<'a> {
+impl<'a> Engine for Engines<'a> {
+	type Demand = super::Demand;
 	type File = super::RwFile;
-	type Gate = super::Gate;
-	type Me<'b> = Providers<'b>;
+	type Me<'b> = Engines<'b>;
 	type ReadDir = super::ReadDir;
 	type UrlCow = UrlCow<'a>;
 
@@ -31,10 +31,10 @@ impl<'a> Provider for Providers<'a> {
 		}
 	}
 
-	fn capabilities(&self) -> Capabilities {
+	async fn capabilities(&self) -> io::Result<Capabilities> {
 		match self {
-			Self::Local(p) => p.capabilities(),
-			Self::Sftp(p) => p.capabilities(),
+			Self::Local(p) => p.capabilities().await,
+			Self::Sftp(p) => p.capabilities().await,
 		}
 	}
 
@@ -55,14 +55,14 @@ impl<'a> Provider for Providers<'a> {
 		}
 	}
 
-	fn copy_with_progress<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
+	fn copy_progressive<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
 	where
 		P: AsPath,
 		A: Into<Attrs>,
 	{
 		match self {
-			Self::Local(p) => p.copy_with_progress(to, attrs),
-			Self::Sftp(p) => p.copy_with_progress(to, attrs),
+			Self::Local(p) => p.copy_progressive(to, attrs),
+			Self::Sftp(p) => p.copy_progressive(to, attrs),
 		}
 	}
 
@@ -115,7 +115,7 @@ impl<'a> Provider for Providers<'a> {
 		use yazi_shared::scheme::SchemeKind as K;
 
 		Ok(match url.kind() {
-			K::Regular | K::Search => Self::Me::Local(yazi_fs::provider::local::Local::new(url).await?),
+			K::Regular | K::Search => Self::Me::Local(yazi_fs::engine::local::Local::new(url).await?),
 			K::Archive => {
 				Err(io::Error::new(io::ErrorKind::Unsupported, "Unsupported filesystem: archive"))?
 			}
@@ -175,10 +175,10 @@ impl<'a> Provider for Providers<'a> {
 		}
 	}
 
-	async fn set_mode(&self, mode: ChaMode) -> io::Result<()> {
+	async fn set_attrs(&self, attrs: Attrs) -> io::Result<()> {
 		match self {
-			Self::Local(p) => p.set_mode(mode).await,
-			Self::Sftp(p) => p.set_mode(mode).await,
+			Self::Local(p) => p.set_attrs(attrs).await,
+			Self::Sftp(p) => p.set_attrs(attrs).await,
 		}
 	}
 

@@ -7,7 +7,7 @@ use std::{
 };
 
 use tokio::process::Command;
-use yazi_fs::{cha::{Cha, ChaKind, ChaMode}, provider::{DirReader, FileHolder}};
+use yazi_fs::{cha::{Cha, ChaKind, ChaMode}, engine::{DirReader, FileHolder}};
 use yazi_shared::{path::PathBufDyn, strand::StrandCow, url::{AsUrl, UrlBuf, UrlLike}};
 
 static ARCHIVE_PASSWORDS: LazyLock<RwLock<HashMap<PathBuf, String>>> =
@@ -317,7 +317,7 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Target is not an archive URL")),
 	};
 
-	let mut src = super::provider::open(from).await?;
+	let mut src = super::engine::open(from).await?;
 	let mut content = Vec::new();
 	tokio::io::AsyncReadExt::read_to_end(&mut src, &mut content).await?;
 	let len = content.len() as u64;

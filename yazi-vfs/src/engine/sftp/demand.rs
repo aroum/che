@@ -1,17 +1,17 @@
 use std::io;
 
 use yazi_config::vfs::{ServiceSftp, Vfs};
-use yazi_fs::provider::{Attrs, FileBuilder};
+use yazi_fs::engine::{Attrs, FileBuilder};
 use yazi_sftp::fs::Flags;
 use yazi_shared::url::{AsUrl, Url};
 
-use crate::provider::sftp::Conn;
+use crate::engine::sftp::Conn;
 
 #[derive(Clone, Copy, Default)]
-pub struct Gate(crate::provider::Gate);
+pub struct Demand(crate::engine::Demand);
 
-impl From<Gate> for Flags {
-	fn from(Gate(g): Gate) -> Self {
+impl From<Demand> for Flags {
+	fn from(Demand(g): Demand) -> Self {
 		let mut flags = Self::empty();
 		if g.append {
 			flags |= Self::APPEND;
@@ -35,7 +35,7 @@ impl From<Gate> for Flags {
 	}
 }
 
-impl FileBuilder for Gate {
+impl FileBuilder for Demand {
 	type File = yazi_sftp::fs::File;
 
 	fn append(&mut self, append: bool) -> &mut Self {
@@ -99,3 +99,6 @@ impl FileBuilder for Gate {
 		self
 	}
 }
+
+#[allow(dead_code)]
+pub type Gate = Demand;

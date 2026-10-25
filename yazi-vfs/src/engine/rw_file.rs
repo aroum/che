@@ -1,7 +1,7 @@
 use std::{io, pin::Pin};
 
 use tokio::io::{AsyncRead, AsyncSeek, AsyncWrite};
-use yazi_fs::provider::Attrs;
+use yazi_fs::engine::Attrs;
 
 pub enum RwFile {
 	Tokio(tokio::fs::File),

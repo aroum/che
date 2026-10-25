@@ -2,12 +2,12 @@ use std::{io, sync::Arc};
 
 use tokio::{io::{AsyncWriteExt, BufReader, BufWriter}, sync::mpsc::Receiver};
 use yazi_config::vfs::{ServiceSftp, Vfs};
-use yazi_fs::{cha::ChaMode, provider::{Capabilities, DirReader, FileHolder, Provider}};
-use yazi_sftp::fs::{Attrs, Flags};
-use yazi_shared::{loc::LocBuf, path::{AsPath, PathBufDyn}, pool::InternStr, scheme::SchemeKind, strand::AsStrand, url::{Url, UrlBuf, UrlCow, UrlLike}};
+use yazi_fs::engine::{Attrs, Capabilities, DirReader, Engine, FileHolder};
+use yazi_sftp::fs::{Attrs as SftpAttrs, Flags};
+use yazi_shared::{loc::LocBuf, path::{AsPath, PathBufDyn}, pool::InternStr, scheme::SchemeKind, strand::AsStrand, url::{Url, UrlBuf, UrlCow}};
 
 use super::Cha;
-use crate::provider::sftp::Conn;
+use crate::engine::sftp::Conn;
 
 #[derive(Clone)]
 pub struct Sftp<'a> {
@@ -18,9 +18,9 @@ pub struct Sftp<'a> {
 	config: &'static ServiceSftp,
 }
 
-impl<'a> Provider for Sftp<'a> {
+impl<'a> Engine for Sftp<'a> {
+	type Demand = super::Demand;
 	type File = yazi_sftp::fs::File;
-	type Gate = super::Gate;
 	type Me<'b> = Sftp<'b>;
 	type ReadDir = super::ReadDir;
 	type UrlCow = UrlCow<'a>;
@@ -40,7 +40,9 @@ impl<'a> Provider for Sftp<'a> {
 		})
 	}
 
-	fn capabilities(&self) -> Capabilities { Capabilities { symlink: true } }
+	async fn capabilities(&self) -> io::Result<Capabilities> {
+		Ok(Capabilities { symlink: true, hard_link: true, trash: false, copy_progressive: true })
+	}
 
 	async fn casefold(&self) -> io::Result<UrlBuf> {
 		let Some((parent, name)) = self.url.parent().zip(self.url.name()) else {
@@ -48,34 +50,20 @@ impl<'a> Provider for Sftp<'a> {
 		};
 
 		if !self.symlink_metadata().await?.is_link() {
-			return Ok(match self.canonicalize().await?.name() {
-				Some(name) => parent.try_join(name)?,
-				None => Err(io::Error::other("Cannot get filename"))?,
-			});
+			return Ok(self.url.to_owned());
 		}
 
 		let mut it = Self::new(parent).await?.read_dir().await?;
-		let mut similar = None;
-		while let Some(entry) = it.next().await? {
-			let s = entry.name();
-			if !name.eq_ignore_ascii_case(&s) {
-				continue;
-			} else if s == name {
-				return Ok(entry.url());
-			} else if similar.is_none() {
-				similar = Some(s.into_owned());
-			} else {
-				return Err(io::Error::from(io::ErrorKind::NotFound));
+		while let Some(child) = it.next().await? {
+			if child.name() == name {
+				return Ok(child.url());
 			}
 		}
 
-		similar
-			.map(|n| parent.try_join(n))
-			.transpose()?
-			.ok_or_else(|| io::Error::from(io::ErrorKind::NotFound))
+		Err(io::Error::from(io::ErrorKind::NotFound))
 	}
 
-	async fn copy<P>(&self, to: P, attrs: yazi_fs::provider::Attrs) -> io::Result<u64>
+	async fn copy<P>(&self, to: P, attrs: Attrs) -> io::Result<u64>
 	where
 		P: AsPath,
 	{
@@ -83,7 +71,7 @@ impl<'a> Provider for Sftp<'a> {
 		let attrs = super::Attrs(attrs).try_into().unwrap_or_default();
 
 		let op = self.op().await?;
-		let from = op.open(self.path, Flags::READ, &Attrs::default()).await?;
+		let from = op.open(self.path, Flags::READ, &SftpAttrs::default()).await?;
 		let to = op.open(to, Flags::WRITE | Flags::CREATE | Flags::TRUNCATE, &attrs).await?;
 
 		let mut reader = BufReader::with_capacity(524288, from);
@@ -99,10 +87,10 @@ impl<'a> Provider for Sftp<'a> {
 		Ok(written)
 	}
 
-	fn copy_with_progress<P, A>(&self, to: P, attrs: A) -> io::Result<Receiver<io::Result<u64>>>
+	fn copy_progressive<P, A>(&self, to: P, attrs: A) -> io::Result<Receiver<io::Result<u64>>>
 	where
 		P: AsPath,
-		A: Into<yazi_fs::provider::Attrs>,
+		A: Into<Attrs>,
 	{
 		let to = UrlBuf::Sftp {
 			loc:    LocBuf::<typed_path::UnixPathBuf>::saturated(
@@ -113,12 +101,12 @@ impl<'a> Provider for Sftp<'a> {
 		};
 		let from = self.url.to_owned();
 
-		Ok(crate::provider::copy_with_progress_impl(from, to, attrs.into()))
+		Ok(crate::engine::copy_progressive_impl(from, to, attrs.into()))
 	}
 
 	async fn create_dir(&self) -> io::Result<()> {
 		let op = self.op().await?;
-		let result = op.mkdir(self.path, Attrs::default()).await;
+		let result = op.mkdir(self.path, SftpAttrs::default()).await;
 
 		if let Err(yazi_sftp::Error::Status(status)) = &result
 			&& status.is_failure()
@@ -157,10 +145,8 @@ impl<'a> Provider for Sftp<'a> {
 	}
 
 	async fn read_dir(self) -> io::Result<Self::ReadDir> {
-		Ok(Self::ReadDir {
-			dir:    Arc::new(self.url.to_owned()),
-			reader: self.op().await?.read_dir(self.path).await?,
-		})
+		let reader = self.op().await?.read_dir(self.path).await?;
+		Ok(Self::ReadDir { dir: Arc::new(self.url.to_owned()), reader })
 	}
 
 	async fn read_link(&self) -> io::Result<PathBufDyn> {
@@ -193,12 +179,12 @@ impl<'a> Provider for Sftp<'a> {
 		Ok(())
 	}
 
-	async fn set_mode(&self, mode: ChaMode) -> io::Result<()> {
-		let attrs = super::Attrs(yazi_fs::provider::Attrs { mode: Some(mode), ..Default::default() })
+	async fn set_attrs(&self, attrs: Attrs) -> io::Result<()> {
+		let sftp_attrs = super::Attrs(attrs)
 			.try_into()
 			.map_err(|()| io::Error::new(io::ErrorKind::InvalidInput, "Cannot convert mode"))?;
 
-		Ok(self.op().await?.setstat(self.path, attrs).await?)
+		Ok(self.op().await?.setstat(self.path, sftp_attrs).await?)
 	}
 
 	async fn symlink<S, F>(&self, original: S, _is_dir: F) -> io::Result<()>

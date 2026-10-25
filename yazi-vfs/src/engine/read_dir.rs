@@ -1,9 +1,9 @@
 use std::io;
 
-use yazi_fs::provider::DirReader;
+use yazi_fs::engine::DirReader;
 
 pub enum ReadDir {
-	Local(yazi_fs::provider::local::ReadDir),
+	Local(yazi_fs::engine::local::ReadDir),
 	Archive(super::archive::ReadDir),
 	Sftp(super::sftp::ReadDir),
 }

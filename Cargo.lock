@@ -5986,6 +5986,7 @@ dependencies = [
  "foldhash 0.2.0",
  "hashbrown 0.16.1",
  "libc",
+ "mlua",
  "objc2",
  "parking_lot",
  "percent-encoding",

@@ -1,5 +1,7 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use mlua::{IntoLua, Lua, Value};
+
 use crate::cha::{Cha, ChaMode};
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -52,9 +54,9 @@ impl TryFrom<Attrs> for std::fs::FileTimes {
 impl TryFrom<Attrs> for std::fs::Permissions {
 	type Error = ();
 
-	fn try_from(value: Attrs) -> Result<Self, Self::Error> {
+	fn try_from(_value: Attrs) -> Result<Self, Self::Error> {
 		#[cfg(unix)]
-		if let Some(mode) = value.mode {
+		if let Some(mode) = _value.mode {
 			return Ok(mode.into());
 		}
 
@@ -63,6 +65,8 @@ impl TryFrom<Attrs> for std::fs::Permissions {
 }
 
 impl Attrs {
+	pub fn mode(mode: ChaMode) -> Self { Self { mode: Some(mode), ..Default::default() } }
+
 	pub fn has_times(self) -> bool {
 		self.atime.is_some() || self.btime.is_some() || self.mtime.is_some()
 	}
@@ -72,4 +76,17 @@ impl Attrs {
 	pub fn btime_dur(self) -> Option<Duration> { self.btime?.duration_since(UNIX_EPOCH).ok() }
 
 	pub fn mtime_dur(self) -> Option<Duration> { self.mtime?.duration_since(UNIX_EPOCH).ok() }
+}
+
+impl IntoLua for Attrs {
+	fn into_lua(self, lua: &Lua) -> mlua::Result<Value> {
+		lua
+			.create_table_from([
+				("mode", self.mode.map(|m| m.bits()).into_lua(lua)?),
+				("atime", self.atime_dur().map(|d| d.as_secs_f64()).into_lua(lua)?),
+				("btime", self.btime_dur().map(|d| d.as_secs_f64()).into_lua(lua)?),
+				("mtime", self.mtime_dur().map(|d| d.as_secs_f64()).into_lua(lua)?),
+			])?
+			.into_lua(lua)
+	}
 }

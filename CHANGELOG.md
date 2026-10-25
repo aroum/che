@@ -19,6 +19,10 @@
   - **Konsole Graphics Fix**: Removed `z=-1` parameter from legacy Kitty graphics placement command to prevent invisible or misplaced previews in Konsole (`yazi-adapter/src/drivers/kgp_old.rs`).
   - **`st-graphics` Terminal Support**: Added emulator brand recognition and Kitty graphics protocol support for `st-graphics` (`yazi-emulator/src/brand.rs`, `yazi-adapter/src/adapters.rs`).
 - **File System & Sorting Enhancements**:
+  - **VFS Engine Architecture Refactor (Stage 1 Modern Infrastructure)**:
+    - Refactored `yazi-fs` and `yazi-vfs` from legacy `Provider` to modern `Engine` architecture (`yazi-fs/src/engine/`, `yazi-vfs/src/engine/`).
+    - Implemented `Engine` trait, `Attrs`, `Capabilities`, and `Demand` builder with backwards compatibility aliases (`Provider`, `Gate`).
+    - Adapted Double Commander archive manager (`archive.rs`) and file descriptions (`descr.rs`, `descript.ion`) into the new engine structure, passing all 7 archive VFS unit tests.
   - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
   - **Relay Update Files Filtering**: Supported `opt.tabs` in `UpdateFilesOpt` and `update_files.rs` for multi-tab event filtering, allowing DDS and relay events to target specific tabs and dual-pane columns (`yazi-actor/src/mgr/update_files.rs`, `yazi-dds/src/spark/kind.rs`).
 - **UI & Navigation Improvements**:

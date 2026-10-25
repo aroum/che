@@ -4,20 +4,20 @@ use tokio::{io::{AsyncRead, AsyncSeek, AsyncWrite, AsyncWriteExt}, sync::mpsc};
 use yazi_macro::ok_or_not_found;
 use yazi_shared::{path::{AsPath, PathBufDyn}, strand::{AsStrand, StrandCow}, url::{AsUrl, Url, UrlBuf}};
 
-use crate::{cha::{Cha, ChaMode, ChaType}, provider::{Attrs, Capabilities}};
+use crate::{cha::{Cha, ChaMode, ChaType}, engine::{Attrs, Capabilities}};
 
-pub trait Provider: Sized {
+pub trait Engine: Sized {
 	type File: AsyncRead + AsyncSeek + AsyncWrite + Unpin;
-	type Gate: FileBuilder<File = Self::File>;
+	type Demand: FileBuilder<File = Self::File>;
 	type ReadDir: DirReader + 'static;
 	type UrlCow;
-	type Me<'a>: Provider;
+	type Me<'a>: Engine;
 
 	fn absolute(&self) -> impl Future<Output = io::Result<Self::UrlCow>>;
 
 	fn canonicalize(&self) -> impl Future<Output = io::Result<UrlBuf>>;
 
-	fn capabilities(&self) -> Capabilities;
+	fn capabilities(&self) -> impl Future<Output = io::Result<Capabilities>>;
 
 	fn casefold(&self) -> impl Future<Output = io::Result<UrlBuf>>;
 
@@ -25,17 +25,21 @@ pub trait Provider: Sized {
 	where
 		P: AsPath;
 
-	fn copy_with_progress<P, A>(
-		&self,
-		to: P,
-		attrs: A,
-	) -> io::Result<mpsc::Receiver<io::Result<u64>>>
+	fn copy_progressive<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
 	where
 		P: AsPath,
 		A: Into<Attrs>;
 
+	fn copy_with_progress<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
+	where
+		P: AsPath,
+		A: Into<Attrs>,
+	{
+		self.copy_progressive(to, attrs)
+	}
+
 	fn create(&self) -> impl Future<Output = io::Result<Self::File>> {
-		async move { self.gate().write(true).create(true).truncate(true).open(self.url()).await }
+		async move { self.demand().write(true).create(true).truncate(true).open(self.url()).await }
 	}
 
 	fn create_dir(&self) -> impl Future<Output = io::Result<()>>;
@@ -77,10 +81,12 @@ pub trait Provider: Sized {
 	}
 
 	fn create_new(&self) -> impl Future<Output = io::Result<Self::File>> {
-		async move { self.gate().write(true).create_new(true).open(self.url()).await }
+		async move { self.demand().write(true).create_new(true).open(self.url()).await }
 	}
 
-	fn gate(&self) -> Self::Gate { Self::Gate::default() }
+	fn demand(&self) -> Self::Demand { Self::Demand::default() }
+
+	fn gate(&self) -> Self::Demand { self.demand() }
 
 	fn hard_link<P>(&self, to: P) -> impl Future<Output = io::Result<()>>
 	where
@@ -91,7 +97,7 @@ pub trait Provider: Sized {
 	fn new<'a>(url: Url<'a>) -> impl Future<Output = io::Result<Self::Me<'a>>>;
 
 	fn open(&self) -> impl Future<Output = io::Result<Self::File>> {
-		async move { self.gate().read(true).open(self.url()).await }
+		async move { self.demand().read(true).open(self.url()).await }
 	}
 
 	fn read_dir(self) -> impl Future<Output = io::Result<Self::ReadDir>>;
@@ -103,7 +109,7 @@ pub trait Provider: Sized {
 	fn remove_dir_all(&self) -> impl Future<Output = io::Result<()>> {
 		async fn remove_dir_all_impl<P>(url: Url<'_>) -> io::Result<()>
 		where
-			P: Provider,
+			P: Engine,
 		{
 			let mut it = ok_or_not_found!(P::new(url).await?.read_dir().await, return Ok(()));
 			while let Some(child) = it.next().await? {
@@ -138,13 +144,13 @@ pub trait Provider: Sized {
 			let mut result = Ok(());
 
 			while let Some((dir, visited)) = stack.pop() {
-				let Ok(provider) = Self::new(dir.as_url()).await else {
+				let Ok(engine) = Self::new(dir.as_url()).await else {
 					continue;
 				};
 
 				if visited {
-					result = provider.remove_dir().await;
-				} else if let Ok(mut it) = provider.read_dir().await {
+					result = engine.remove_dir().await;
+				} else if let Ok(mut it) = engine.read_dir().await {
 					stack.push((dir, true));
 					while let Ok(Some(ent)) = it.next().await {
 						if ent.file_type().await.is_ok_and(|t| t.is_dir()) {
@@ -163,7 +169,11 @@ pub trait Provider: Sized {
 	where
 		P: AsPath;
 
-	fn set_mode(&self, mode: ChaMode) -> impl Future<Output = io::Result<()>>;
+	fn set_attrs(&self, attrs: Attrs) -> impl Future<Output = io::Result<()>>;
+
+	fn set_mode(&self, mode: ChaMode) -> impl Future<Output = io::Result<()>> {
+		self.set_attrs(Attrs::mode(mode))
+	}
 
 	fn symlink<S, F>(&self, original: S, _is_dir: F) -> impl Future<Output = io::Result<()>>
 	where

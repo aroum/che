@@ -2,7 +2,7 @@ use std::{io, sync::Arc, time::{Duration, SystemTime}};
 
 use russh::keys::PrivateKeyWithHashAlg;
 use yazi_config::vfs::ServiceSftp;
-use yazi_fs::provider::local::Local;
+use yazi_fs::engine::local::Local;
 
 #[derive(Clone, Copy)]
 pub(super) struct Conn {

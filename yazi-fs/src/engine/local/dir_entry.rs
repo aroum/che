@@ -2,7 +2,7 @@ use std::{io, sync::Arc};
 
 use yazi_shared::{path::PathBufDyn, strand::StrandCow, url::{UrlBuf, UrlLike}};
 
-use crate::{cha::{Cha, ChaType}, provider::FileHolder};
+use crate::{cha::{Cha, ChaType}, engine::FileHolder};
 
 pub enum DirEntry {
 	Regular(tokio::fs::DirEntry),

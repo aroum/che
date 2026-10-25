@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, io, time::{Duration, Instant}};
 
 use either::Either;
-use yazi_fs::{cha::Cha, provider::{DirReader, FileHolder}};
+use yazi_fs::{cha::Cha, engine::{DirReader, FileHolder}};
 use yazi_shared::url::{AsUrl, UrlBuf};
 
 use super::ReadDir;

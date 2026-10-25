@@ -1,9 +1,9 @@
-use std::{io, path::Path, sync::Arc};
+use std::{fs::FileTimes, io, path::Path, sync::Arc};
 
 use tokio::sync::mpsc;
 use yazi_shared::{path::{AsPath, PathBufDyn}, scheme::SchemeKind, strand::AsStrand, url::{Url, UrlBuf, UrlCow}};
 
-use crate::{cha::{Cha, ChaMode}, provider::{Attrs, Capabilities, Provider}};
+use crate::{cha::{Cha, ChaMode}, engine::{Attrs, Capabilities, Engine}};
 
 #[derive(Clone)]
 pub struct Local<'a> {
@@ -11,9 +11,9 @@ pub struct Local<'a> {
 	path: &'a Path,
 }
 
-impl<'a> Provider for Local<'a> {
+impl<'a> Engine for Local<'a> {
+	type Demand = super::Demand;
 	type File = tokio::fs::File;
-	type Gate = super::Gate;
 	type Me<'b> = Local<'b>;
 	type ReadDir = super::ReadDir;
 	type UrlCow = UrlCow<'a>;
@@ -29,7 +29,14 @@ impl<'a> Provider for Local<'a> {
 	}
 
 	#[inline]
-	fn capabilities(&self) -> Capabilities { Capabilities { symlink: true } }
+	async fn capabilities(&self) -> io::Result<Capabilities> {
+		Ok(Capabilities {
+			symlink:          true,
+			hard_link:        true,
+			trash:            true,
+			copy_progressive: true,
+		})
+	}
 
 	async fn casefold(&self) -> io::Result<UrlBuf> {
 		super::casefold(self.path).await.map(Into::into)
@@ -45,14 +52,14 @@ impl<'a> Provider for Local<'a> {
 		super::copy_impl(from, to, attrs).await
 	}
 
-	fn copy_with_progress<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
+	fn copy_progressive<P, A>(&self, to: P, attrs: A) -> io::Result<mpsc::Receiver<io::Result<u64>>>
 	where
 		P: AsPath,
 		A: Into<Attrs>,
 	{
 		let to = to.as_path().to_os_owned()?;
 		let from = self.path.to_owned();
-		Ok(super::copy_with_progress_impl(from, to, attrs.into()))
+		Ok(super::copy_progressive_impl(from, to, attrs.into()))
 	}
 
 	#[inline]
@@ -125,24 +132,19 @@ impl<'a> Provider for Local<'a> {
 		tokio::fs::rename(self.path, to).await
 	}
 
-	async fn set_mode(&self, mode: ChaMode) -> io::Result<()> {
-		#[cfg(unix)]
-		{
-			return tokio::fs::set_permissions(self.path, mode.into()).await;
+	async fn set_attrs(&self, attrs: Attrs) -> io::Result<()> {
+		let (mode, times) = (attrs.mode, attrs.try_into());
+		if mode.is_none() && times.is_err() {
+			return Ok(());
 		}
-		#[cfg(windows)]
-		{
-			use std::os::windows::ffi::OsStrExt;
 
-			let path: Vec<u16> = self.path.as_os_str().encode_wide().chain(Some(0)).collect();
-			let perm = if mode.contains(ChaMode::U_WRITE) { libc::S_IWRITE } else { libc::S_IREAD };
-
-			return tokio::task::spawn_blocking(move || {
-				let result = unsafe { libc::wchmod(path.as_ptr(), perm) };
-				if result == 0 { Ok(()) } else { Err(io::Error::last_os_error()) }
-			})
-			.await?;
-		}
+		let path = self.path.to_owned();
+		tokio::task::spawn_blocking(move || {
+			let a = mode.map_or(Ok(()), |mode| Self::set_mode(&path, mode));
+			let b = times.map_or(Ok(()), |times| Self::set_times(&path, times));
+			a.and(b)
+		})
+		.await?
 	}
 
 	#[inline]
@@ -349,5 +351,27 @@ impl<'a> Local<'a> {
 		P: ?Sized + AsRef<Path>,
 	{
 		Self { url: Url::regular(path), path: path.as_ref() }
+	}
+
+	fn set_mode(path: &Path, mode: ChaMode) -> io::Result<()> {
+		#[cfg(unix)]
+		{
+			std::fs::set_permissions(path, mode.into())
+		}
+
+		#[cfg(windows)]
+		{
+			use std::os::windows::ffi::OsStrExt;
+
+			let path: Vec<u16> = path.as_os_str().encode_wide().chain(Some(0)).collect();
+			let perm = if mode.contains(ChaMode::U_WRITE) { libc::S_IWRITE } else { libc::S_IREAD };
+
+			let result = unsafe { libc::wchmod(path.as_ptr(), perm) };
+			if result == 0 { Ok(()) } else { Err(io::Error::last_os_error()) }
+		}
+	}
+
+	fn set_times(path: &Path, times: FileTimes) -> io::Result<()> {
+		std::fs::File::open(path)?.set_times(times)
 	}
 }

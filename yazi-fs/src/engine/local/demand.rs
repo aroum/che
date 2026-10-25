@@ -2,12 +2,12 @@ use std::io;
 
 use yazi_shared::url::AsUrl;
 
-use crate::provider::{Attrs, FileBuilder};
+use crate::engine::{Attrs, FileBuilder};
 
 #[derive(Default)]
-pub struct Gate(tokio::fs::OpenOptions);
+pub struct Demand(tokio::fs::OpenOptions);
 
-impl FileBuilder for Gate {
+impl FileBuilder for Demand {
 	type File = tokio::fs::File;
 
 	fn append(&mut self, append: bool) -> &mut Self {

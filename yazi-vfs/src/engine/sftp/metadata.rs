@@ -3,7 +3,7 @@ use std::{io, time::{Duration, UNIX_EPOCH}};
 use yazi_fs::cha::ChaKind;
 
 // --- Attrs
-pub(crate) struct Attrs(pub(crate) yazi_fs::provider::Attrs);
+pub(crate) struct Attrs(pub(crate) yazi_fs::engine::Attrs);
 
 impl TryFrom<Attrs> for yazi_sftp::fs::Attrs {
 	type Error = ();

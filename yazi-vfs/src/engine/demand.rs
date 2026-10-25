@@ -1,10 +1,10 @@
 use std::io;
 
-use yazi_fs::provider::{Attrs, FileBuilder};
+use yazi_fs::engine::{Attrs, FileBuilder};
 use yazi_shared::{scheme::SchemeKind, url::AsUrl};
 
 #[derive(Clone, Copy, Default)]
-pub struct Gate {
+pub struct Demand {
 	pub(super) append:     bool,
 	pub(super) attrs:      Attrs,
 	pub(super) create:     bool,
@@ -14,7 +14,7 @@ pub struct Gate {
 	pub(super) write:      bool,
 }
 
-impl FileBuilder for Gate {
+impl FileBuilder for Demand {
 	type File = super::RwFile;
 
 	fn append(&mut self, append: bool) -> &mut Self {
@@ -44,12 +44,12 @@ impl FileBuilder for Gate {
 		let url = url.as_url();
 		Ok(match url.kind() {
 			SchemeKind::Regular | SchemeKind::Search => {
-				self.build::<yazi_fs::provider::local::Gate>().open(url).await?.into()
+				self.build::<yazi_fs::engine::local::Demand>().open(url).await?.into()
 			}
 			SchemeKind::Archive => {
 				Err(io::Error::new(io::ErrorKind::Unsupported, "Unsupported filesystem: archive"))?
 			}
-			SchemeKind::Sftp => self.build::<super::sftp::Gate>().open(url).await?.into(),
+			SchemeKind::Sftp => self.build::<super::sftp::Demand>().open(url).await?.into(),
 		})
 	}
 
@@ -69,28 +69,31 @@ impl FileBuilder for Gate {
 	}
 }
 
-impl Gate {
+impl Demand {
 	fn build<T: FileBuilder>(self) -> T {
-		let mut gate = T::default();
+		let mut demand = T::default();
 		if self.append {
-			gate.append(true);
+			demand.append(true);
 		}
-		gate.attrs(self.attrs);
+		demand.attrs(self.attrs);
 		if self.create {
-			gate.create(true);
+			demand.create(true);
 		}
 		if self.create_new {
-			gate.create_new(true);
+			demand.create_new(true);
 		}
 		if self.read {
-			gate.read(true);
+			demand.read(true);
 		}
 		if self.truncate {
-			gate.truncate(true);
+			demand.truncate(true);
 		}
 		if self.write {
-			gate.write(true);
+			demand.write(true);
 		}
-		gate
+		demand
 	}
 }
+
+#[allow(dead_code)]
+pub type Gate = Demand;

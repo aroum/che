@@ -2,7 +2,7 @@ use std::{io, sync::Arc};
 
 use yazi_shared::url::UrlBuf;
 
-use crate::provider::DirReader;
+use crate::engine::DirReader;
 
 pub enum ReadDir {
 	Regular(tokio::fs::ReadDir),

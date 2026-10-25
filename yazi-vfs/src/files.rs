@@ -1,10 +1,10 @@
 use std::io;
 
 use tokio::{select, sync::mpsc::{self, UnboundedReceiver}};
-use yazi_fs::{File, Files, FilesOp, cha::Cha, mounts::PARTITIONS, provider::{DirReader, FileHolder}};
+use yazi_fs::{File, Files, FilesOp, cha::Cha, mounts::PARTITIONS, engine::{DirReader, FileHolder}};
 use yazi_shared::url::{UrlBuf, UrlLike};
 
-use crate::{VfsCha, VfsFile, VfsFilesOp, provider::{self, DirEntry}};
+use crate::{VfsCha, VfsFile, VfsFilesOp, engine::{self, DirEntry}};
 
 pub trait VfsFiles {
 	fn from_dir(dir: &UrlBuf) -> impl Future<Output = io::Result<UnboundedReceiver<File>>>;
@@ -16,7 +16,7 @@ pub trait VfsFiles {
 
 impl VfsFiles for Files {
 	async fn from_dir(dir: &UrlBuf) -> std::io::Result<UnboundedReceiver<File>> {
-		let mut it = provider::read_dir(dir).await?;
+		let mut it = engine::read_dir(dir).await?;
 		let (tx, rx) = mpsc::unbounded_channel();
 
 		tokio::spawn(async move {
@@ -37,7 +37,7 @@ impl VfsFiles for Files {
 	}
 
 	async fn from_dir_bulk(dir: &UrlBuf) -> std::io::Result<Vec<File>> {
-		let mut it = provider::read_dir(dir).await?;
+		let mut it = engine::read_dir(dir).await?;
 		let mut entries = Vec::new();
 		while let Ok(Some(entry)) = it.next().await {
 			entries.push(entry);
@@ -69,7 +69,7 @@ impl VfsFiles for Files {
 	async fn assert_stale(dir: &UrlBuf, cha: Cha) -> Option<Cha> {
 		use std::io::ErrorKind;
 		if dir.is_archive() {
-			return Some(provider::metadata(dir).await.unwrap_or_default());
+			return Some(engine::metadata(dir).await.unwrap_or_default());
 		}
 		match Cha::from_url(dir).await {
 			Ok(c) if !c.is_dir() => FilesOp::issue_error(dir, ErrorKind::NotADirectory).await,
