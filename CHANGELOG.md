@@ -5,6 +5,20 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.10.25`)
+
+### ⚡ Plugin Compatibility & Upstream Sync (Phase 1)
+- **Plugin Fetcher Schema Compatibility ([#6](https://github.com/aroum/che/issues/6))**:
+  - Made `id` optional in `[plugin.fetchers]` config rules, defaulting to `group` or `run.name` if omitted.
+  - Added support for `group` attribute on fetcher rules to match modern upstream Yazi plugin specifications.
+  - Added robust generator/coroutine support for fetcher plugins returning Lua coroutines (`ya.co`) or generator functions, resolving `error converting Lua function to FetchState`.
+- **Platform & Runtime Bug Fixes**:
+  - **macOS Fallback Copy**: Added automatic fallback to `std::io::copy()` with permission transfer when `std::fs::copy()` fails on macOS due to `PermissionDenied` or filesystem restrictions (`yazi-fs/src/provider/local/copier.rs`).
+  - **Boot Entry URL Cleaning**: Normalized and cleaned resolved absolute URLs on startup to avoid redundant path segments (`yazi-boot/src/boot.rs`).
+  - **Asynchronous Shell Process Spawning**: Spawned shell child processes outside blocking worker threads to ensure proper registration on the Tokio reactor (`yazi-scheduler/src/process/shell.rs`).
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.10.12`)
 
 ### 🖼️ Image Preview & CLI Enhancements

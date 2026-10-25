@@ -34,7 +34,20 @@ pub(super) async fn copy_impl(from: PathBuf, to: PathBuf, attrs: Attrs) -> io::R
 	#[cfg(not(any(target_os = "linux", target_os = "android")))]
 	{
 		tokio::task::spawn_blocking(move || {
-			let written = std::fs::copy(from, &to)?;
+			let written = match std::fs::copy(&from, &to) {
+				Ok(n) => n,
+				#[cfg(target_os = "macos")]
+				Err(e) if matches!(e.kind(), io::ErrorKind::PermissionDenied | io::ErrorKind::Unsupported) => {
+					let mut reader = std::fs::File::open(&from)?;
+					let mut writer = std::fs::File::create(&to)?;
+					let written = std::io::copy(&mut reader, &mut writer)?;
+					if let Ok(perm) = reader.metadata().map(|m| m.permissions()) {
+						writer.set_permissions(perm).ok();
+					}
+					written
+				}
+				Err(e) => return Err(e),
+			};
 
 			if let Ok(times) = attrs.try_into()
 				&& let Ok(file) = std::fs::File::options().write(true).open(to)

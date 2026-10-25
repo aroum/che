@@ -9,12 +9,15 @@ pub struct Fetcher {
 	#[serde(skip)]
 	pub idx: u8,
 
-	pub id:   String,
-	pub url:  Option<Pattern>,
-	pub mime: Option<Pattern>,
-	pub run:  Action,
 	#[serde(default)]
-	pub prio: Priority,
+	pub id:    String,
+	pub url:   Option<Pattern>,
+	pub mime:  Option<Pattern>,
+	pub run:   Action,
+	#[serde(default)]
+	pub prio:  Priority,
+	#[serde(default)]
+	pub group: Option<String>,
 }
 
 impl Fetcher {
