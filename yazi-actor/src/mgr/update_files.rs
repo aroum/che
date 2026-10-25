@@ -26,7 +26,9 @@ impl Actor for UpdateFiles {
 			let tab_count = cx.mgr.tabs.panes[p].len();
 			for t in 0..tab_count {
 				cx.tab = t;
-				revisions.push((p, t, cx.current().files.revision));
+				if opt.tabs.is_empty() || opt.tabs.contains(&cx.tab().id) {
+					revisions.push((p, t, cx.current().files.revision));
+				}
 			}
 		}
 
@@ -37,7 +39,9 @@ impl Actor for UpdateFiles {
 				let tab_count = cx.mgr.tabs.panes[p].len();
 				for t in 0..tab_count {
 					cx.tab = t;
-					Self::update_tab(cx, op.clone()).ok();
+					if opt.tabs.is_empty() || opt.tabs.contains(&cx.tab().id) {
+						Self::update_tab(cx, op.clone()).ok();
+					}
 				}
 			}
 		}

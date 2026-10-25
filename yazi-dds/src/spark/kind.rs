@@ -22,6 +22,9 @@ pub enum SparkKind {
 
 	// notify:push
 	RelayNotifyPush,
+
+	// mgr:update_files
+	RelayUpdateFiles,
 }
 
 impl AsRef<str> for SparkKind {
@@ -47,6 +50,9 @@ impl AsRef<str> for SparkKind {
 
 			// notify:push
 			Self::RelayNotifyPush => "relay-notify-push",
+
+			// mgr:update_files
+			Self::RelayUpdateFiles => "relay-update-files",
 		}
 	}
 }

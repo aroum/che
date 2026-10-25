@@ -205,6 +205,9 @@ impl<'a> Spark<'a> {
 
 			// notify:push
 			RelayNotifyPush => Self::NotifyPush(<_>::from_lua(value, lua)?),
+
+			// mgr:update_files
+			RelayUpdateFiles => Self::UpdateFiles(<_>::from_lua(value, lua)?),
 		})
 	}
 }
