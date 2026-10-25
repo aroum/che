@@ -93,3 +93,40 @@ impl Tabs {
 		self.panes.iter_mut().flat_map(|p| p.items.iter_mut())
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_dual_pane_tabs_state() {
+		yazi_shared::init();
+		yazi_boot::init_default();
+		_ = yazi_config::init();
+		yazi_dds::init();
+		let mut tabs = Tabs::default();
+
+		assert_eq!(tabs.active_pane, 0);
+		assert_eq!(tabs.panes[0].len(), 1);
+		assert_eq!(tabs.panes[1].len(), 1);
+		assert_eq!(tabs.all_tabs().count(), 2);
+
+		let tab0_id = tabs.active().id;
+		let tab1_id = tabs.other().id;
+		assert_ne!(tab0_id, tab1_id, "Tabs in different panes should have distinct IDs");
+
+		tabs.set_active_pane(1);
+		assert_eq!(tabs.active_pane, 1);
+		assert_eq!(tabs.active().id, tab1_id);
+		assert_eq!(tabs.other().id, tab0_id);
+
+		tabs.set_active_pane(0);
+		assert_eq!(tabs.active_pane, 0);
+		assert_eq!(tabs.active().id, tab0_id);
+		assert_eq!(tabs.other().id, tab1_id);
+
+		assert_eq!(tabs.find_tab(tab0_id), Some((0, 0)));
+		assert_eq!(tabs.find_tab(tab1_id), Some((1, 0)));
+		assert_eq!(tabs.find_tab(Id::unique()), None);
+	}
+}

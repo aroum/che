@@ -140,3 +140,31 @@ impl mlua::UserData for File {
 		});
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use std::path::Path;
+
+	use yazi_shared::url::UrlBuf;
+
+	use super::*;
+
+	#[test]
+	fn test_file_make_upparent() {
+		let parent_url: UrlBuf = "/home/user".parse().unwrap();
+		let upparent = File::make_upparent(parent_url.clone());
+
+		assert!(upparent.is_upparent, "Expected is_upparent to be true");
+		assert!(upparent.is_dir(), "Expected upparent to be a directory");
+		assert_eq!(upparent.name().unwrap(), "..", "Expected upparent name to be '..'");
+		assert_eq!(upparent.url, parent_url);
+
+		let rebased = upparent.chdir(Path::new("/home"));
+		assert!(rebased.is_upparent, "Expected rebased upparent to retain is_upparent");
+		assert_eq!(rebased.name().unwrap(), "..");
+
+		let dummy = File::from_dummy(parent_url, None);
+		assert!(!dummy.is_upparent, "Expected regular file not to have is_upparent");
+		assert_ne!(dummy.name().unwrap(), "..");
+	}
+}

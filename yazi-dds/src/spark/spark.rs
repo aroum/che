@@ -522,3 +522,37 @@ try_from_spark!(yazi_widgets::input::parser::InsertOpt, input:insert);
 try_from_spark!(yazi_widgets::input::parser::KillOpt, input:kill);
 try_from_spark!(yazi_widgets::input::parser::MoveOpt, input:move);
 try_from_spark!(yazi_widgets::input::parser::PasteOpt, input:paste);
+
+#[cfg(test)]
+mod tests {
+	use yazi_parser::mgr::{PaneFocusOpt, PaneOnlyOpt, PaneOpenOtherOpt, PanePreviewOpt, PaneSwapOpt, PaneSwitchOpt, PaneSyncDirOpt};
+
+	use super::*;
+
+	#[test]
+	fn test_pane_actions_try_from_spark() {
+		let s = Spark::PaneFocus(PaneFocusOpt { left: true });
+		assert!(PaneFocusOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneOnly(PaneOnlyOpt);
+		assert!(PaneOnlyOpt::try_from(s).is_ok());
+
+		let s = Spark::PanePreview(PanePreviewOpt);
+		assert!(PanePreviewOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneSwitch(PaneSwitchOpt);
+		assert!(PaneSwitchOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneSyncDir(PaneSyncDirOpt);
+		assert!(PaneSyncDirOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneSwap(PaneSwapOpt);
+		assert!(PaneSwapOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneOpenOther(PaneOpenOtherOpt);
+		assert!(PaneOpenOtherOpt::try_from(s).is_ok());
+
+		let s = Spark::PaneFocus(PaneFocusOpt { left: false });
+		assert!(PaneOnlyOpt::try_from(s).is_err());
+	}
+}

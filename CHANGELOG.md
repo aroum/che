@@ -33,6 +33,12 @@
   - **Unified Action Deserialization & Dual-Pane Spark Registration (Stage 3 Modern Infrastructure)**:
     - Ported modern Serde deserializers for owned and borrowed data: `de_owned.rs`, `de_key.rs`, `de_bytes.rs`, and numeric conversion macros (`impl_into_integer!`, `impl_into_number!`) in `yazi-shared/src/data/`.
     - Preserved dual-pane actions (`pane:focus`, `pane:only`, `pane:preview`, `pane:switch`, `pane:sync_dir`, `pane:swap`, `pane:open_other`) and custom fork actions (`flat_toggle`, `jump_letter`, `jump_mode`, `comment`) in `yazi-dds::Spark` and action conversion macros.
+  - **Comprehensive Automated Test Coverage for Fork Extensions**:
+    - Added Lua preset syntax compilation test (`test_preset_plugins_compile`) verifying all 42 Lua plugins and components (`dual_pane.lua`) in `yazi-runner`.
+    - Added upper-parent folder navigation test (`test_file_make_upparent`) verifying `is_upparent` (`..`) directory construction and chdir rebasing in `yazi-fs`.
+    - Added dual-pane independent tabs state test (`test_dual_pane_tabs_state`) verifying 2-pane switching, ID uniqueness, and tab indexing in `yazi-core`.
+    - Added Spark action deserialization test (`test_pane_actions_try_from_spark`) verifying roundtrip conversion for all 7 dual-pane actions in `yazi-dds`.
+    - Added CLI integration smoke test suite (`smoke.rs`) verifying binary names (`che` and `ch`), version outputs, subcommands (`archive`, `multirename`), and environment diagnostics.
   - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
   - **Relay Update Files Filtering**: Supported `opt.tabs` in `UpdateFilesOpt` and `update_files.rs` for multi-tab event filtering, allowing DDS and relay events to target specific tabs and dual-pane columns (`yazi-actor/src/mgr/update_files.rs`, `yazi-dds/src/spark/kind.rs`).
 - **UI & Navigation Improvements**:

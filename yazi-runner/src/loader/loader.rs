@@ -204,3 +204,78 @@ impl Loader {
 		Ok((name, plugin, entry))
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_preset_plugins_compile() {
+		let lua = Lua::new();
+		let loader = Loader::default();
+		let cache = loader.cache.read();
+
+		assert!(cache.len() >= 40, "Expected at least 40 preset entries in loader cache");
+
+		let required_plugins = [
+			"archive",
+			"audio",
+			"che-archive",
+			"che-bookmarks",
+			"che-session",
+			"clipboard",
+			"code",
+			"dds",
+			"dnd",
+			"empty",
+			"error",
+			"extract",
+			"fd",
+			"file",
+			"folder",
+			"font",
+			"fzf",
+			"go",
+			"image",
+			"init",
+			"json",
+			"magick",
+			"mime",
+			"mime.dir",
+			"mime.local",
+			"mime.remote",
+			"mime.trash",
+			"multi",
+			"multirename",
+			"noop",
+			"pdf",
+			"place",
+			"rg",
+			"search",
+			"session",
+			"svg",
+			"system-copy",
+			"trash",
+			"vfs",
+			"video",
+			"zoxide",
+		];
+
+		for name in required_plugins {
+			let chunk = cache.get(name).unwrap_or_else(|| panic!("Missing preset plugin: {name}"));
+			lua.load(&*chunk.bytes)
+				.set_name(format!("{name}.lua"))
+				.into_function()
+				.unwrap_or_else(|e| panic!("Failed to compile Lua preset `{name}.lua`: {e}"));
+		}
+
+		let dual_pane_bytes = include_bytes!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/../yazi-plugin/preset/components/dual_pane.lua"
+		));
+		lua.load(&dual_pane_bytes[..])
+			.set_name("dual_pane.lua")
+			.into_function()
+			.expect("Failed to compile dual_pane.lua");
+	}
+}

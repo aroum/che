@@ -5877,6 +5877,7 @@ dependencies = [
  "unicode-width",
  "yazi-adapter",
  "yazi-binding",
+ "yazi-boot",
  "yazi-config",
  "yazi-dds",
  "yazi-emulator",
