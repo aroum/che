@@ -1,24 +1,16 @@
 use mlua::{AnyUserData, IntoLua, Lua, MetaMethod, Table, UserData, Value};
 use ratatui::widgets::{Borders, Widget};
 
-use super::{Area, Edge};
+use super::{Area, BorderSet, BorderType, Edge};
 use crate::elements::Line;
-
-// Type
-const PLAIN: u8 = 0;
-const ROUNDED: u8 = 1;
-const DOUBLE: u8 = 2;
-const THICK: u8 = 3;
-const QUADRANT_INSIDE: u8 = 4;
-const QUADRANT_OUTSIDE: u8 = 5;
 
 #[derive(Clone, Debug, Default)]
 pub struct Border {
 	pub area: Area,
 
-	pub edge:   Edge,
-	pub r#type: ratatui::widgets::BorderType,
-	pub style:  ratatui::style::Style,
+	pub edge:  Edge,
+	pub set:   BorderSet,
+	pub style: ratatui::style::Style,
 
 	pub titles: Vec<(ratatui::widgets::TitlePosition, ratatui::text::Line<'static>)>,
 }
@@ -26,18 +18,10 @@ pub struct Border {
 impl Border {
 	pub fn compose(lua: &Lua) -> mlua::Result<Value> {
 		let new = lua.create_function(|_, (_, edge): (Table, Edge)| {
-			Ok(Self { edge, r#type: ratatui::widgets::BorderType::Rounded, ..Default::default() })
+			Ok(Self { edge, set: BorderType::Rounded.into(), ..Default::default() })
 		})?;
 
-		let border = lua.create_table_from([
-			// Type
-			("PLAIN", PLAIN),
-			("ROUNDED", ROUNDED),
-			("DOUBLE", DOUBLE),
-			("THICK", THICK),
-			("QUADRANT_INSIDE", QUADRANT_INSIDE),
-			("QUADRANT_OUTSIDE", QUADRANT_OUTSIDE),
-		])?;
+		let border = BorderType::compose(lua)?;
 
 		border.set_metatable(Some(lua.create_table_from([(MetaMethod::Call.name(), new)])?))?;
 		border.into_lua(lua)
@@ -51,7 +35,7 @@ impl Widget for Border {
 	{
 		let mut block = ratatui::widgets::Block::default()
 			.borders(self.edge.0)
-			.border_type(self.r#type)
+			.border_set(self.set.as_set())
 			.border_style(self.style);
 
 		for title in self.titles {
@@ -80,14 +64,11 @@ impl UserData for Border {
 		crate::impl_style_method!(methods, style);
 
 		methods.add_function_mut("type", |_, (ud, value): (AnyUserData, u8)| {
-			ud.borrow_mut::<Self>()?.r#type = match value {
-				ROUNDED => ratatui::widgets::BorderType::Rounded,
-				DOUBLE => ratatui::widgets::BorderType::Double,
-				THICK => ratatui::widgets::BorderType::Thick,
-				QUADRANT_INSIDE => ratatui::widgets::BorderType::QuadrantInside,
-				QUADRANT_OUTSIDE => ratatui::widgets::BorderType::QuadrantOutside,
-				_ => ratatui::widgets::BorderType::Plain,
-			};
+			ud.borrow_mut::<Self>()?.set = BorderType::from(value).into();
+			Ok(ud)
+		});
+		methods.add_function_mut("set", |_, (ud, value): (AnyUserData, BorderSet)| {
+			ud.borrow_mut::<Self>()?.set = value;
 			Ok(ud)
 		});
 		methods.add_function_mut(

@@ -5744,6 +5744,7 @@ dependencies = [
  "mlua",
  "paste",
  "ratatui",
+ "serde",
  "serde_json",
  "tokio",
  "tokio-stream",

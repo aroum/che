@@ -35,6 +35,7 @@ hashbrown     = { workspace = true }
 mlua          = { workspace = true }
 paste         = { workspace = true }
 ratatui       = { workspace = true }
+serde         = { workspace = true }
 serde_json    = { workspace = true }
 tokio  	      = { workspace = true }
 tokio-stream  = { workspace = true }
