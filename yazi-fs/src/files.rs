@@ -1,7 +1,7 @@
 use std::{mem, ops::{Deref, DerefMut, Not}};
 
 use hashbrown::{HashMap, HashSet};
-use yazi_shared::{Id, path::{PathBufDyn, PathDyn}};
+use yazi_shared::{Id, path::{PathBufDyn, PathDyn, PathLike}};
 
 use super::{FilesSorter, Filter};
 use crate::{FILES_TICKET, File, SortBy};
@@ -15,6 +15,7 @@ pub struct Files {
 	pub revision: u64,
 
 	pub sizes: HashMap<PathBufDyn, u64>,
+	pub ranks: HashMap<PathBufDyn, i64>,
 
 	sorter:      FilesSorter,
 	filter:      Option<Filter>,
@@ -82,6 +83,31 @@ impl Files {
 			self.revision += 1;
 		}
 		self.sizes.extend(sizes);
+	}
+
+	pub fn update_rank(&mut self, mut ranks: HashMap<PathBufDyn, i64>) {
+		let mut changed = false;
+
+		if self.ranks.is_empty() {
+			ranks.retain(|key, rank| *rank != 0 && !key.is_empty());
+			(changed, self.ranks) = (!ranks.is_empty(), std::mem::take(&mut ranks));
+		}
+
+		for (key, rank) in ranks {
+			if key.is_empty() {
+				continue;
+			}
+
+			changed |= if rank == 0 {
+				self.ranks.remove(&key).is_some()
+			} else {
+				self.ranks.insert(key, rank) != Some(rank)
+			};
+		}
+
+		if changed && self.sorter.by == SortBy::Custom {
+			self.revision += 1;
+		}
 	}
 
 	pub fn update_ioerr(&mut self) {
@@ -256,10 +282,10 @@ impl Files {
 		let has_upparent = self.items.first().is_some_and(|f| f.is_upparent);
 		if has_upparent {
 			let upparent = self.items.remove(0);
-			self.sorter.sort(&mut self.items, &self.sizes);
+			self.sorter.sort(&mut self.items, &self.sizes, &self.ranks);
 			self.items.insert(0, upparent);
 		} else {
-			self.sorter.sort(&mut self.items, &self.sizes);
+			self.sorter.sort(&mut self.items, &self.sizes, &self.ranks);
 		}
 	}
 

@@ -15,6 +15,7 @@ pub enum FilesOp {
 	Part(UrlBuf, Vec<File>, Id),
 	Done(UrlBuf, Cha, Id),
 	Size(UrlBuf, HashMap<PathBufDyn, u64>),
+	Rank(UrlBuf, HashMap<PathBufDyn, i64>),
 	IOErr(UrlBuf, Error),
 
 	Creating(UrlBuf, Vec<File>),
@@ -31,6 +32,7 @@ impl FilesOp {
 			Self::Part(u, ..) => u,
 			Self::Done(u, ..) => u,
 			Self::Size(u, _) => u,
+			Self::Rank(u, _) => u,
 			Self::IOErr(u, _) => u,
 
 			Self::Creating(u, _) => u,
@@ -112,6 +114,7 @@ impl FilesOp {
 			Self::Part(_, files, ticket) => Self::Part(w, files!(files), *ticket),
 			Self::Done(_, cha, ticket) => Self::Done(w, *cha, *ticket),
 			Self::Size(_, map) => Self::Size(w, map.iter().map(|(urn, &s)| (urn.clone(), s)).collect()),
+			Self::Rank(_, map) => Self::Rank(w, map.clone()),
 			Self::IOErr(_, err) => Self::IOErr(w, err.clone()),
 
 			Self::Creating(_, files) => Self::Creating(w, files!(files)),

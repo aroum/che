@@ -7,11 +7,19 @@
 
 ## 📅 Versioning & CalVer Release (`26.10.25`)
 
-### ⚡ Plugin Compatibility & Upstream Sync (Phase 1)
+### ⚡ Plugin Compatibility & Upstream Sync (Phase 1, 2 & 3)
 - **Plugin Fetcher Schema Compatibility ([#6](https://github.com/aroum/che/issues/6))**:
   - Made `id` optional in `[plugin.fetchers]` config rules, defaulting to `group` or `run.name` if omitted.
   - Added support for `group` attribute on fetcher rules to match modern upstream Yazi plugin specifications.
   - Added robust generator/coroutine support for fetcher plugins returning Lua coroutines (`ya.co`) or generator functions, resolving `error converting Lua function to FetchState`.
+- **Performance & Terminal Optimizations**:
+  - **Lua Generational Garbage Collection**: Switched the Lua runtime GC to generational mode (`gc_gen(0, 0)`), cutting GC pause times during directory traversal and UI linemode rendering (`yazi-plugin/src/lua.rs`).
+  - **Terminal Frame Buffer Recycling**: Eliminated full-buffer reallocations on each render tick by reusing allocated frame vector memory via `clone_from` (`yazi-term/src/term.rs`).
+  - **Instant CLI Version & Cache Execution**: Decoupled `--version` and `--clear-cache` actions from terminal initialization, eliminating terminal probing delays and spurious timeout warnings (`yazi-boot/src/actions/actions.rs`).
+  - **Konsole Graphics Fix**: Removed `z=-1` parameter from legacy Kitty graphics placement command to prevent invisible or misplaced previews in Konsole (`yazi-adapter/src/drivers/kgp_old.rs`).
+  - **`st-graphics` Terminal Support**: Added emulator brand recognition and Kitty graphics protocol support for `st-graphics` (`yazi-emulator/src/brand.rs`, `yazi-adapter/src/adapters.rs`).
+- **File System & Sorting Enhancements**:
+  - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
 - **Platform & Runtime Bug Fixes**:
   - **macOS Fallback Copy**: Added automatic fallback to `std::io::copy()` with permission transfer when `std::fs::copy()` fails on macOS due to `PermissionDenied` or filesystem restrictions (`yazi-fs/src/provider/local/copier.rs`).
   - **Boot Entry URL Cleaning**: Normalized and cleaned resolved absolute URLs on startup to avoid redundant path segments (`yazi-boot/src/boot.rs`).

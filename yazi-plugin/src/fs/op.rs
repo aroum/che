@@ -39,6 +39,19 @@ impl FilesOp {
 				.collect::<mlua::Result<_>>()?,
 		)))
 	}
+
+	pub(super) fn rank(_: &Lua, t: Table) -> mlua::Result<Self> {
+		let url: Url = t.raw_get("url")?;
+		let ranks: Table = t.raw_get("ranks")?;
+
+		Ok(Self(yazi_fs::FilesOp::Rank(
+			url.into(),
+			ranks
+				.pairs::<Path, i64>()
+				.map(|r| r.map(|(urn, rank)| (urn.into(), rank)))
+				.collect::<mlua::Result<_>>()?,
+		)))
+	}
 }
 
 impl IntoLua for FilesOp {

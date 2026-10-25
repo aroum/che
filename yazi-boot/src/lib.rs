@@ -15,6 +15,7 @@ pub fn init_args() {
 			std::env::set_var("CHE_LOG", "debug");
 		}
 	}
+	actions::Actions::act_early(&ARGS);
 }
 
 pub fn init() {

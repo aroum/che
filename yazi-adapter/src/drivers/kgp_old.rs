@@ -96,7 +96,7 @@ impl KgpOld {
 				let p = y * cols + x + 1;
 				write!(
 					buf,
-					"{}{START}_Gq=2,a=p,i={},p={p},x={left},y={top},w={},h={},c=1,r=1,z=-1,C=1{ESCAPE}\\{CLOSE}",
+					"{}{START}_Gq=2,a=p,i={},p={p},x={left},y={top},w={},h={},c=1,r=1,C=1{ESCAPE}\\{CLOSE}",
 					MoveTo(area.x + x as u16, area.y + y as u16),
 					Kgp::image_id(),
 					right - left,

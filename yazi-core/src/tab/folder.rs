@@ -67,6 +67,7 @@ impl Folder {
 			FilesOp::Part(_, files, ticket) => self.files.update_part(files, ticket),
 			FilesOp::Done(..) => {}
 			FilesOp::Size(_, sizes) => self.files.update_size(sizes),
+			FilesOp::Rank(_, ranks) => self.files.update_rank(ranks),
 			FilesOp::IOErr(..) => self.files.update_ioerr(),
 
 			FilesOp::Creating(_, files) => self.files.update_creating(files),
@@ -87,11 +88,13 @@ impl Folder {
 	}
 
 	pub fn update_pub(&mut self, tab: Id, op: FilesOp) -> bool {
-		if self.update(op) {
+		let load = !matches!(op, FilesOp::Rank(..));
+		if !self.update(op) {
+			return false;
+		} else if load {
 			err!(Pubsub::pub_after_load(tab, &self.url, &self.stage));
-			return true;
 		}
-		false
+		true
 	}
 
 	pub fn arrow(&mut self, step: impl Into<Step>) -> bool {

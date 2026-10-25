@@ -9,7 +9,9 @@ use yazi_shared::RoCell;
 pub static LUA: RoCell<Lua> = RoCell::new();
 
 pub(super) fn init_lua() -> Result<()> {
-	LUA.init(Lua::new());
+	let lua = Lua::new();
+	lua.gc_gen(0, 0);
+	LUA.init(lua);
 
 	stage_1(&LUA).context("Lua setup failed")?;
 	stage_2(&LUA).context("Lua runtime failed")?;

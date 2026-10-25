@@ -32,6 +32,7 @@ impl From<yazi_emulator::Brand> for Adapters {
 			B::Foot => vec![A::Sixel],
 			B::Ghostty => vec![A::Kgp],
 			B::Microsoft => vec![A::Sixel],
+			B::StGraphics => vec![A::Kgp],
 			B::Warp => vec![A::Iip, A::KgpOld],
 			B::Rio => vec![A::Iip, A::Sixel],
 			B::BlackBox => vec![A::Sixel],

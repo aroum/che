@@ -125,6 +125,7 @@ fn op(lua: &Lua) -> mlua::Result<Function> {
 		b"part" => super::FilesOp::part(lua, t),
 		b"done" => super::FilesOp::done(lua, t),
 		b"size" => super::FilesOp::size(lua, t),
+		b"rank" => super::FilesOp::rank(lua, t),
 		_ => Err("Unknown operation".into_lua_err())?,
 	})
 }
