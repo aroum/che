@@ -109,6 +109,7 @@ impl<'a> Executor<'a> {
 		on!(toggle);
 		on!(toggle_all);
 		on!(visual_mode);
+		on!(visual_arrow);
 
 		// Operation
 		on!(open);

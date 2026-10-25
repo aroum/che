@@ -21,7 +21,7 @@ impl Actor for Arrow {
 		// Visual selection
 		if let Some((start, items)) = tab.mode.visual_mut() {
 			let end = tab.current.cursor;
-			*items = (start.min(end)..=end.max(start)).collect();
+			*items = ((*start).min(end)..=end.max(*start)).collect();
 		}
 
 		act!(mgr:hover, cx)?;

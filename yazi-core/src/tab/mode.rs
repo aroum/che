@@ -9,11 +9,11 @@ pub enum Mode {
 }
 
 impl Mode {
-	pub fn visual_mut(&mut self) -> Option<(usize, &mut BTreeSet<usize>)> {
+	pub fn visual_mut(&mut self) -> Option<(&mut usize, &mut BTreeSet<usize>)> {
 		match self {
 			Self::Normal => None,
-			Self::Select(start, indices) => Some((*start, indices)),
-			Self::Unset(start, indices) => Some((*start, indices)),
+			Self::Select(start, indices) => Some((start, indices)),
+			Self::Unset(start, indices) => Some((start, indices)),
 		}
 	}
 

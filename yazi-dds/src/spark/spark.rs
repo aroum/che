@@ -113,6 +113,7 @@ pub enum Spark<'a> {
 	UpdateSpotted(yazi_parser::mgr::UpdateSpottedOpt),
 	UpdateYanked(yazi_parser::mgr::UpdateYankedOpt<'a>),
 	Upload(yazi_parser::mgr::UploadOpt),
+	VisualArrow(yazi_parser::mgr::VisualArrowOpt),
 	VisualMode(yazi_parser::mgr::VisualModeOpt),
 	Watch(yazi_parser::VoidOpt),
 	Yank(yazi_parser::mgr::YankOpt),
@@ -320,6 +321,7 @@ impl<'a> IntoLua for Spark<'a> {
 			Self::UpdateSpotted(b) => b.into_lua(lua),
 			Self::UpdateYanked(b) => b.into_lua(lua),
 			Self::Upload(b) => b.into_lua(lua),
+			Self::VisualArrow(b) => b.into_lua(lua),
 			Self::VisualMode(b) => b.into_lua(lua),
 			Self::Watch(b) => b.into_lua(lua),
 			Self::Yank(b) => b.into_lua(lua),
@@ -497,6 +499,7 @@ try_from_spark!(yazi_parser::mgr::UpdatePeekedOpt, mgr:update_peeked);
 try_from_spark!(yazi_parser::mgr::UpdateSpottedOpt, mgr:update_spotted);
 try_from_spark!(yazi_parser::mgr::UpdateYankedOpt<'a>, mgr:update_yanked);
 try_from_spark!(yazi_parser::mgr::UploadOpt, mgr:upload);
+try_from_spark!(yazi_parser::mgr::VisualArrowOpt, mgr:visual_arrow);
 try_from_spark!(yazi_parser::mgr::VisualModeOpt, mgr:visual_mode);
 try_from_spark!(yazi_parser::mgr::YankOpt, mgr:yank);
 try_from_spark!(yazi_parser::notify::PushOpt, notify:push);
