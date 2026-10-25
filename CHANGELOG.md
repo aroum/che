@@ -20,6 +20,10 @@
   - **`st-graphics` Terminal Support**: Added emulator brand recognition and Kitty graphics protocol support for `st-graphics` (`yazi-emulator/src/brand.rs`, `yazi-adapter/src/adapters.rs`).
 - **File System & Sorting Enhancements**:
   - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
+  - **Relay Update Files Filtering**: Supported `opt.tabs` in `UpdateFilesOpt` and `update_files.rs` for multi-tab event filtering, allowing DDS and relay events to target specific tabs and dual-pane columns (`yazi-actor/src/mgr/update_files.rs`, `yazi-dds/src/spark/kind.rs`).
+- **UI & Navigation Improvements**:
+  - **Reanchor Visual Selections (`visual_arrow`)**: Added new `visual_arrow <step>` manager action to dynamically reanchor selection start and adjust visual mode range using relative step navigation (`yazi-actor/src/mgr/visual_arrow.rs`, `yazi-parser/src/mgr/visual_arrow.rs`).
+  - **Custom Border Shapes & Border Set**: Added support for customizable border sets (`BorderSet`) and styles (`BorderType`: `plain`, `rounded`, `double`, `thick`, `quadrant-inside`, `quadrant-outside`) via `ui.Border:set()` in `yazi-binding/src/elements/border.rs` and `border_set.rs`.
 - **Platform & Runtime Bug Fixes**:
   - **macOS Fallback Copy**: Added automatic fallback to `std::io::copy()` with permission transfer when `std::fs::copy()` fails on macOS due to `PermissionDenied` or filesystem restrictions (`yazi-fs/src/provider/local/copier.rs`).
   - **Boot Entry URL Cleaning**: Normalized and cleaned resolved absolute URLs on startup to avoid redundant path segments (`yazi-boot/src/boot.rs`).
