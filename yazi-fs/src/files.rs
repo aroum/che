@@ -383,4 +383,9 @@ impl Files {
 			self.items.extend(items);
 		}
 	}
+
+	pub fn hashes(&self) -> impl Iterator<Item = u64> + '_ {
+		use crate::FsHash64;
+		self.items.iter().map(|f| crate::file::FileSig(f).hash_u64())
+	}
 }

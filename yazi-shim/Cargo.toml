@@ -12,14 +12,30 @@ rust-version.workspace = true
 [lints]
 workspace = true
 
+[features]
+default      = [ "vendored-lua" ]
+vendored-lua = [ "mlua/vendored" ]
+
 [dependencies]
-yazi-macro = { path = "../yazi-macro", version = "26.8.15" }
+yazi-codegen = { path = "../yazi-codegen", version = "26.8.15" }
+yazi-macro   = { path = "../yazi-macro", version = "26.8.15" }
 
 # External dependencies
-crossterm = { workspace = true }
-ratatui   = { workspace = true }
-twox-hash = { workspace = true }
-unicode-width = { workspace = true }
+anyhow               = { workspace = true }
+arc-swap             = { workspace = true }
+crossterm            = { workspace = true }
+hashbrown            = { workspace = true }
+indexmap             = { workspace = true }
+memchr               = "2.8.0"
+mlua                 = { workspace = true }
+percent-encoding     = { workspace = true }
+ratatui              = { workspace = true }
+serde                = { workspace = true }
+thiserror            = { workspace = true }
+tokio                = { workspace = true }
+toml                 = { workspace = true }
+twox-hash            = { workspace = true }
+unicode-width        = { workspace = true }
 
 [dependencies.unicode-segmentation]
 version = "1.13.3"

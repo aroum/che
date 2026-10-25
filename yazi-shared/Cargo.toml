@@ -12,6 +12,10 @@ rust-version.workspace = true
 [lints]
 workspace = true
 
+[features]
+default      = [ "vendored-lua" ]
+vendored-lua = [ "mlua/vendored" ]
+
 [dependencies]
 yazi-macro = { path = "../yazi-macro", version = "26.8.15" }
 
@@ -23,6 +27,7 @@ foldhash         = { workspace = true }
 futures          = { workspace = true }
 hashbrown        = { workspace = true }
 memchr           = "2.8.0"
+mlua             = { workspace = true }
 ordered-float    = { workspace = true }
 parking_lot      = { workspace = true }
 percent-encoding = { workspace = true }

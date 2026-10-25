@@ -42,6 +42,7 @@ base64              = "0.22.1"
 bitflags            = { version = "2.11.0", features = [ "serde" ] }
 chrono              = "0.4.44"
 clap                = { version = "4.6.0", features = [ "derive" ] }
+compact_str         = { version = "0.9.0", features = [ "serde" ] }
 core-foundation-sys = "0.8.7"
 crossterm           = { version = "0.29.0", features = [ "event-stream" ] }
 dirs                = "6.0.0"
@@ -69,6 +70,7 @@ scopeguard          = "1.2.0"
 serde               = { version = "1.0.228", features = [ "derive" ] }
 serde_json          = "1.0.149"
 serde_with          = "3.18.0"
+strum               = { version = "0.27.2", features = [ "derive" ] }
 syntect             = { version = "5.3.0", default-features = false, features = [ "parsing", "plist-load", "regex-onig" ] }
 thiserror           = "2.0.18"
 tokio               = { version = "1.50.0", features = [ "full" ] }

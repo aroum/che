@@ -14,7 +14,7 @@ use super::Utils;
 impl Utils {
 	pub(super) fn which(lua: &Lua) -> mlua::Result<Function> {
 		lua.create_async_function(|lua, t: Table| async move {
-			if runtime!(lua)?.blocking {
+			if runtime!(lua)?.is_blocking() {
 				return Err("Cannot call `ya.which()` while main thread is blocked".into_lua_err());
 			}
 
@@ -48,7 +48,7 @@ impl Utils {
 
 	pub(super) fn input(lua: &Lua) -> mlua::Result<Function> {
 		lua.create_async_function(|lua, t: Table| async move {
-			if runtime!(lua)?.blocking {
+			if runtime!(lua)?.is_blocking() {
 				return Err("Cannot call `ya.input()` while main thread is blocked".into_lua_err());
 			}
 
@@ -81,7 +81,7 @@ impl Utils {
 
 	pub(super) fn confirm(lua: &Lua) -> mlua::Result<Function> {
 		lua.create_async_function(|lua, t: Table| async move {
-			if runtime!(lua)?.blocking {
+			if runtime!(lua)?.is_blocking() {
 				return Err("Cannot call `ya.confirm()` while main thread is blocked".into_lua_err());
 			}
 

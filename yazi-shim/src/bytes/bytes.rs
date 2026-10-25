@@ -1,0 +1,57 @@
+use std::fmt::{self, Display};
+
+use super::BytePredictor;
+
+pub trait BytesExt {
+	fn display(&self) -> impl Display;
+
+	fn kebab_cased(&self) -> bool;
+
+	fn rsplit_pred_once<P: BytePredictor>(&self, pred: P) -> Option<(&[u8], &[u8])>;
+
+	fn rsplit_seq_once(&self, sep: &[u8]) -> Option<(&[u8], &[u8])>;
+
+	fn snake_cased(&self) -> bool;
+
+	fn split_seq_once(&self, sep: &[u8]) -> Option<(&[u8], &[u8])>;
+}
+
+impl BytesExt for [u8] {
+	fn display(&self) -> impl Display {
+		fmt::from_fn(|f| {
+			for chunk in self.utf8_chunks() {
+				chunk.valid().fmt(f)?;
+				if !chunk.invalid().is_empty() {
+					char::REPLACEMENT_CHARACTER.fmt(f)?;
+				}
+			}
+			Ok(())
+		})
+	}
+
+	fn kebab_cased(&self) -> bool {
+		self.iter().all(|&b| matches!(b, b'0'..=b'9' | b'a'..=b'z' | b'-'))
+	}
+
+	fn rsplit_pred_once<P: BytePredictor>(&self, pred: P) -> Option<(&[u8], &[u8])> {
+		let i = self.iter().rposition(|&byte| pred.predicate(byte))?;
+		let (a, b) = self.split_at(i);
+		Some((a, &b[1..]))
+	}
+
+	fn snake_cased(&self) -> bool {
+		self.iter().all(|&b| matches!(b, b'0'..=b'9' | b'a'..=b'z' | b'_'))
+	}
+
+	fn split_seq_once(&self, sep: &[u8]) -> Option<(&[u8], &[u8])> {
+		let idx = memchr::memmem::find(self, sep)?;
+		let (a, b) = self.split_at(idx);
+		Some((a, &b[sep.len()..]))
+	}
+
+	fn rsplit_seq_once(&self, sep: &[u8]) -> Option<(&[u8], &[u8])> {
+		let idx = memchr::memmem::rfind(self, sep)?;
+		let (a, b) = self.split_at(idx);
+		Some((a, &b[sep.len()..]))
+	}
+}

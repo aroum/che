@@ -1,4 +1,4 @@
-use std::{hash::{Hash, Hasher}, ops::Deref, path::Path};
+use std::{hash::{BuildHasher, Hash, Hasher}, ops::Deref, path::Path};
 
 use yazi_shared::{path::{PathBufDyn, PathDyn}, strand::Strand, url::{UrlBuf, UrlLike}};
 
@@ -80,5 +80,63 @@ impl Hash for File {
 		self.cha.btime.hash(state);
 		self.cha.ctime.hash(state);
 		self.cha.mtime.hash(state);
+	}
+}
+
+pub use crate::files::Files;
+
+#[derive(Clone, Copy, Debug)]
+pub struct FileSig<'a>(pub &'a File);
+
+impl Deref for FileSig<'_> {
+	type Target = File;
+
+	fn deref(&self) -> &Self::Target { self.0 }
+}
+
+impl Hash for FileSig<'_> {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.url.hash(state);
+		self.cha.len.hash(state);
+		self.cha.btime.hash(state);
+		self.cha.ctime.hash(state);
+		self.cha.mtime.hash(state);
+	}
+}
+
+impl crate::FsHash64 for FileSig<'_> {
+	fn hash_u64(&self) -> u64 {
+		foldhash::fast::FixedState::default().hash_one(self)
+	}
+}
+
+use mlua::{AnyUserData, ExternalError, FromLua, Lua, Value};
+
+pub struct FileRef(pub AnyUserData);
+
+impl FileRef {
+	pub fn borrow<R>(&self, mut f: impl FnMut(&File) -> mlua::Result<R>) -> mlua::Result<R> {
+		match self.0.borrow::<File>() {
+			Ok(file) => f(&file),
+			Err(e) => Err(e),
+		}
+	}
+}
+
+impl FromLua for FileRef {
+	fn from_lua(value: Value, _: &Lua) -> mlua::Result<Self> {
+		match value {
+			Value::UserData(ud) => Ok(Self(ud)),
+			_ => Err("expected a table or File".into_lua_err())?,
+		}
+	}
+}
+
+impl mlua::UserData for File {
+	fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
+		methods.add_method("hash", |_, me, ()| {
+			use crate::FsHash64;
+			Ok(me.hash_u64())
+		});
 	}
 }

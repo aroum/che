@@ -19,6 +19,21 @@ macro_rules! time {
 }
 
 #[macro_export]
+macro_rules! debug {
+	($($args:tt)+) => { tracing::debug!($($args)+) };
+}
+
+#[macro_export]
+macro_rules! warn {
+	($($args:tt)+) => { tracing::warn!($($args)+) };
+}
+
+#[macro_export]
+macro_rules! error {
+	($($args:tt)+) => { tracing::error!($($args)+) };
+}
+
+#[macro_export]
 macro_rules! err {
 	($expr:expr) => {
 		$crate::err!(stringify!($expr), $expr)

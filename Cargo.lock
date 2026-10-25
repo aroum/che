@@ -4635,6 +4635,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
  "tokio",
 ]
@@ -5738,6 +5739,7 @@ version = "26.8.15"
 dependencies = [
  "ansi-to-tui",
  "anyhow",
+ "compact_str",
  "crossterm 0.29.0",
  "futures",
  "hashbrown 0.16.1",
@@ -5748,6 +5750,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tracing",
  "unicode-width",
  "yazi-adapter",
@@ -5814,6 +5817,7 @@ dependencies = [
  "yazi-macro",
  "yazi-shared",
  "yazi-shim",
+ "yazi-version",
 ]
 
 [[package]]
@@ -5965,9 +5969,11 @@ dependencies = [
  "yazi-parser",
  "yazi-plugin",
  "yazi-proxy",
+ "yazi-runner",
  "yazi-shared",
  "yazi-term",
  "yazi-tty",
+ "yazi-version",
  "yazi-vfs",
  "yazi-watcher",
  "yazi-widgets",
@@ -6101,6 +6107,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "yazi-runner"
+version = "26.8.15"
+dependencies = [
+ "anyhow",
+ "compact_str",
+ "futures",
+ "hashbrown 0.16.1",
+ "mlua",
+ "parking_lot",
+ "strum",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "yazi-binding",
+ "yazi-config",
+ "yazi-fs",
+ "yazi-macro",
+ "yazi-shared",
+ "yazi-shim",
+ "yazi-version",
+]
+
+[[package]]
 name = "yazi-scheduler"
 version = "26.8.15"
 dependencies = [
@@ -6125,6 +6154,7 @@ dependencies = [
  "yazi-parser",
  "yazi-plugin",
  "yazi-proxy",
+ "yazi-runner",
  "yazi-shared",
  "yazi-term",
  "yazi-vfs",
@@ -6154,6 +6184,7 @@ dependencies = [
  "hashbrown 0.16.1",
  "libc",
  "memchr",
+ "mlua",
  "ordered-float 5.1.0",
  "parking_lot",
  "percent-encoding",
@@ -6170,11 +6201,23 @@ dependencies = [
 name = "yazi-shim"
 version = "26.8.15"
 dependencies = [
+ "anyhow",
+ "arc-swap",
  "crossterm 0.29.0",
+ "hashbrown 0.16.1",
+ "indexmap 2.13.0",
+ "memchr",
+ "mlua",
+ "percent-encoding",
  "ratatui",
+ "serde",
+ "thiserror 2.0.18",
+ "tokio",
+ "toml",
  "twox-hash",
  "unicode-segmentation",
  "unicode-width",
+ "yazi-codegen",
  "yazi-macro",
 ]
 
@@ -6204,6 +6247,13 @@ dependencies = [
  "windows-sys 0.61.2",
  "yazi-macro",
  "yazi-shared",
+]
+
+[[package]]
+name = "yazi-version"
+version = "26.8.15"
+dependencies = [
+ "vergen-gitcl",
 ]
 
 [[package]]

@@ -8,8 +8,13 @@ use serde::{Deserialize, Serialize};
 pub struct Id(pub u64);
 
 impl Id {
+	pub const ZERO: Self = Self(0);
+
 	#[inline]
 	pub const fn get(&self) -> u64 { self.0 }
+
+	#[inline]
+	pub fn nz(self) -> Option<Self> { (self != Self::ZERO).then_some(self) }
 
 	pub fn unique() -> Self { Self(crate::timestamp_us()) }
 }
@@ -67,4 +72,16 @@ impl Ids {
 
 impl Default for Ids {
 	fn default() -> Self { Self::new() }
+}
+
+impl mlua::IntoLua for Id {
+	fn into_lua(self, lua: &mlua::Lua) -> mlua::Result<mlua::Value> {
+		(self.0 as i64).into_lua(lua)
+	}
+}
+
+impl mlua::FromLua for Id {
+	fn from_lua(value: mlua::Value, lua: &mlua::Lua) -> mlua::Result<Self> {
+		i64::from_lua(value, lua).map(|i| Self(i as u64))
+	}
 }

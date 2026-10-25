@@ -44,7 +44,7 @@ impl Utils {
 			lua.create_async_function(move |lua, mut args: MultiValue| {
 				let (f, current) = (f.clone(), current.clone());
 				async move {
-					let blocking = runtime!(lua)?.blocking;
+					let blocking = runtime!(lua)?.is_blocking();
 					if blocking {
 						args.push_front(Value::Table(LOADER.try_load(&lua, &current)?));
 						f.call::<MultiValue>(args)

@@ -30,9 +30,11 @@ yazi-macro = { path = "../yazi-macro", version = "26.8.15" }
 yazi-parser = { path = "../yazi-parser", version = "26.8.15" }
 yazi-plugin = { path = "../yazi-plugin", version = "26.8.15" }
 yazi-proxy = { path = "../yazi-proxy", version = "26.8.15" }
+yazi-runner = { path = "../yazi-runner", version = "26.8.15" }
 yazi-shared = { path = "../yazi-shared", version = "26.8.15" }
 yazi-term = { path = "../yazi-term", version = "26.8.15" }
 yazi-tty = { path = "../yazi-tty", version = "26.8.15" }
+yazi-version = { path = "../yazi-version", version = "26.8.15" }
 yazi-vfs = { path = "../yazi-vfs", version = "26.8.15" }
 yazi-watcher = { path = "../yazi-watcher", version = "26.8.15" }
 yazi-widgets = { path = "../yazi-widgets", version = "26.8.15" }

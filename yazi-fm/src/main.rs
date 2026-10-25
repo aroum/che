@@ -10,6 +10,8 @@ yazi_macro::mod_flat!(dispatcher executor logs panic root router signals);
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+	yazi_version::setup!();
+
 	Panic::install();
 	yazi_boot::init_args();
 	yazi_shared::init();
@@ -36,6 +38,8 @@ async fn main() -> anyhow::Result<()> {
 	yazi_widgets::init();
 
 	yazi_watcher::init();
+
+	yazi_runner::init(yazi_plugin::slim_lua_env);
 
 	yazi_plugin::init()?;
 

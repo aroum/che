@@ -35,15 +35,7 @@ async fn main() -> ExitCode {
 }
 
 async fn run() -> anyhow::Result<()> {
-	if std::env::args_os().nth(1).is_some_and(|s| s == "-V" || s == "--version") {
-		outln!(
-			"Ch {} ({} {})",
-			env!("CARGO_PKG_VERSION"),
-			env!("VERGEN_GIT_SHA"),
-			env!("VERGEN_BUILD_DATE")
-		)?;
-		return Ok(());
-	}
+	yazi_version::setup!();
 
 	match Args::parse().command {
 		Command::Emit(cmd) => {

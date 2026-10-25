@@ -23,6 +23,13 @@
     - Refactored `yazi-fs` and `yazi-vfs` from legacy `Provider` to modern `Engine` architecture (`yazi-fs/src/engine/`, `yazi-vfs/src/engine/`).
     - Implemented `Engine` trait, `Attrs`, `Capabilities`, and `Demand` builder with backwards compatibility aliases (`Provider`, `Gate`).
     - Adapted Double Commander archive manager (`archive.rs`) and file descriptions (`descr.rs`, `descript.ion`) into the new engine structure, passing all 7 archive VFS unit tests.
+  - **Decoupled Plugin Runner & `yazi-runner` Architecture (Stage 2 Modern Infrastructure)**:
+    - Introduced standalone `yazi-version` crate providing structured version metadata (`setup!` macro, `version()`, `version_full()`) preserving custom binary naming (`Ch` and `Che`).
+    - Integrated `yazi-runner` crate for isolated, asynchronous Lua plugin execution across fetchers, preloaders, previewers, spotters, and sync runners without event loop blocking.
+    - Refactored `yazi-binding` runtime and execution scopes (`Scope`, `RuntimeCo`, `Frame`) while preserving full backwards compatibility for all existing `che` plugins.
+    - Implemented `RoCell`, `BytesExt`, and thread-safe sendable Lua argument serializers (`yazi-shim`, `yazi-shared`).
+    - Added Arc-wrapped action delegates in `yazi-config` (`fetcher_arc.rs`, `preloader_arc.rs`, `previewer_arc.rs`, `spotter_arc.rs`).
+    - Preserved 100% of custom fork features: upper parent navigation (`is_upparent`), dual-pane support, archive manager, and custom preset plugins (`audio`, `che-archive`, `che-bookmarks`, `che-session`, `multirename`, `system-copy`).
   - **Custom Sorting & Rank Operation**: Added `SortBy::Custom` and `fs.op("rank")` support (`FilesOp::Rank`), allowing Lua plugins to supply custom sorting ranks for items (`yazi-fs/src/sorting.rs`, `yazi-fs/src/sorter.rs`).
   - **Relay Update Files Filtering**: Supported `opt.tabs` in `UpdateFilesOpt` and `update_files.rs` for multi-tab event filtering, allowing DDS and relay events to target specific tabs and dual-pane columns (`yazi-actor/src/mgr/update_files.rs`, `yazi-dds/src/spark/kind.rs`).
 - **UI & Navigation Improvements**:
