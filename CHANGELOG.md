@@ -45,6 +45,9 @@
   - **Reanchor Visual Selections (`visual_arrow`)**: Added new `visual_arrow <step>` manager action to dynamically reanchor selection start and adjust visual mode range using relative step navigation (`yazi-actor/src/mgr/visual_arrow.rs`, `yazi-parser/src/mgr/visual_arrow.rs`).
   - **Custom Border Shapes & Border Set**: Added support for customizable border sets (`BorderSet`) and styles (`BorderType`: `plain`, `rounded`, `double`, `thick`, `quadrant-inside`, `quadrant-outside`) via `ui.Border:set()` in `yazi-binding/src/elements/border.rs` and `border_set.rs`.
 - **Platform & Runtime Bug Fixes**:
+  - **Upper Parent (`..`) Leave Navigation Fix ([#7](https://github.com/aroum/che/issues/7))**:
+    - Fixed an issue where pressing the left key (`leave` action) while hovering over the virtual parent entry (`..` / `is_upparent`) navigated two levels up instead of one.
+    - Excluded `is_upparent` files from hovered parent resolution so `leave` correctly targets `cwd.parent()`.
   - **macOS Fallback Copy**: Added automatic fallback to `std::io::copy()` with permission transfer when `std::fs::copy()` fails on macOS due to `PermissionDenied` or filesystem restrictions (`yazi-fs/src/provider/local/copier.rs`).
   - **Boot Entry URL Cleaning**: Normalized and cleaned resolved absolute URLs on startup to avoid redundant path segments (`yazi-boot/src/boot.rs`).
   - **Asynchronous Shell Process Spawning**: Spawned shell child processes outside blocking worker threads to ensure proper registration on the Tokio reactor (`yazi-scheduler/src/process/shell.rs`).
