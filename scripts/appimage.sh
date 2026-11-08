@@ -63,15 +63,29 @@ exec "${HERE}/usr/bin/che" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 
+# Download runtime file with retry
+RUNTIME_URL="https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-${ARCH}"
+for i in 1 2 3 4 5; do
+  if curl -fsSL --retry 3 --retry-delay 2 "$RUNTIME_URL" -o "runtime-${ARCH}"; then
+    break
+  fi
+  echo "Retrying download runtime-${ARCH} (attempt $i)..."
+  sleep 2
+done
+
 # Download and run appimagetool
 APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage"
-if ! curl -fsSL "$APPIMAGETOOL_URL" -o appimagetool 2>/dev/null; then
-  curl -fsSL "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage" -o appimagetool
+if ! curl -fsSL --retry 3 "$APPIMAGETOOL_URL" -o appimagetool 2>/dev/null; then
+  curl -fsSL --retry 3 "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage" -o appimagetool
 fi
 chmod +x appimagetool
 
 ./appimagetool --appimage-extract
-ARCH="$ARCH" ./squashfs-root/AppRun --no-appstream "$APPDIR" "che-${ARCH}.AppImage"
+if [ -f "runtime-${ARCH}" ]; then
+  ARCH="$ARCH" ./squashfs-root/AppRun --runtime-file "runtime-${ARCH}" --no-appstream "$APPDIR" "che-${ARCH}.AppImage"
+else
+  ARCH="$ARCH" ./squashfs-root/AppRun --no-appstream "$APPDIR" "che-${ARCH}.AppImage"
+fi
 
-rm -rf "$APPDIR" squashfs-root appimagetool
+rm -rf "$APPDIR" squashfs-root appimagetool runtime-*
 echo "Successfully created che-${ARCH}.AppImage"
