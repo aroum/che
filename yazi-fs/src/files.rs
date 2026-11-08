@@ -270,7 +270,11 @@ impl Files {
 		}
 	}
 
-	pub fn set_upparent(&mut self, parent_url: Option<yazi_shared::url::UrlBuf>, show_upparent: bool) {
+	pub fn set_upparent(
+		&mut self,
+		parent_url: Option<yazi_shared::url::UrlBuf>,
+		show_upparent: bool,
+	) {
 		self.items.retain(|f| !f.is_upparent);
 		if let Some(parent) = parent_url.filter(|_| show_upparent) {
 			let upparent = File::make_upparent(parent);

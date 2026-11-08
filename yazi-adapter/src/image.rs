@@ -14,7 +14,10 @@ pub struct Image;
 impl Image {
 	pub async fn precache(src: PathBuf, cache: &Path) -> Result<()> {
 		let (mut img, orientation) = Self::decode_from(src).await?;
-		let (w, h) = Self::flip_size(orientation, (YAZI.preview.max_width.max(1920), YAZI.preview.max_height.max(1440)));
+		let (w, h) = Self::flip_size(
+			orientation,
+			(YAZI.preview.max_width.max(1920), YAZI.preview.max_height.max(1440)),
+		);
 
 		let buf = tokio::task::spawn_blocking(move || {
 			if img.width() > w || img.height() > h {
@@ -66,10 +69,7 @@ impl Image {
 	pub(super) fn max_pixel(rect: Rect) -> (u16, u16) {
 		Dimension::cell_size()
 			.map(|(cw, ch)| {
-				(
-					(rect.width as f64 * cw).ceil() as u16,
-					(rect.height as f64 * ch).ceil() as u16,
-				)
+				((rect.width as f64 * cw).ceil() as u16, (rect.height as f64 * ch).ceil() as u16)
 			})
 			.unwrap_or((YAZI.preview.max_width.max(1920), YAZI.preview.max_height.max(1440)))
 	}

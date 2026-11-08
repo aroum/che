@@ -231,7 +231,8 @@ impl Conn {
 
 		let hash_alg = session.best_supported_rsa_hash().await?.flatten();
 		for key in keys {
-			match session.authenticate_publickey_with(&self.config.user, key, hash_alg, &mut agent).await {
+			match session.authenticate_publickey_with(&self.config.user, key, hash_alg, &mut agent).await
+			{
 				Ok(result) if result.success() => return Ok(session),
 				Ok(result) => tracing::debug!("Identity agent authentication failed: {result:?}"),
 				Err(e) => tracing::error!("Identity agent authentication error: {e}"),

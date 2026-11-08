@@ -1,26 +1,8 @@
-use std::{
-	fs,
-	io::stdout,
-	path::{Path, PathBuf},
-};
+use std::{fs, io::stdout, path::{Path, PathBuf}};
 
 use anyhow::Result;
-use crossterm::{
-	event::{
-		self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers,
-		MouseButton, MouseEventKind,
-	},
-	execute,
-	terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
-};
-use ratatui::{
-	Terminal,
-	backend::CrosstermBackend,
-	layout::{Alignment, Constraint, Direction, Layout, Rect},
-	style::{Color, Modifier, Style},
-	text::{Line, Span},
-	widgets::{Block, Borders, Clear, Paragraph},
-};
+use crossterm::{event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind}, execute, terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode}};
+use ratatui::{Terminal, backend::CrosstermBackend, layout::{Alignment, Constraint, Direction, Layout, Rect}, style::{Color, Modifier, Style}, text::{Line, Span}, widgets::{Block, Borders, Clear, Paragraph}};
 use serde::{Deserialize, Serialize};
 
 use crate::input::TextInput;
@@ -50,9 +32,7 @@ impl ArchiveFormat {
 	}
 
 	#[inline]
-	pub fn label(&self) -> &'static str {
-		self.extension()
-	}
+	pub fn label(&self) -> &'static str { self.extension() }
 
 	pub fn all() -> &'static [Self] {
 		&[Self::SevenZip, Self::Zip, Self::TarGz, Self::TarXz, Self::TarBz2, Self::TarZst]
@@ -140,12 +120,12 @@ impl CompressionMethod {
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct PersistentArchiveState {
-	pub format: Option<ArchiveFormat>,
-	pub level_idx: Option<usize>,
-	pub method_idx: Option<usize>,
-	pub solid: Option<bool>,
+	pub format:        Option<ArchiveFormat>,
+	pub level_idx:     Option<usize>,
+	pub method_idx:    Option<usize>,
+	pub solid:         Option<bool>,
 	pub delete_source: Option<bool>,
-	pub overwrite: Option<bool>,
+	pub overwrite:     Option<bool>,
 }
 
 fn state_path() -> PathBuf {
@@ -158,9 +138,7 @@ fn state_path() -> PathBuf {
 	}
 }
 
-pub fn result_file_path() -> PathBuf {
-	std::env::temp_dir().join("che_archive_result.json")
-}
+pub fn result_file_path() -> PathBuf { std::env::temp_dir().join("che_archive_result.json") }
 
 fn load_state() -> PersistentArchiveState {
 	let p = state_path();
@@ -203,18 +181,18 @@ pub enum Focus {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct ArchiveResult {
-	pub op: String,
-	pub format: String,
-	pub archive_path: String,
-	pub target_dir: String,
-	pub files: Vec<String>,
-	pub level: u8,
-	pub method: String,
-	pub solid: bool,
-	pub password: Option<String>,
+	pub op:             String,
+	pub format:         String,
+	pub archive_path:   String,
+	pub target_dir:     String,
+	pub files:          Vec<String>,
+	pub level:          u8,
+	pub method:         String,
+	pub solid:          bool,
+	pub password:       Option<String>,
 	pub encrypt_header: bool,
-	pub delete_source: bool,
-	pub overwrite: bool,
+	pub delete_source:  bool,
+	pub overwrite:      bool,
 }
 
 pub fn run(
@@ -361,9 +339,9 @@ fn run_pack_app(
 			f.render_widget(main_block, popup_area);
 
 			let inner_area = Rect {
-				x: popup_area.x + 2,
-				y: popup_area.y + 1,
-				width: popup_area.width.saturating_sub(4),
+				x:      popup_area.x + 2,
+				y:      popup_area.y + 1,
+				width:  popup_area.width.saturating_sub(4),
 				height: popup_area.height.saturating_sub(2),
 			};
 
@@ -616,12 +594,12 @@ fn run_pack_app(
 								}
 
 								save_state(&PersistentArchiveState {
-									format: Some(format),
-									level_idx: Some(level_idx),
-									method_idx: Some(method_idx),
-									solid: Some(solid),
+									format:        Some(format),
+									level_idx:     Some(level_idx),
+									method_idx:    Some(method_idx),
+									solid:         Some(solid),
 									delete_source: Some(delete_source),
-									overwrite: None,
+									overwrite:     None,
 								});
 
 								let result = ArchiveResult {
@@ -781,12 +759,12 @@ fn run_pack_app(
 							}
 
 							save_state(&PersistentArchiveState {
-								format: Some(format),
-								level_idx: Some(level_idx),
-								method_idx: Some(method_idx),
-								solid: Some(solid),
+								format:        Some(format),
+								level_idx:     Some(level_idx),
+								method_idx:    Some(method_idx),
+								solid:         Some(solid),
 								delete_source: Some(delete_source),
-								overwrite: None,
+								overwrite:     None,
 							});
 
 							let result = ArchiveResult {
@@ -1061,9 +1039,9 @@ fn run_extract_app(
 			f.render_widget(main_block, popup_area);
 
 			let inner_area = Rect {
-				x: popup_area.x + 2,
-				y: popup_area.y + 1,
-				width: popup_area.width.saturating_sub(4),
+				x:      popup_area.x + 2,
+				y:      popup_area.y + 1,
+				width:  popup_area.width.saturating_sub(4),
 				height: popup_area.height.saturating_sub(2),
 			};
 
@@ -1282,12 +1260,12 @@ fn run_extract_app(
 								}
 
 								save_state(&PersistentArchiveState {
-									format: None,
-									level_idx: None,
-									method_idx: None,
-									solid: None,
+									format:        None,
+									level_idx:     None,
+									method_idx:    None,
+									solid:         None,
 									delete_source: None,
-									overwrite: Some(overwrite),
+									overwrite:     Some(overwrite),
 								});
 
 								let result = ArchiveResult {
@@ -1443,12 +1421,12 @@ fn run_extract_app(
 							}
 
 							save_state(&PersistentArchiveState {
-								format: None,
-								level_idx: None,
-								method_idx: None,
-								solid: None,
+								format:        None,
+								level_idx:     None,
+								method_idx:    None,
+								solid:         None,
 								delete_source: None,
-								overwrite: Some(overwrite),
+								overwrite:     Some(overwrite),
 							});
 
 							let result = ArchiveResult {
@@ -1653,18 +1631,18 @@ mod tests {
 	#[test]
 	fn test_archive_result_serialization() {
 		let res = ArchiveResult {
-			op: "pack".to_string(),
-			format: "7z".to_string(),
-			archive_path: "/tmp/test.7z".to_string(),
-			target_dir: "/tmp".to_string(),
-			files: vec!["/tmp/file1.txt".to_string()],
-			level: 5,
-			method: "LZMA2".to_string(),
-			solid: true,
-			password: Some("secret123".to_string()),
+			op:             "pack".to_string(),
+			format:         "7z".to_string(),
+			archive_path:   "/tmp/test.7z".to_string(),
+			target_dir:     "/tmp".to_string(),
+			files:          vec!["/tmp/file1.txt".to_string()],
+			level:          5,
+			method:         "LZMA2".to_string(),
+			solid:          true,
+			password:       Some("secret123".to_string()),
 			encrypt_header: true,
-			delete_source: false,
-			overwrite: false,
+			delete_source:  false,
+			overwrite:      false,
 		};
 
 		let json_str = serde_json::to_string(&res).expect("serialization failed");

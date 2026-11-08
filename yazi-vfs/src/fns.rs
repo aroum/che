@@ -64,11 +64,8 @@ pub async fn unique_file(u: UrlBuf, is_dir: bool) -> io::Result<UrlBuf> {
 	if u.is_archive() {
 		return Ok(u);
 	}
-	let result = if is_dir {
-		engine::create_dir(&u).await
-	} else {
-		engine::create_new(&u).await.map(|_| ())
-	};
+	let result =
+		if is_dir { engine::create_dir(&u).await } else { engine::create_new(&u).await.map(|_| ()) };
 
 	match result {
 		Ok(()) => Ok(u),

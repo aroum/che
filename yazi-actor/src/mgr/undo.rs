@@ -62,10 +62,7 @@ impl Undo {
 		Ok(())
 	}
 
-	async fn undo_create(
-		target: &yazi_shared::url::UrlBuf,
-		is_dir: bool,
-	) -> Result<()> {
+	async fn undo_create(target: &yazi_shared::url::UrlBuf, is_dir: bool) -> Result<()> {
 		if is_dir {
 			provider::remove_dir_all(target).await?;
 		} else {
@@ -78,11 +75,12 @@ impl Undo {
 		Ok(())
 	}
 
-	async fn undo_copy(pairs: &[(yazi_shared::url::UrlBuf, yazi_shared::url::UrlBuf)], overwritten: &[(yazi_shared::url::UrlBuf, yazi_shared::url::UrlBuf)]) -> Result<()> {
+	async fn undo_copy(
+		pairs: &[(yazi_shared::url::UrlBuf, yazi_shared::url::UrlBuf)],
+		overwritten: &[(yazi_shared::url::UrlBuf, yazi_shared::url::UrlBuf)],
+	) -> Result<()> {
 		for (_, dest) in pairs {
-			if provider::remove_file(dest).await.is_ok()
-				|| provider::remove_dir_all(dest).await.is_ok()
-			{
+			if provider::remove_file(dest).await.is_ok() || provider::remove_dir_all(dest).await.is_ok() {
 				if let Some((parent, urn)) = dest.pair() {
 					FilesOp::Deleting(parent.into(), [urn.into()].into()).emit();
 				}

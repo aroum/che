@@ -5,9 +5,7 @@ use yazi_shared::event::ActionCow;
 pub struct CommentOpt;
 
 impl From<ActionCow> for CommentOpt {
-	fn from(_a: ActionCow) -> Self {
-		Self
-	}
+	fn from(_a: ActionCow) -> Self { Self }
 }
 
 impl FromLua for CommentOpt {

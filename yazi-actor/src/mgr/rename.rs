@@ -8,8 +8,8 @@ use yazi_proxy::{ConfirmProxy, InputProxy, MgrProxy};
 use yazi_shared::{Id, UndoOp, data::Data, url::{UrlBuf, UrlLike}};
 use yazi_vfs::{VfsFile, maybe_exists, provider};
 use yazi_watcher::WATCHER;
-
 use yazi_widgets::input::InputError;
+
 use crate::{Actor, Ctx};
 
 pub struct Rename;
@@ -40,9 +40,9 @@ impl Actor for Rename {
 
 		let rename_opt = yazi_parser::mgr::RenameOpt {
 			hovered: opt.hovered,
-			force: opt.force,
-			empty: opt.empty.clone(),
-			cursor: opt.cursor.clone(),
+			force:   opt.force,
+			empty:   opt.empty.clone(),
+			cursor:  opt.cursor.clone(),
 		};
 
 		tokio::spawn(async move {

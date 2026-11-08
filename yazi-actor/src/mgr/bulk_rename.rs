@@ -316,7 +316,8 @@ mod tests {
 			vec![Tuple::new(0, "1"), Tuple::new(1, "2"), Tuple::new(2, "3"), Tuple::new(3, "4")],
 			vec![Tuple::new(0, "2"), Tuple::new(1, "3"), Tuple::new(2, "4"), Tuple::new(3, "5")],
 		);
-		let res: Vec<_> = sorted.iter().map(|(o, n)| (o.to_str().unwrap(), n.to_str().unwrap())).collect();
+		let res: Vec<_> =
+			sorted.iter().map(|(o, n)| (o.to_str().unwrap(), n.to_str().unwrap())).collect();
 		assert_eq!(res, vec![("4", "5"), ("3", "4"), ("2", "3"), ("1", "2")]);
 	}
 

@@ -24,22 +24,25 @@ impl<'a> Router<'a> {
 			return Ok(true);
 		}
 
-		if core.pick.visible && !key.ctrl && !key.alt
-			&& let crossterm::event::KeyCode::Char(c) = key.code {
-				use yazi_core::pick::PickJumpResult as R;
-				match core.pick.jump_letter(c) {
-					R::Submit => {
-						let cx = &mut Ctx::active(&mut self.app.core, &mut self.app.term);
-						act!(pick:close, cx, true).ok();
-						return Ok(true);
-					}
-					R::Moved => {
-						yazi_macro::render!();
-						return Ok(true);
-					}
-					R::None => {}
+		if core.pick.visible
+			&& !key.ctrl
+			&& !key.alt
+			&& let crossterm::event::KeyCode::Char(c) = key.code
+		{
+			use yazi_core::pick::PickJumpResult as R;
+			match core.pick.jump_letter(c) {
+				R::Submit => {
+					let cx = &mut Ctx::active(&mut self.app.core, &mut self.app.term);
+					act!(pick:close, cx, true).ok();
+					return Ok(true);
 				}
+				R::Moved => {
+					yazi_macro::render!();
+					return Ok(true);
+				}
+				R::None => {}
 			}
+		}
 
 		if layer == Layer::Mgr && !core.input.visible && !core.confirm.visible && !core.help.visible {
 			let is_jump_mode = core.active().jump_mode;
@@ -60,12 +63,14 @@ impl<'a> Router<'a> {
 					return Ok(true);
 				}
 
-				if !key.ctrl && !key.alt
-					&& let crossterm::event::KeyCode::Char(c) = key.code {
-						let cx = &mut Ctx::active(&mut self.app.core, &mut self.app.term);
-						act!(mgr:jump_letter, cx, c).ok();
-						return Ok(true);
-					}
+				if !key.ctrl
+					&& !key.alt
+					&& let crossterm::event::KeyCode::Char(c) = key.code
+				{
+					let cx = &mut Ctx::active(&mut self.app.core, &mut self.app.term);
+					act!(mgr:jump_letter, cx, c).ok();
+					return Ok(true);
+				}
 			}
 		}
 

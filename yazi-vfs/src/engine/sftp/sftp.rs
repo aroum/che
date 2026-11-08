@@ -41,7 +41,12 @@ impl<'a> Engine for Sftp<'a> {
 	}
 
 	async fn capabilities(&self) -> io::Result<Capabilities> {
-		Ok(Capabilities { symlink: true, hard_link: true, trash: false, copy_progressive: true })
+		Ok(Capabilities {
+			symlink:          true,
+			hard_link:        true,
+			trash:            false,
+			copy_progressive: true,
+		})
 	}
 
 	async fn casefold(&self) -> io::Result<UrlBuf> {

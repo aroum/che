@@ -28,9 +28,7 @@ impl Pane {
 		self.closed.push_back(tab);
 	}
 
-	pub fn pop_closed(&mut self) -> Option<Tab> {
-		self.closed.pop_back()
-	}
+	pub fn pop_closed(&mut self) -> Option<Tab> { self.closed.pop_back() }
 
 	#[inline]
 	pub fn active(&self) -> &Tab { &self.items[self.cursor] }

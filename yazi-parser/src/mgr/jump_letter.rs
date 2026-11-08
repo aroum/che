@@ -17,9 +17,7 @@ impl From<ActionCow> for JumpLetterOpt {
 }
 
 impl From<char> for JumpLetterOpt {
-	fn from(ch: char) -> Self {
-		Self { ch }
-	}
+	fn from(ch: char) -> Self { Self { ch } }
 }
 
 impl FromLua for JumpLetterOpt {

@@ -145,7 +145,11 @@ impl Scheduler {
 		let mut ongoing = self.ongoing.lock();
 		let task = ongoing.add::<FileProgTrash>(format!("Trash {}", target.display()));
 
-		task.set_hook(HookInTrash { id: task.id, target: target.clone(), trash_path: None });
+		task.set_hook(HookInTrash {
+			id:         task.id,
+			target:     target.clone(),
+			trash_path: None,
+		});
 		self.file.submit(FileInTrash { id: task.id, target }, LOW);
 	}
 

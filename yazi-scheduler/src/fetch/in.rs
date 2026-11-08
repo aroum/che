@@ -8,8 +8,6 @@ pub(crate) struct FetchIn {
 	pub(crate) targets: Vec<yazi_fs::File>,
 }
 
-
-
 impl FetchIn {
 	pub(crate) fn id(&self) -> Id { self.id }
 }

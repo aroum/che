@@ -1,10 +1,4 @@
-use std::{
-	collections::{HashMap, HashSet},
-	io,
-	path::{Path, PathBuf},
-	process::Stdio,
-	sync::{Arc, LazyLock, RwLock},
-};
+use std::{collections::{HashMap, HashSet}, io, path::{Path, PathBuf}, process::Stdio, sync::{Arc, LazyLock, RwLock}};
 
 use tokio::process::Command;
 use yazi_fs::{cha::{Cha, ChaKind, ChaMode}, engine::{DirReader, FileHolder}};
@@ -91,14 +85,24 @@ impl ReadDir {
 		let (base_path, target_dir) = match url.as_url() {
 			yazi_shared::url::Url::Archive { loc, .. } => {
 				let (base, rest, urn) = loc.triple();
-				let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-				let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+				let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+					.replace('\\', "/")
+					.trim_matches('/')
+					.to_string();
+				let clean_base = std::path::PathBuf::from(
+					base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+				);
 				(clean_base, target)
 			}
-			_ => (url.loc().as_os().map_or_else(|_| std::path::PathBuf::new(), std::path::PathBuf::from), String::new()),
+			_ => (
+				url.loc().as_os().map_or_else(|_| std::path::PathBuf::new(), std::path::PathBuf::from),
+				String::new(),
+			),
 		};
 
-		tracing::info!("Archive ReadDir::new: url={url:?}, base_path={base_path:?}, target_dir={target_dir:?}");
+		tracing::info!(
+			"Archive ReadDir::new: url={url:?}, base_path={base_path:?}, target_dir={target_dir:?}"
+		);
 
 		let pwd_opt = get_archive_password(&base_path);
 		let pwd_arg = pwd_opt.as_deref().map(|p| format!("-p{p}")).unwrap_or_else(|| "-p-".to_string());
@@ -159,7 +163,8 @@ impl ReadDir {
 		}
 
 		let target_dir_norm = target_dir.replace('\\', "/").trim_matches('/').to_string();
-		let prefix = if target_dir_norm.is_empty() { String::new() } else { format!("{target_dir_norm}/") };
+		let prefix =
+			if target_dir_norm.is_empty() { String::new() } else { format!("{target_dir_norm}/") };
 		let mut seen_subdirs = HashSet::new();
 		let mut entries = Vec::new();
 
@@ -175,36 +180,23 @@ impl ReadDir {
 
 			if let Some((dir_name, _)) = rel_path.split_once('/') {
 				if seen_subdirs.insert(dir_name.to_string()) {
-					entries.push(ArchiveEntry {
-						name: dir_name.to_string(),
-						is_dir: true,
-						size: 0,
-					});
+					entries.push(ArchiveEntry { name: dir_name.to_string(), is_dir: true, size: 0 });
 				}
 			} else if is_dir {
 				if seen_subdirs.insert(rel_path.to_string()) {
-					entries.push(ArchiveEntry {
-						name: rel_path.to_string(),
-						is_dir: true,
-						size: 0,
-					});
+					entries.push(ArchiveEntry { name: rel_path.to_string(), is_dir: true, size: 0 });
 				}
 			} else {
-				entries.push(ArchiveEntry {
-					name: rel_path.to_string(),
-					is_dir,
-					size,
-				});
+				entries.push(ArchiveEntry { name: rel_path.to_string(), is_dir, size });
 			}
 		}
 
-		tracing::info!("Archive ReadDir::new: found {} entries for target_dir_norm '{target_dir_norm}' (orig '{target_dir}')", entries.len());
+		tracing::info!(
+			"Archive ReadDir::new: found {} entries for target_dir_norm '{target_dir_norm}' (orig '{target_dir}')",
+			entries.len()
+		);
 
-		Ok(Self {
-			dir: Arc::new(url.clone()),
-			entries,
-			idx: 0,
-		})
+		Ok(Self { dir: Arc::new(url.clone()), entries, idx: 0 })
 	}
 }
 
@@ -220,10 +212,10 @@ impl DirReader for ReadDir {
 		self.idx += 1;
 
 		Ok(Some(DirEntry {
-			dir: self.dir.clone(),
-			name: item.name.clone(),
+			dir:    self.dir.clone(),
+			name:   item.name.clone(),
 			is_dir: item.is_dir,
-			size: item.size,
+			size:   item.size,
 		}))
 	}
 }
@@ -237,30 +229,17 @@ pub struct DirEntry {
 
 impl FileHolder for DirEntry {
 	async fn file_type(&self) -> io::Result<yazi_fs::cha::ChaType> {
-		Ok(if self.is_dir {
-			yazi_fs::cha::ChaType::Dir
-		} else {
-			yazi_fs::cha::ChaType::File
-		})
+		Ok(if self.is_dir { yazi_fs::cha::ChaType::Dir } else { yazi_fs::cha::ChaType::File })
 	}
 
 	async fn metadata(&self) -> io::Result<Cha> {
 		let mode = if self.is_dir { ChaMode::T_DIR } else { ChaMode::T_FILE };
-		Ok(Cha {
-			kind: ChaKind::empty(),
-			mode,
-			len: self.size,
-			..Default::default()
-		})
+		Ok(Cha { kind: ChaKind::empty(), mode, len: self.size, ..Default::default() })
 	}
 
-	fn name(&self) -> StrandCow<'_> {
-		StrandCow::from(self.name.as_str())
-	}
+	fn name(&self) -> StrandCow<'_> { StrandCow::from(self.name.as_str()) }
 
-	fn path(&self) -> PathBufDyn {
-		PathBufDyn::from(std::path::PathBuf::from(&self.name))
-	}
+	fn path(&self) -> PathBufDyn { PathBufDyn::from(std::path::PathBuf::from(&self.name)) }
 
 	fn url(&self) -> UrlBuf {
 		self.dir.try_join(&self.name).unwrap_or_else(|_| self.dir.as_ref().clone())
@@ -271,8 +250,13 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 	let (base_path, target_file) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -300,7 +284,10 @@ pub async fn open(url: &UrlBuf) -> io::Result<super::RwFile> {
 	};
 
 	if !output.status.success() || output.stdout.is_empty() {
-		return Err(io::Error::new(io::ErrorKind::NotFound, format!("File {target_file} not found in archive")));
+		return Err(io::Error::new(
+			io::ErrorKind::NotFound,
+			format!("File {target_file} not found in archive"),
+		));
 	}
 
 	Ok(super::RwFile::Archive(std::io::Cursor::new(output.stdout)))
@@ -310,8 +297,13 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 	let (base_path, target_file) = match to.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Target is not an archive URL")),
@@ -350,7 +342,10 @@ pub async fn copy(from: &UrlBuf, to: &UrlBuf) -> io::Result<u64> {
 
 	let output = child.wait_with_output().await?;
 	if !output.status.success() {
-		return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to add {target_file} to archive")));
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!("Failed to add {target_file} to archive"),
+		));
 	}
 
 	Ok(len)
@@ -360,8 +355,13 @@ pub async fn remove_file(url: &UrlBuf) -> io::Result<()> {
 	let (base_path, target_file) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -386,7 +386,10 @@ pub async fn remove_file(url: &UrlBuf) -> io::Result<()> {
 	};
 
 	if !output.status.success() {
-		return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to remove {target_file} from archive")));
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!("Failed to remove {target_file} from archive"),
+		));
 	}
 
 	Ok(())
@@ -396,8 +399,13 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 	let (base_path, target_dir) = match url.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "Not an archive URL")),
@@ -425,7 +433,10 @@ pub async fn remove_dir(url: &UrlBuf) -> io::Result<()> {
 	};
 
 	if !output.status.success() {
-		return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to remove directory {target_dir} from archive")));
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!("Failed to remove directory {target_dir} from archive"),
+		));
 	}
 
 	Ok(())
@@ -435,8 +446,13 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	let (from_base, old_target) = match from.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "From is not an archive URL")),
@@ -445,15 +461,23 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	let (to_base, new_target) = match to.as_url() {
 		yazi_shared::url::Url::Archive { loc, .. } => {
 			let (base, rest, urn) = loc.triple();
-			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy()).replace('\\', "/").trim_matches('/').to_string();
-			let clean_base = std::path::PathBuf::from(base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'));
+			let target = format!("{}{}", rest.to_string_lossy(), urn.to_string_lossy())
+				.replace('\\', "/")
+				.trim_matches('/')
+				.to_string();
+			let clean_base = std::path::PathBuf::from(
+				base.to_string_lossy().trim_end_matches(|c| c == '/' || c == '\\'),
+			);
 			(clean_base, target)
 		}
 		_ => return Err(io::Error::new(io::ErrorKind::InvalidInput, "To is not an archive URL")),
 	};
 
 	if from_base != to_base {
-		return Err(io::Error::new(io::ErrorKind::CrossesDevices, "Cannot rename across different archives"));
+		return Err(io::Error::new(
+			io::ErrorKind::CrossesDevices,
+			"Cannot rename across different archives",
+		));
 	}
 
 	let mut cmd = Command::new("7zz");
@@ -477,7 +501,10 @@ pub async fn rename(from: &UrlBuf, to: &UrlBuf) -> io::Result<()> {
 	};
 
 	if !output.status.success() {
-		return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to rename {old_target} to {new_target} in archive")));
+		return Err(io::Error::new(
+			io::ErrorKind::Other,
+			format!("Failed to rename {old_target} to {new_target} in archive"),
+		));
 	}
 
 	Ok(())
@@ -496,10 +523,10 @@ mod tests {
 	#[tokio::test]
 	async fn test_archive_entry_metadata() {
 		let entry = DirEntry {
-			dir: Arc::new(UrlBuf::default()),
-			name: "test.txt".to_string(),
+			dir:    Arc::new(UrlBuf::default()),
+			name:   "test.txt".to_string(),
 			is_dir: false,
-			size: 1234,
+			size:   1234,
 		};
 
 		let meta = entry.metadata().await.unwrap();
@@ -597,7 +624,10 @@ mod tests {
 
 		// 2. copy file from archive to local file
 		let tmp_dest = std::env::temp_dir().join("test_copy_out_sample.txt");
-		let copied_bytes = crate::provider::copy(&sub_file, &tmp_dest, yazi_fs::provider::Attrs::default()).await.unwrap();
+		let copied_bytes =
+			crate::provider::copy(&sub_file, &tmp_dest, yazi_fs::provider::Attrs::default())
+				.await
+				.unwrap();
 		assert!(copied_bytes > 0);
 
 		let read_back = tokio::fs::read_to_string(&tmp_dest).await.unwrap();
@@ -610,7 +640,10 @@ mod tests {
 		let archive_target_url = UrlBuf::from(tmp_zip.clone()).into_archive("1").unwrap();
 		let target_file_url = archive_target_url.try_join("test_folder/added_test.txt").unwrap();
 
-		let added_bytes = crate::provider::copy(&tmp_dest, &target_file_url, yazi_fs::provider::Attrs::default()).await.unwrap();
+		let added_bytes =
+			crate::provider::copy(&tmp_dest, &target_file_url, yazi_fs::provider::Attrs::default())
+				.await
+				.unwrap();
 		assert!(added_bytes > 0);
 
 		// Verify added file exists inside archive and can be opened
@@ -675,7 +708,8 @@ mod tests {
 		let dst_url = archive_url.try_join("test_folder/subfolder/AGENTS_COPIED.md").unwrap();
 
 		// Copy file between subfolders inside the archive
-		let copied_bytes = crate::provider::copy(&src_url, &dst_url, yazi_fs::provider::Attrs::default()).await.unwrap();
+		let copied_bytes =
+			crate::provider::copy(&src_url, &dst_url, yazi_fs::provider::Attrs::default()).await.unwrap();
 		assert!(copied_bytes > 0);
 
 		// Verify both original and copied files exist and can be opened

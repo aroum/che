@@ -3,12 +3,7 @@ use std::borrow::Cow;
 use hashbrown::HashMap;
 use mlua::{ExternalError, Lua, Table, Value};
 
-use crate::{
-	data::{Data, DataKey},
-	path::PathLike,
-	replace_cow,
-	url::UrlLike,
-};
+use crate::{data::{Data, DataKey}, path::PathLike, replace_cow, url::UrlLike};
 
 pub struct Sendable;
 
@@ -39,9 +34,7 @@ impl Sendable {
 		for (k, v) in args {
 			match k {
 				DataKey::Integer(i) => tbl.raw_set(i + 1, Self::data_to_value(lua, v)?),
-				DataKey::String(s) => {
-					tbl.raw_set(replace_cow(s, "-", "_"), Self::data_to_value(lua, v)?)
-				}
+				DataKey::String(s) => tbl.raw_set(replace_cow(s, "-", "_"), Self::data_to_value(lua, v)?),
 				_ => Err("invalid key in Data".into_lua_err()),
 			}?;
 		}

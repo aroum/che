@@ -1,19 +1,9 @@
-use crossterm::{
-	event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
-	execute,
-	terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
-};
-use ratatui::{
-	Terminal,
-	backend::CrosstermBackend,
-	layout::{Constraint, Direction, Layout},
-	style::{Color, Modifier, Style},
-	text::{Line, Span},
-	widgets::{Block, Borders, Paragraph, Row, Table, TableState, Wrap},
-};
+use std::path::Path;
+
+use crossterm::{event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers}, execute, terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode}};
+use ratatui::{Terminal, backend::CrosstermBackend, layout::{Constraint, Direction, Layout}, style::{Color, Modifier, Style}, text::{Line, Span}, widgets::{Block, Borders, Paragraph, Row, Table, TableState, Wrap}};
 use regex::Regex;
 use serde::Serialize;
-use std::path::Path;
 
 use crate::input::TextInput;
 
@@ -114,14 +104,14 @@ impl CaseConv {
 }
 
 struct Layouts {
-	chunks: Vec<ratatui::layout::Rect>,
-	left_chunks: Vec<ratatui::layout::Rect>,
+	chunks:          Vec<ratatui::layout::Rect>,
+	left_chunks:     Vec<ratatui::layout::Rect>,
 	name_mask_inner: Vec<ratatui::layout::Rect>,
-	ext_mask_inner: Vec<ratatui::layout::Rect>,
-	fr_inner: Vec<ratatui::layout::Rect>,
-	cb_chunks: Vec<ratatui::layout::Rect>,
-	counter_chunks: Vec<ratatui::layout::Rect>,
-	button_chunks: Vec<ratatui::layout::Rect>,
+	ext_mask_inner:  Vec<ratatui::layout::Rect>,
+	fr_inner:        Vec<ratatui::layout::Rect>,
+	cb_chunks:       Vec<ratatui::layout::Rect>,
+	counter_chunks:  Vec<ratatui::layout::Rect>,
+	button_chunks:   Vec<ratatui::layout::Rect>,
 }
 
 fn calculate_layouts(area: ratatui::layout::Rect) -> Layouts {

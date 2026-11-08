@@ -263,7 +263,8 @@ mod tests {
 
 		for name in required_plugins {
 			let chunk = cache.get(name).unwrap_or_else(|| panic!("Missing preset plugin: {name}"));
-			lua.load(&*chunk.bytes)
+			lua
+				.load(&*chunk.bytes)
 				.set_name(format!("{name}.lua"))
 				.into_function()
 				.unwrap_or_else(|e| panic!("Failed to compile Lua preset `{name}.lua`: {e}"));
@@ -273,7 +274,8 @@ mod tests {
 			env!("CARGO_MANIFEST_DIR"),
 			"/../yazi-plugin/preset/components/dual_pane.lua"
 		));
-		lua.load(&dual_pane_bytes[..])
+		lua
+			.load(&dual_pane_bytes[..])
 			.set_name("dual_pane.lua")
 			.into_function()
 			.expect("Failed to compile dual_pane.lua");

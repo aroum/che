@@ -86,10 +86,7 @@ impl Redo {
 		Ok(())
 	}
 
-	async fn redo_create(
-		target: &yazi_shared::url::UrlBuf,
-		is_dir: bool,
-	) -> Result<()> {
+	async fn redo_create(target: &yazi_shared::url::UrlBuf, is_dir: bool) -> Result<()> {
 		if is_dir {
 			provider::create_dir_all(target).await?;
 		} else {

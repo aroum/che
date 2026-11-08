@@ -3,9 +3,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 pub(super) struct Id(AtomicU32);
 
 impl Default for Id {
-	fn default() -> Self {
-		Self(AtomicU32::new(1))
-	}
+	fn default() -> Self { Self(AtomicU32::new(1)) }
 }
 
 impl Id {

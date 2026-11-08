@@ -1,5 +1,4 @@
-use ratatui::{buffer::Buffer, layout::{Constraint, Layout, Rect}, widgets::{Block, Widget}};
-use ratatui::widgets::BorderType;
+use ratatui::{buffer::Buffer, layout::{Constraint, Layout, Rect}, widgets::{Block, BorderType, Widget}};
 use yazi_config::THEME;
 use yazi_core::Core;
 use yazi_widgets::Clear;

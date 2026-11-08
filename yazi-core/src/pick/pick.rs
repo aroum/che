@@ -1,5 +1,5 @@
 use tokio::sync::mpsc::UnboundedSender;
-use yazi_config::{popup::Position, YAZI};
+use yazi_config::{YAZI, popup::Position};
 use yazi_widgets::Scrollable;
 
 #[derive(Default)]

@@ -37,7 +37,9 @@ pub(super) async fn copy_impl(from: PathBuf, to: PathBuf, attrs: Attrs) -> io::R
 			let written = match std::fs::copy(&from, &to) {
 				Ok(n) => n,
 				#[cfg(target_os = "macos")]
-				Err(e) if matches!(e.kind(), io::ErrorKind::PermissionDenied | io::ErrorKind::Unsupported) => {
+				Err(e)
+					if matches!(e.kind(), io::ErrorKind::PermissionDenied | io::ErrorKind::Unsupported) =>
+				{
 					let mut reader = std::fs::File::open(&from)?;
 					let mut writer = std::fs::File::create(&to)?;
 					let written = std::io::copy(&mut reader, &mut writer)?;

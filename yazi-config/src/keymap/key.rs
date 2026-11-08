@@ -58,7 +58,10 @@ impl From<KeyEvent> for Key {
 			(_, m) => m.contains(KeyModifiers::SHIFT),
 		};
 
-		if shift && let KeyCode::Char(c) = value.code && c.is_lowercase() {
+		if shift
+			&& let KeyCode::Char(c) = value.code
+			&& c.is_lowercase()
+		{
 			value.code = KeyCode::Char(c.to_uppercase().next().unwrap_or(c));
 		}
 
@@ -213,11 +216,7 @@ impl Display for Key {
 			_ => "Unknown",
 		};
 
-		if code.is_empty() {
-			write!(f, ">")
-		} else {
-			write!(f, "{code}>")
-		}
+		if code.is_empty() { write!(f, ">") } else { write!(f, "{code}>") }
 	}
 }
 

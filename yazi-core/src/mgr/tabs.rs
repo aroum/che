@@ -7,27 +7,25 @@ use super::Pane;
 use crate::tab::{Folder, Tab};
 
 pub struct Tabs {
-	pub active_pane: usize,
-	pub panes: [Pane; 2],
-	pub single_pane: bool,
+	pub active_pane:  usize,
+	pub panes:        [Pane; 2],
+	pub single_pane:  bool,
 	pub preview_pane: bool,
 }
 
 impl Default for Tabs {
 	fn default() -> Self {
 		Self {
-			active_pane: 0,
-			panes: [Pane::default(), Pane::default()],
-			single_pane: false,
+			active_pane:  0,
+			panes:        [Pane::default(), Pane::default()],
+			single_pane:  false,
 			preview_pane: false,
 		}
 	}
 }
 
 impl Tabs {
-	pub fn set_idx(&mut self, idx: usize) {
-		self.panes[self.active_pane].set_idx(idx);
-	}
+	pub fn set_idx(&mut self, idx: usize) { self.panes[self.active_pane].set_idx(idx); }
 
 	pub fn set_active_pane(&mut self, idx: usize) {
 		if let Some(pane) = self.panes.get_mut(self.active_pane) {
@@ -55,14 +53,10 @@ impl Tabs {
 	pub fn other(&self) -> &Tab { self.panes[1 - self.active_pane].active() }
 
 	#[inline]
-	pub(super) fn active_mut(&mut self) -> &mut Tab {
-		self.panes[self.active_pane].active_mut()
-	}
+	pub(super) fn active_mut(&mut self) -> &mut Tab { self.panes[self.active_pane].active_mut() }
 
 	#[inline]
-	pub fn other_mut(&mut self) -> &mut Tab {
-		self.panes[1 - self.active_pane].active_mut()
-	}
+	pub fn other_mut(&mut self) -> &mut Tab { self.panes[1 - self.active_pane].active_mut() }
 
 	#[inline]
 	pub fn active_pane_ref(&self) -> &Pane { &self.panes[self.active_pane] }

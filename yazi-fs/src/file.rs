@@ -6,9 +6,9 @@ use crate::cha::{Cha, ChaType};
 
 #[derive(Clone, Debug, Default)]
 pub struct File {
-	pub url:     UrlBuf,
-	pub cha:     Cha,
-	pub link_to: Option<PathBufDyn>,
+	pub url:         UrlBuf,
+	pub cha:         Cha,
+	pub link_to:     Option<PathBufDyn>,
 	pub is_upparent: bool,
 }
 
@@ -35,17 +35,17 @@ impl File {
 		let url = parent_url.into();
 		let mut cha = Cha::default();
 		cha.mode = crate::cha::ChaMode::T_DIR;
-		Self {
-			url,
-			cha,
-			link_to: None,
-			is_upparent: true,
-		}
+		Self { url, cha, link_to: None, is_upparent: true }
 	}
 
 	#[inline]
 	pub fn chdir(&self, wd: &Path) -> Self {
-		Self { url: self.url.rebase(wd), cha: self.cha, link_to: self.link_to.clone(), is_upparent: self.is_upparent }
+		Self {
+			url:         self.url.rebase(wd),
+			cha:         self.cha,
+			link_to:     self.link_to.clone(),
+			is_upparent: self.is_upparent,
+		}
 	}
 }
 
@@ -62,11 +62,7 @@ impl File {
 
 	#[inline]
 	pub fn name(&self) -> Option<Strand<'_>> {
-		if self.is_upparent {
-			Some(Strand::Utf8(".."))
-		} else {
-			self.url.name()
-		}
+		if self.is_upparent { Some(Strand::Utf8("..")) } else { self.url.name() }
 	}
 
 	#[inline]
@@ -105,9 +101,7 @@ impl Hash for FileSig<'_> {
 }
 
 impl crate::FsHash64 for FileSig<'_> {
-	fn hash_u64(&self) -> u64 {
-		foldhash::fast::FixedState::default().hash_one(self)
-	}
+	fn hash_u64(&self) -> u64 { foldhash::fast::FixedState::default().hash_one(self) }
 }
 
 use mlua::{AnyUserData, ExternalError, FromLua, Lua, Value};

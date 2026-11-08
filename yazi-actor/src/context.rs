@@ -31,11 +31,7 @@ impl<'a> Ctx<'a> {
 	#[inline]
 	pub fn new(action: &Action, core: &'a mut Core, term: &'a mut Option<Term>) -> Result<Self> {
 		let (pane, tab) = if let Ok(id) = action.get::<Id>("tab") {
-			core
-				.mgr
-				.tabs
-				.find_tab(id)
-				.ok_or_else(|| anyhow!("Tab with id {id} not found"))?
+			core.mgr.tabs.find_tab(id).ok_or_else(|| anyhow!("Tab with id {id} not found"))?
 		} else {
 			let p = core.mgr.tabs.active_pane;
 			(p, core.mgr.tabs.panes[p].cursor)
@@ -97,9 +93,7 @@ impl<'a> Ctx<'a> {
 	pub fn tab(&self) -> &Tab { &self.mgr.tabs.panes[self.pane].items[self.tab] }
 
 	#[inline]
-	pub fn tab_mut(&mut self) -> &mut Tab {
-		&mut self.core.mgr.tabs.panes[self.pane].items[self.tab]
-	}
+	pub fn tab_mut(&mut self) -> &mut Tab { &mut self.core.mgr.tabs.panes[self.pane].items[self.tab] }
 
 	#[inline]
 	pub fn cwd(&self) -> &UrlBuf { self.tab().cwd() }

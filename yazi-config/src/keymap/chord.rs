@@ -12,9 +12,9 @@ static RE: OnceLock<Regex> = OnceLock::new();
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct Chord {
 	#[serde(deserialize_with = "super::deserialize_on")]
-	pub on:    Vec<Key>,
+	pub on:     Vec<Key>,
 	#[serde(deserialize_with = "super::deserialize_run")]
-	pub run:   Vec<Action>,
+	pub run:    Vec<Action>,
 	pub desc:   Option<String>,
 	pub r#for:  Option<String>,
 	#[serde(default)]

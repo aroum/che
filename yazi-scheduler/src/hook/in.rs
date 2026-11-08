@@ -45,7 +45,12 @@ pub(crate) struct HookInOutCopy {
 
 impl From<&FileInCopy> for HookInOutCopy {
 	fn from(value: &FileInCopy) -> Self {
-		Self { id: value.id, from: value.from.clone(), to: value.to.clone(), overwritten: None }
+		Self {
+			id:          value.id,
+			from:        value.from.clone(),
+			to:          value.to.clone(),
+			overwritten: None,
+		}
 	}
 }
 
@@ -68,7 +73,12 @@ pub(crate) struct HookInOutCut {
 
 impl From<&FileInCut> for HookInOutCut {
 	fn from(value: &FileInCut) -> Self {
-		Self { id: value.id, from: value.from.clone(), to: value.to.clone(), overwritten: None }
+		Self {
+			id:          value.id,
+			from:        value.from.clone(),
+			to:          value.to.clone(),
+			overwritten: None,
+		}
 	}
 }
 

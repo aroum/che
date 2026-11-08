@@ -50,6 +50,7 @@ impl Mux {
 			}
 		}
 	}
+
 	pub fn tmux_drain() -> Result<()> {
 		// tmux 3.6a under Kitty does not answer this DSR through passthrough.
 		// Waiting here adds 200 ms to every startup and can block the first frame.

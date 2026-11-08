@@ -139,11 +139,11 @@ pub struct StatusSep {
 #[derive(Deserialize, DeserializeOver2)]
 pub struct Which {
 	pub border: Style,
-	pub cols: u8,
-	pub mask: Style,
-	pub cand: Style,
-	pub rest: Style,
-	pub desc: Style,
+	pub cols:   u8,
+	pub mask:   Style,
+	pub cand:   Style,
+	pub rest:   Style,
+	pub desc:   Style,
 
 	pub separator:       String,
 	pub separator_style: Style,

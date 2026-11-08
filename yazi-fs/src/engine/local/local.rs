@@ -217,11 +217,9 @@ impl<'a> Engine for Local<'a> {
 			}
 			#[cfg(target_os = "macos")]
 			{
-				use std::ffi::{CStr, CString, c_char};
-				use std::os::unix::ffi::OsStrExt;
-				use std::path::PathBuf;
-				use objc2::msg_send;
-				use objc2::runtime::{AnyClass, AnyObject};
+				use std::{ffi::{CStr, CString, c_char}, os::unix::ffi::OsStrExt, path::PathBuf};
+
+				use objc2::{msg_send, runtime::{AnyClass, AnyObject}};
 
 				let path_cstr = CString::new(path.as_os_str().as_bytes())
 					.map_err(|e| io::Error::other(format!("Invalid path: {e}")))?;
@@ -272,9 +270,8 @@ impl<'a> Engine for Local<'a> {
 					}
 					#[allow(unexpected_cfgs)]
 					let cstr: *const c_char = msg_send![ns_result_path, UTF8String];
-					let trash_path = PathBuf::from(std::ffi::OsStr::from_bytes(
-						CStr::from_ptr(cstr).to_bytes(),
-					));
+					let trash_path =
+						PathBuf::from(std::ffi::OsStr::from_bytes(CStr::from_ptr(cstr).to_bytes()));
 
 					Ok(UrlBuf::from(trash_path))
 				}
@@ -315,9 +312,8 @@ impl<'a> Engine for Local<'a> {
 				}
 
 				// Fallback: construct from filename
-				let filename = path
-					.file_name()
-					.ok_or_else(|| io::Error::other("Cannot determine filename"))?;
+				let filename =
+					path.file_name().ok_or_else(|| io::Error::other("Cannot determine filename"))?;
 				Ok(UrlBuf::from(files_dir.join(filename)))
 			}
 		})

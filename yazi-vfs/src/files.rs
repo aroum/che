@@ -1,7 +1,7 @@
 use std::io;
 
 use tokio::{select, sync::mpsc::{self, UnboundedReceiver}};
-use yazi_fs::{File, Files, FilesOp, cha::Cha, mounts::PARTITIONS, engine::{DirReader, FileHolder}};
+use yazi_fs::{File, Files, FilesOp, cha::Cha, engine::{DirReader, FileHolder}, mounts::PARTITIONS};
 use yazi_shared::url::{UrlBuf, UrlLike};
 
 use crate::{VfsCha, VfsFile, VfsFilesOp, engine::{self, DirEntry}};

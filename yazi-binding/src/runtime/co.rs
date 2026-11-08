@@ -1,8 +1,4 @@
-use std::{
-	future::Future,
-	pin::Pin,
-	task::{Context, Poll},
-};
+use std::{future::Future, pin::Pin, task::{Context, Poll}};
 
 use mlua::{Lua, MultiValue};
 

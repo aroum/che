@@ -162,7 +162,9 @@ where
 	U: AsUrl,
 {
 	let url = url.as_url();
-	if url.is_archive() { return Ok(()); }
+	if url.is_archive() {
+		return Ok(());
+	}
 	Engines::new(url).await?.create_dir().await
 }
 
@@ -171,7 +173,9 @@ where
 	U: AsUrl,
 {
 	let url = url.as_url();
-	if url.is_archive() { return Ok(()); }
+	if url.is_archive() {
+		return Ok(());
+	}
 	Engines::new(url).await?.create_dir_all().await
 }
 
@@ -219,10 +223,8 @@ pub async fn metadata<U>(url: U) -> io::Result<Cha>
 where
 	U: AsUrl,
 {
-	use yazi_shared::url::UrlLike;
-	use yazi_fs::engine::DirReader;
-	use yazi_fs::engine::FileHolder;
-	use yazi_shared::strand::StrandLike;
+	use yazi_fs::engine::{DirReader, FileHolder};
+	use yazi_shared::{strand::StrandLike, url::UrlLike};
 
 	let url = url.as_url();
 	if url.is_archive() {
@@ -370,7 +372,10 @@ where
 	if from.is_archive() && to.is_archive() {
 		return super::archive::rename(&from.to_owned(), &to.to_owned()).await;
 	} else if from.is_archive() || to.is_archive() {
-		return Err(io::Error::new(io::ErrorKind::CrossesDevices, "Cannot rename between archive and local filesystem"));
+		return Err(io::Error::new(
+			io::ErrorKind::CrossesDevices,
+			"Cannot rename between archive and local filesystem",
+		));
 	}
 	let res = if from.scheme().covariant(to.scheme()) {
 		Engines::new(from).await?.rename(to.loc()).await
@@ -438,7 +443,9 @@ where
 	U: AsUrl,
 {
 	let url = url.as_url();
-	if url.is_archive() { return metadata(url).await; }
+	if url.is_archive() {
+		return metadata(url).await;
+	}
 	Engines::new(url).await?.symlink_metadata().await
 }
 

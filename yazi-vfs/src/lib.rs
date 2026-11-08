@@ -6,6 +6,4 @@ pub use engine as provider;
 
 yazi_macro::mod_flat!(cha file files fns op);
 
-pub fn init() {
-	engine::init();
-}
+pub fn init() { engine::init(); }

@@ -17,10 +17,7 @@ impl Actor for FlatToggle {
 		if in_flat_view {
 			// Grab the real filesystem path of the hovered file (converts search URL → regular URL).
 			// We must do this before aborting the handle / changing cwd.
-			let hovered_regular = cx
-				.tab()
-				.hovered()
-				.and_then(|f| f.url.to_regular().ok());
+			let hovered_regular = cx.tab().hovered().and_then(|f| f.url.to_regular().ok());
 
 			if let Some(handle) = cx.tab_mut().search.take() {
 				handle.abort();

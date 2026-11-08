@@ -25,7 +25,8 @@ impl Actor for Disks {
 		let targets: Vec<UrlBuf> = disks.into_iter().map(|d| d.path).collect();
 
 		tokio::spawn(async move {
-			let max_height = YAZI.pick.open_offset.height.min(YAZI.pick.border().saturating_add(items.len() as u16));
+			let max_height =
+				YAZI.pick.open_offset.height.min(YAZI.pick.border().saturating_add(items.len() as u16));
 			let cfg = PickCfg {
 				title: "Select Disk / Volume".to_string(),
 				items,
@@ -56,17 +57,15 @@ impl Disks {
 
 		// Home directory
 		let home_url: UrlBuf = expand_url(std::path::Path::new("~")).into();
-		disks.push(DiskInfo {
-			display: format!("~ (Home: {})", home_url.display()),
-			path: home_url,
-		});
+		disks
+			.push(DiskInfo { display: format!("~ (Home: {})", home_url.display()), path: home_url });
 
 		// Root directory
 		#[cfg(unix)]
 		{
 			disks.push(DiskInfo {
 				display: "/ (Root)".to_string(),
-				path: UrlBuf::from(std::path::Path::new("/")),
+				path:    UrlBuf::from(std::path::Path::new("/")),
 			});
 		}
 
@@ -77,10 +76,8 @@ impl Disks {
 				let path_str = format!("{}:\\", letter);
 				let path = std::path::Path::new(&path_str);
 				if path.exists() {
-					disks.push(DiskInfo {
-						display: format!("Drive {}:", letter),
-						path: UrlBuf::from(path),
-					});
+					disks
+						.push(DiskInfo { display: format!("Drive {}:", letter), path: UrlBuf::from(path) });
 				}
 			}
 		}
@@ -95,7 +92,7 @@ impl Disks {
 						let name = p.file_name().unwrap_or_default().to_string_lossy().into_owned();
 						disks.push(DiskInfo {
 							display: format!("Volume: {}", name),
-							path: UrlBuf::from(p.as_path()),
+							path:    UrlBuf::from(p.as_path()),
 						});
 					}
 				}
@@ -105,10 +102,8 @@ impl Disks {
 		// Linux mounts
 		#[cfg(target_os = "linux")]
 		{
-			let mut candidate_bases = vec![
-				std::path::PathBuf::from("/media"),
-				std::path::PathBuf::from("/mnt"),
-			];
+			let mut candidate_bases =
+				vec![std::path::PathBuf::from("/media"), std::path::PathBuf::from("/mnt")];
 			if let Ok(user) = std::env::var("USER") {
 				candidate_bases.push(std::path::PathBuf::from(format!("/media/{}", user)));
 				candidate_bases.push(std::path::PathBuf::from(format!("/run/media/{}", user)));
@@ -123,7 +118,7 @@ impl Disks {
 							let name = p.file_name().unwrap_or_default().to_string_lossy().into_owned();
 							disks.push(DiskInfo {
 								display: format!("Mount: {} ({})", name, base.display()),
-								path: UrlBuf::from(p.as_path()),
+								path:    UrlBuf::from(p.as_path()),
 							});
 						}
 					}

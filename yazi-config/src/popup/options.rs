@@ -6,13 +6,13 @@ use crate::{YAZI, popup::Origin};
 
 #[derive(Clone, Debug, Default)]
 pub struct InputCfg {
-	pub title:      String,
-	pub value:      String,
-	pub cursor:     Option<usize>,
-	pub obscure:    bool,
-	pub position:   Position,
-	pub realtime:   bool,
-	pub completion: bool,
+	pub title:          String,
+	pub value:          String,
+	pub cursor:         Option<usize>,
+	pub obscure:        bool,
+	pub position:       Position,
+	pub realtime:       bool,
+	pub completion:     bool,
 	pub highlight_stem: bool,
 }
 

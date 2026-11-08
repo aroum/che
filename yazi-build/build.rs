@@ -1,10 +1,4 @@
-use std::{
-	env,
-	error::Error,
-	io::{BufRead, BufReader, Read, Write},
-	process::{Command, Stdio},
-	thread,
-};
+use std::{env, error::Error, io::{BufRead, BufReader, Read, Write}, process::{Command, Stdio}, thread};
 
 use yazi_tty::TTY;
 

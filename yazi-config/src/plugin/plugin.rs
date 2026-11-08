@@ -54,9 +54,10 @@ impl Plugin {
 	pub fn mime_fetchers(&self, files: Vec<File>) -> impl Iterator<Item = (&Fetcher, Vec<File>)> {
 		let mut tasks: [Vec<_>; MAX_FETCHERS as usize] = Default::default();
 		for f in files {
-			let found = self.fetchers.iter().find(|&g| {
-				(g.id == "mime" || g.group.as_deref() == Some("mime")) && g.matches(&f, "")
-			});
+			let found = self
+				.fetchers
+				.iter()
+				.find(|&g| (g.id == "mime" || g.group.as_deref() == Some("mime")) && g.matches(&f, ""));
 			if let Some(g) = found {
 				tasks[g.idx as usize].push(f);
 			} else {

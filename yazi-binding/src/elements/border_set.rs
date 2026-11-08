@@ -35,14 +35,30 @@ impl From<BorderType> for BorderSet {
 impl BorderSet {
 	pub fn as_set(&self) -> border::Set<'_> {
 		let mut set = self.r#as.to_border_set();
-		if !self.tl.is_empty() { set.top_left = &self.tl; }
-		if !self.tc.is_empty() { set.horizontal_top = &self.tc; }
-		if !self.tr.is_empty() { set.top_right = &self.tr; }
-		if !self.cl.is_empty() { set.vertical_left = &self.cl; }
-		if !self.cr.is_empty() { set.vertical_right = &self.cr; }
-		if !self.bl.is_empty() { set.bottom_left = &self.bl; }
-		if !self.bc.is_empty() { set.horizontal_bottom = &self.bc; }
-		if !self.br.is_empty() { set.bottom_right = &self.br; }
+		if !self.tl.is_empty() {
+			set.top_left = &self.tl;
+		}
+		if !self.tc.is_empty() {
+			set.horizontal_top = &self.tc;
+		}
+		if !self.tr.is_empty() {
+			set.top_right = &self.tr;
+		}
+		if !self.cl.is_empty() {
+			set.vertical_left = &self.cl;
+		}
+		if !self.cr.is_empty() {
+			set.vertical_right = &self.cr;
+		}
+		if !self.bl.is_empty() {
+			set.bottom_left = &self.bl;
+		}
+		if !self.bc.is_empty() {
+			set.horizontal_bottom = &self.bc;
+		}
+		if !self.br.is_empty() {
+			set.bottom_right = &self.br;
+		}
 		set
 	}
 
@@ -65,8 +81,8 @@ impl FromLua for BorderSet {
 			Value::UserData(ud) => Ok(ud.borrow::<Self>()?.clone()),
 			Value::Table(_) => lua.from_value(value),
 			_ => Err(mlua::Error::FromLuaConversionError {
-				from: value.type_name(),
-				to: "BorderSet".to_string(),
+				from:    value.type_name(),
+				to:      "BorderSet".to_string(),
 				message: None,
 			}),
 		}

@@ -14,9 +14,9 @@ pub struct MoveOpt {
 impl From<ActionCow> for MoveOpt {
 	fn from(a: ActionCow) -> Self {
 		Self {
-			step: a.first().ok().unwrap_or_default(),
+			step:         a.first().ok().unwrap_or_default(),
 			in_operating: a.bool("in-operating"),
-			visual: a.bool("visual"),
+			visual:       a.bool("visual"),
 		}
 	}
 }

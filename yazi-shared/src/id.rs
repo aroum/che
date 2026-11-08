@@ -75,9 +75,7 @@ impl Default for Ids {
 }
 
 impl mlua::IntoLua for Id {
-	fn into_lua(self, lua: &mlua::Lua) -> mlua::Result<mlua::Value> {
-		(self.0 as i64).into_lua(lua)
-	}
+	fn into_lua(self, lua: &mlua::Lua) -> mlua::Result<mlua::Value> { (self.0 as i64).into_lua(lua) }
 }
 
 impl mlua::FromLua for Id {

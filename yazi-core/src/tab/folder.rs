@@ -130,11 +130,7 @@ impl Folder {
 		}
 
 		let new = if let Some(pos) = self.files.position(urn) {
-			if self.files[pos].is_upparent {
-				self.cursor
-			} else {
-				pos
-			}
+			if self.files[pos].is_upparent { self.cursor } else { pos }
 		} else {
 			self.cursor
 		} as isize;
@@ -145,7 +141,11 @@ impl Folder {
 	pub fn repos(&mut self, urn: Option<PathDyn>) -> bool {
 		if let Some(u) = urn {
 			self.hover(u)
-		} else if let Some(u) = self.trace.clone().or_else(|| self.hovered().filter(|h| !h.is_upparent).map(|h| h.urn().into())) {
+		} else if let Some(u) = self
+			.trace
+			.clone()
+			.or_else(|| self.hovered().filter(|h| !h.is_upparent).map(|h| h.urn().into()))
+		{
 			self.hover(u.as_path())
 		} else {
 			self.arrow(0)

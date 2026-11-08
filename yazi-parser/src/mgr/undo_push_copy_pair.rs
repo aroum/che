@@ -8,9 +8,7 @@ pub struct UndoPushCopyPairOpt {
 }
 
 impl From<ActionCow> for UndoPushCopyPairOpt {
-	fn from(mut a: ActionCow) -> Self {
-		Self { from: a.take_any("from"), to: a.take_any("to") }
-	}
+	fn from(mut a: ActionCow) -> Self { Self { from: a.take_any("from"), to: a.take_any("to") } }
 }
 
 impl FromLua for UndoPushCopyPairOpt {

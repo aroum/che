@@ -7,29 +7,19 @@ pub struct JumpModeOpt {
 }
 
 impl From<ActionCow> for JumpModeOpt {
-	fn from(mut a: ActionCow) -> Self {
-		Self {
-			state: a.take_any("state"),
-		}
-	}
+	fn from(mut a: ActionCow) -> Self { Self { state: a.take_any("state") } }
 }
 
 impl From<()> for JumpModeOpt {
-	fn from(_: ()) -> Self {
-		Self { state: None }
-	}
+	fn from(_: ()) -> Self { Self { state: None } }
 }
 
 impl From<bool> for JumpModeOpt {
-	fn from(state: bool) -> Self {
-		Self { state: Some(state) }
-	}
+	fn from(state: bool) -> Self { Self { state: Some(state) } }
 }
 
 impl From<Option<bool>> for JumpModeOpt {
-	fn from(state: Option<bool>) -> Self {
-		Self { state }
-	}
+	fn from(state: Option<bool>) -> Self { Self { state } }
 }
 
 impl FromLua for JumpModeOpt {

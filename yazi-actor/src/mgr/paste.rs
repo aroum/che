@@ -19,7 +19,10 @@ impl Actor for Paste {
 		let dest = tab.cwd().clone();
 		if mgr.yanked.cut {
 			if mgr.yanked.iter().any(|u| u.parent().map_or(false, |p| p == dest)) {
-				yazi_proxy::NotifyProxy::push_warn("Paste", "Source and destination directories are the same");
+				yazi_proxy::NotifyProxy::push_warn(
+					"Paste",
+					"Source and destination directories are the same",
+				);
 				succ!();
 			}
 

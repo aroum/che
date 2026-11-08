@@ -1,11 +1,8 @@
-use ratatui::{
-	style::{Color, Modifier, Style},
-	text::Span,
-};
+use ratatui::{style::{Color, Modifier, Style}, text::Span};
 
 #[derive(Clone, Debug, Default)]
 pub struct TextInput {
-	pub value: String,
+	pub value:  String,
 	pub cursor: usize,
 }
 
@@ -57,33 +54,21 @@ impl TextInput {
 		}
 	}
 
-	pub fn move_home(&mut self) {
-		self.cursor = 0;
-	}
+	pub fn move_home(&mut self) { self.cursor = 0; }
 
-	pub fn move_end(&mut self) {
-		self.cursor = self.value.chars().count();
-	}
+	pub fn move_end(&mut self) { self.cursor = self.value.chars().count(); }
 
 	#[inline]
-	pub fn left(&mut self) {
-		self.move_left();
-	}
+	pub fn left(&mut self) { self.move_left(); }
 
 	#[inline]
-	pub fn right(&mut self) {
-		self.move_right();
-	}
+	pub fn right(&mut self) { self.move_right(); }
 
 	#[inline]
-	pub fn home(&mut self) {
-		self.move_home();
-	}
+	pub fn home(&mut self) { self.move_home(); }
 
 	#[inline]
-	pub fn end(&mut self) {
-		self.move_end();
-	}
+	pub fn end(&mut self) { self.move_end(); }
 
 	pub fn word_left(&mut self) {
 		let chars: Vec<char> = self.value.chars().collect();

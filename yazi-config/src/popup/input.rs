@@ -20,9 +20,9 @@ pub struct Input {
 	pub create_offset: Offset,
 
 	// rename
-	pub rename_title:  String,
-	pub rename_origin: Origin,
-	pub rename_offset: Offset,
+	pub rename_title:          String,
+	pub rename_origin:         Origin,
+	pub rename_offset:         Offset,
 	pub rename_highlight_stem: bool,
 
 	// filter

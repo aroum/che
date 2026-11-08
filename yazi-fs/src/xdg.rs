@@ -4,7 +4,8 @@ pub struct Xdg;
 
 impl Xdg {
 	pub fn config_dir() -> PathBuf {
-		if let Some(p) = env::var_os("CHE_CONFIG_HOME").or_else(|| env::var_os("GEZI_CONFIG_HOME")).map(PathBuf::from)
+		if let Some(p) =
+			env::var_os("CHE_CONFIG_HOME").or_else(|| env::var_os("GEZI_CONFIG_HOME")).map(PathBuf::from)
 			&& p.is_absolute()
 		{
 			return p;
@@ -62,4 +63,3 @@ impl Xdg {
 		})
 	}
 }
-

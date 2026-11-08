@@ -19,13 +19,14 @@ impl Widget for Preview<'_> {
 		}
 
 		if let Some(lock) = &self.core.active().preview.lock
-			&& *lock.area == LAYOUT.get().preview {
-				for w in &lock.data {
-					let rect = w.area().transform(|p| self.core.mgr.area(p));
-					if rect.intersection(win) == rect {
-						w.render(rect, buf);
-					}
+			&& *lock.area == LAYOUT.get().preview
+		{
+			for w in &lock.data {
+				let rect = w.area().transform(|p| self.core.mgr.area(p));
+				if rect.intersection(win) == rect {
+					w.render(rect, buf);
 				}
 			}
+		}
 	}
 }

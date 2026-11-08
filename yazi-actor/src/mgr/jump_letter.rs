@@ -27,11 +27,7 @@ impl Actor for JumpLetter {
 			.enumerate()
 			.filter_map(|(idx, file)| {
 				let name = file.name().map(|n| n.to_string_lossy()).unwrap_or_default();
-				if yazi_shared::translit::matches_jump_char(&name, opt.ch) {
-					Some(idx)
-				} else {
-					None
-				}
+				if yazi_shared::translit::matches_jump_char(&name, opt.ch) { Some(idx) } else { None }
 			})
 			.collect();
 

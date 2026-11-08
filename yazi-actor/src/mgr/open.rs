@@ -45,7 +45,6 @@ impl Actor for Open {
 			succ!();
 		}
 
-
 		let is_archive_hovered = cx.hovered().is_some_and(|h| {
 			h.url.ext().is_some_and(|ext| {
 				let ext = ext.to_string_lossy().to_lowercase();

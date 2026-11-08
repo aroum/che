@@ -38,7 +38,8 @@ impl Enter {
 	}
 
 	fn enter_archive(url: &yazi_shared::url::UrlBuf) -> Result<()> {
-		let path = url.loc().as_os().map_or_else(|_| std::path::PathBuf::new(), std::path::PathBuf::from);
+		let path =
+			url.loc().as_os().map_or_else(|_| std::path::PathBuf::new(), std::path::PathBuf::from);
 		let target_url = url.clone().into_archive("1")?;
 
 		tokio::spawn(async move {

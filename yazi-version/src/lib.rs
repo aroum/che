@@ -1,13 +1,8 @@
 mod macros;
 
-use std::{
-	env::consts::{ARCH, OS},
-	fmt::Write,
-};
+use std::{env::consts::{ARCH, OS}, fmt::Write};
 
-pub fn version() -> &'static str {
-	concat!(env!("CARGO_PKG_VERSION"), " ", env!("VERGEN_GIT_SHA"))
-}
+pub fn version() -> &'static str { concat!(env!("CARGO_PKG_VERSION"), " ", env!("VERGEN_GIT_SHA")) }
 
 pub fn version_long() -> &'static str {
 	concat!(

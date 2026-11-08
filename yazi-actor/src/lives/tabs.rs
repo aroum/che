@@ -28,9 +28,7 @@ impl UserData for Tabs {
 	}
 
 	fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-		methods.add_meta_method(MetaMethod::Len, |_, me, ()| {
-			Ok(me.panes.len())
-		});
+		methods.add_meta_method(MetaMethod::Len, |_, me, ()| Ok(me.panes.len()));
 
 		methods.add_meta_method(MetaMethod::Index, |_, me, idx: usize| {
 			if idx == 0 || idx > me.panes.len() {

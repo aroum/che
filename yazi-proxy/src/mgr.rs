@@ -79,7 +79,11 @@ impl MgrProxy {
 	}
 
 	pub fn undo_push_trash_pair(original: UrlBuf, trash_path: UrlBuf) {
-		emit!(Call(relay!(mgr:undo_push_trash_pair).with_any("original", original).with_any("trash_path", trash_path)));
+		emit!(Call(
+			relay!(mgr:undo_push_trash_pair)
+				.with_any("original", original)
+				.with_any("trash_path", trash_path)
+		));
 	}
 
 	pub fn undo_push_copy_pair(from: UrlBuf, to: UrlBuf) {
@@ -91,11 +95,19 @@ impl MgrProxy {
 	}
 
 	pub fn undo_push_copy_overwritten(original: UrlBuf, trash_path: UrlBuf) {
-		emit!(Call(relay!(mgr:undo_push_copy_overwritten).with_any("original", original).with_any("trash_path", trash_path)));
+		emit!(Call(
+			relay!(mgr:undo_push_copy_overwritten)
+				.with_any("original", original)
+				.with_any("trash_path", trash_path)
+		));
 	}
 
 	pub fn undo_push_move_overwritten(original: UrlBuf, trash_path: UrlBuf) {
-		emit!(Call(relay!(mgr:undo_push_move_overwritten).with_any("original", original).with_any("trash_path", trash_path)));
+		emit!(Call(
+			relay!(mgr:undo_push_move_overwritten)
+				.with_any("original", original)
+				.with_any("trash_path", trash_path)
+		));
 	}
 
 	pub fn watch() {
