@@ -1,10 +1,10 @@
 local M = {}
 
 local state = ya.sync(function(st)
-	return {
-		cwd = tostring(cx.active.current.cwd),
-		empty = st.empty,
-	}
+	local tab = cx.tab
+	if tab then
+		return tostring(tab.current.cwd), st.empty
+	end
 end)
 
 local set_state = ya.sync(function(st, empty) st.empty = empty end)
@@ -13,21 +13,24 @@ function M:setup(opts)
 	opts = opts or {}
 
 	if opts.update_db then
-		ps.sub("cd", function()
-			local cwd = cx.active.current.cwd
-			ya.async(function() Command("zoxide"):arg({ "add", tostring(cwd) }):status() end)
+		ps.sub("cd", function(body)
+			ya.async(function() Command("zoxide"):arg({ "add", tostring(body.url) }):status() end)
 		end)
 	end
 end
 
-function M:entry()
-	local st = state()
-	if st.empty == nil then
-		st.empty = M.is_empty(st.cwd)
-		set_state(st.empty)
+function M:entry(job)
+	local cwd, empty = state()
+	if not cwd then
+		return
 	end
 
-	if st.empty then
+	if empty == nil then
+		empty = M.is_empty(cwd)
+		set_state(empty)
+	end
+
+	if empty then
 		return ya.notify {
 			title = "Zoxide",
 			content = "No directory history found, check Zoxide's doc to set it up and restart Yazi.",
@@ -37,13 +40,13 @@ function M:entry()
 	end
 
 	local permit = ui.hide()
-	local target, err = M.run_with(st.cwd)
+	local target, err = M.run_with(cwd)
 	permit:drop()
 
 	if not target then
 		ya.notify { title = "Zoxide", content = tostring(err), timeout = 5, level = "error" }
 	elseif target ~= "" then
-		ya.emit("cd", { target, raw = true })
+		ya.emit("cd", { target, raw = true, scope = job.scope })
 	end
 end
 
@@ -89,14 +92,12 @@ end
 ---@param cwd string
 ---@return boolean
 function M.is_empty(cwd)
-	local child = Command("zoxide"):arg({ "query", "-l", "--exclude", cwd }):stdout(Command.PIPED):spawn()
+	local child <close> = Command("zoxide"):arg({ "query", "-l", "--exclude", cwd }):stdout(Command.PIPED):spawn()
 	if not child then
 		return true
 	end
 
-	local first = child:read_line()
-	child:start_kill()
-	return not first
+	return not child:read_line()
 end
 
 ---@param cwd string
