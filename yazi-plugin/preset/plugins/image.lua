@@ -2,7 +2,7 @@ local M = {}
 
 function M:peek(job)
 	local start, url = os.clock(), ya.file_cache(job)
-	if not url or not fs.cha(url) then
+	if not url or not fs.lstat(url) then
 		url = job.file.url
 	end
 
@@ -16,7 +16,7 @@ function M:seek() end
 
 function M:preload(job)
 	local cache = ya.file_cache(job)
-	if not cache or fs.cha(cache) then
+	if not cache or fs.lstat(cache) then
 		return true
 	end
 
