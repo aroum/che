@@ -8,7 +8,6 @@ on:
 
 env:
   SCCACHE_GHA_ENABLED: true
-  RUSTC_WRAPPER: sccache
   CARGO_TERM_COLOR: always
 
 permissions:
@@ -27,7 +26,12 @@ jobs:
         run: rustup toolchain install stable --profile minimal
 
       - name: Setup sccache
+        if: matrix.os != 'windows-latest'
         uses: mozilla-actions/sccache-action@v0.0.10
+
+      - name: Set RUSTC_WRAPPER
+        if: matrix.os != 'windows-latest'
+        run: echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
 
       - name: Build
         run: cargo build --verbose

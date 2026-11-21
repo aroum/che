@@ -74,7 +74,6 @@ jobs:
             target: aarch64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     env:
-      RUSTC_WRAPPER: sccache
       YAZI_GEN_COMPLETIONS: true
       CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER: lld-link.exe
       CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER: lld-link.exe
@@ -84,9 +83,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Build
         shell: bash
