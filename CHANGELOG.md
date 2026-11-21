@@ -5,6 +5,24 @@
 
 ---
 
+## 📅 Versioning & CalVer Release (`26.11.21`)
+
+### ⚡ Upstream Sync & Core Enhancements
+- **Upstream Sync with `sxyazi/yazi` (November 2026)**:
+  - **Git Symlinks Compatibility**: Added support for legacy Git symlinks in package cache (`yazi-cli/src/package/git.rs`).
+  - **VFS View Search Presets**: Configured default `view` kinds and themes for `fd` and `rg` preset search plugins (`yazi-config/preset/`).
+  - **Windows MSI Installer Pipeline**: Added WiX v4 manifest (`assets/msi.wxs`) and automated Windows MSI installer packaging job to CI workflow (`.github/workflows/draft.yml`).
+  - **Plugin Runner & Scope Enhancements**:
+    - Passed asynchronous `job.scope` across `code`, `pdf`, and `video` previewers during `peek` and `seek` operations.
+    - Updated `image`, `pdf`, and `video` plugins to utilize `fs.lstat` instead of `fs.cha` for cache verification.
+    - Added scoped directory changing and child process cleanup support in `zoxide` plugin.
+    - Optimized `ya.list_merge` in plugin runtime with zero-copy `table.move`.
+  - **Preserved Fork Invariants**:
+    - Maintained strictly `che` and `ch` binary names.
+    - Preserved dual-pane architecture, Double Commander archives, Cyrillic keybindings, and CalVer release numbering.
+
+---
+
 ## 📅 Versioning & CalVer Release (`26.10.25`)
 
 ### ⚡ Plugin Compatibility & Upstream Sync (Phase 1, 2 & 3)
