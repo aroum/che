@@ -236,6 +236,19 @@ footer  = { fg = "black", bg = "white" }
 # : }}}
 
 
+# : Search {{{
+
+[fd]
+title    = "Search via fd:"
+position = { at = "top-center", y = 2, w = 50, h = 3 }
+
+[rg]
+title    = "Search via rg:"
+position = { at = "top-center", y = 2, w = 50, h = 3 }
+
+# : }}}
+
+
 # : File-specific styles {{{
 
 [filetype]

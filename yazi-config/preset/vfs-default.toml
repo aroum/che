@@ -1,1 +1,9 @@
+[fd.default]
+kind = "view"
+run  = "fd"
+
+[rg.default]
+kind = "view"
+run  = "rg"
+
 [services]
